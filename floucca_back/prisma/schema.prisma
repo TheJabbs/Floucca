@@ -1,8 +1,146 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+model Coop {
+  coop_code  Int      @id
+  region_code Int
+  coop_name   String
+  Region      Region   @relation(fields: [region_code], references: [region_code])
+}
+
+model Fish {
+  fish_id     Int      @id @default(autoincrement())
+  specie_code Int
+  landing_id  Int
+  gear_code   Int
+  fish_weight Float?
+  fish_length Float?
+  fish_quantity Int?
+  Specie      Specie   @relation(fields: [specie_code], references: [specie_code])
+  Landing     Landing  @relation(fields: [landing_id], references: [landing_id])
+  Gear        Gear     @relation(fields: [gear_code], references: [gear_code])
+}
+
+model Form {
+  form_id       Int      @id @default(autoincrement())
+  user_id       Int
+  period_date   DateTime
+  form_type     String
+  fisher_name   String   @default("unknown")
+  creation_time DateTime @default(now())
+  port_id       Int?
+  port_name     String?
+  User          User     @relation(fields: [user_id], references: [user_id])
+  Period        Period   @relation(fields: [period_date], references: [period_date])
+  Ports         Ports?   @relation(fields: [port_id], references: [port_id])
+  Landings      Landing[]
+  BoatDetails   BoatDetails[] @relation("FormBoatDetails")
+}
+
+model User {
+  user_id   Int     @id @default(autoincrement())
+  Forms     Form[]
+}
+
+model Gear {
+  gear_code    Int      @id @default(autoincrement())
+  gear_name    String
+  equipment_id Int?
+  equipment_name String?
+  GearDetail   GearDetail[]
+  GearUsage    GearUsage[]
+  Fish         Fish[]
+}
+
+model GearDetail {
+  detail_id    Int    @id @default(autoincrement())
+  gear_code    Int
+  detail_name  String
+  detail_value String
+  Gear         Gear   @relation(fields: [gear_code], references: [gear_code])
+}
+
+model Landing {
+  landing_id  Int      @id @default(autoincrement())
+  form_id     Int
+  longitude   Float
+  latitude    Float
+  boat_id     Int?
+  Form        Form     @relation(fields: [form_id], references: [form_id])
+  // BoatDetails BoatDetails? @relation(fields: [boat_id], references: [boat_id])
+  Fish        Fish[]
+  LandingBoatDetails LandingBoatDetails[]
+}
+
+model Period {
+  period_date   DateTime @id
+  period_status String   @default("B")
+  Forms         Form[]
+}
+
+model Region {
+  region_code Int     @id
+  region_name String
+  Coop        Coop[]
+}
+
+model Roles {
+  role_id   Int     @id @default(autoincrement())
+  role_code String  @unique
+  role_name String
+}
+
+model BoatDetails {
+  boat_id           Int      @id @default(autoincrement())
+  form_id           Int
+  fleet_owner       String   @default("Unknown")
+  fleet_size        Int?
+  fleet_crew        Int?
+  fleet_max_weight  Float?
+  fleet_length      Float?
+  fleet_registration Int?
+  // Form              Form     @relation(fields: [form_id], references: [form_id])
+  Landings          LandingBoatDetails[]
+  FormBoatDetails   Form[]   @relation("FormBoatDetails")
+}
+
+model Effort {
+  effort_id   Int     @id @default(autoincrement())
+  effort_name String
+  GearUsage   GearUsage[]
+}
+
+model LandingBoatDetails {
+  landing_id Int
+  boat_id    Int
+  Landing    Landing @relation(fields: [landing_id], references: [landing_id])
+  BoatDetails BoatDetails @relation(fields: [boat_id], references: [boat_id])
+  @@id([landing_id, boat_id])
+}
+
+model Ports {
+  port_id   Int      @id @default(autoincrement())
+  port_name String
+  Forms     Form[]
+}
+
+model GearUsage {
+  usage_id     Int      @id @default(autoincrement())
+  effort_id    Int
+  gear_code    Int
+  months       Int?
+  boolean_flag Boolean?
+  Effort       Effort   @relation(fields: [effort_id], references: [effort_id])
+  Gear         Gear     @relation(fields: [gear_code], references: [gear_code])
+}
+
+model Specie {
+  specie_code Int     @id
+  Fish        Fish[]
 }

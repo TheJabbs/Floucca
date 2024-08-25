@@ -1,7 +1,7 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from "@nestjs/common";
 import {CoopService} from "./coop.service";
-import {CoopInterface} from "./interface/coop.interface";
 import {CoopDto} from "./coopDto/coop.Dto";
+import {mapCoopToReturnCoopInterface} from "./mapper/coop.mapper";
 
 @Controller('api/coop')
 export class CoopController {
@@ -25,7 +25,7 @@ export class CoopController {
             return "Coop already exists"
         }
 
-        return this.coopService.createCoop(coop);
+        return this.coopService.createCoop(mapCoopToReturnCoopInterface(coop));
 
     }
 
@@ -35,7 +35,7 @@ export class CoopController {
         if (!check){
             return "Coop does not exist"
         }
-        return this.coopService.updateCoop(id,coop);
+        return this.coopService.updateCoop(id,mapCoopToReturnCoopInterface(coop));
     }
 
     @Delete('/delete/:id')

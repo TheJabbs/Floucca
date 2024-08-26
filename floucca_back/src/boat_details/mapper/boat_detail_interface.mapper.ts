@@ -1,4 +1,4 @@
-import {CreateBoatDetailDto} from "../boat_detailDto/boat_detail.Dto";
+import {CreateBoatDetailDto} from "../dto/boat_detail.Dto";
 import {BoatDetailInterface} from "../interface/boat_detail.interface";
 
 export function mapBoatDetailToBoatDetailInterface(boatDetail: CreateBoatDetailDto): BoatDetailInterface {

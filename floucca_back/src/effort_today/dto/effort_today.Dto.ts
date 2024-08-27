@@ -1,4 +1,4 @@
-import {IsNotEmpty, Max, Min} from "class-validator";
+import {IsInt, IsNotEmpty, Max, Min} from "class-validator";
 
 export class EffortTodayDto {
     @IsNotEmpty()
@@ -6,7 +6,9 @@ export class EffortTodayDto {
     @Max(24)
     hours_fished: number;
     @IsNotEmpty()
+    @IsInt()
     detail_id: number;
     @IsNotEmpty()
+    @IsInt()
     landing_id: number;
 }

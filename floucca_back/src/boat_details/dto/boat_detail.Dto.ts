@@ -1,4 +1,4 @@
-import {IsNotEmpty, IsNumber, IsString} from "class-validator";
+import {IsInt, IsNotEmpty, IsNumber, IsString} from "class-validator";
 
 export class CreateBoatDetailDto {
     @IsNotEmpty()

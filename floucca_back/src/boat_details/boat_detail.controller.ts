@@ -1,46 +1,30 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from "@nestjs/common";
-import {BoatDetailService} from "./boat_detail.service";
-import {mapBoatDetailToBoatDetailInterface} from "./mapper/boat_detail_interface.mapper";
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { BoatDetailsServices } from './boat_detail.service';
+import { BoatDetails_Id_Dto, CreateBoatDetailsDto } from './dto';
 
-@Controller('api/boatdetail')
-export class BoatDetailController {
-    constructor(private boatDetailService: BoatDetailService) {
-    }
+@Controller('api/dev/boat_details')
+export class BoatDetailsController {
+  constructor(private readonly boatDetailsService: BoatDetailsServices) {}
 
-    @Get('/all')
-    getAllBoatDetails() {
-        return this.boatDetailService.getAllBoatDetails();
-    }
+  @Get('/all/boat_details')
+  getAllBoatDetails() {
+    return this.boatDetailsService.getAllBoatDetails();
+  }
 
-    @Get('/:id')
-    getBoatDetailById(@Param('id') id: number) {
-        return this.boatDetailService.getBoatDetailById(id);
-    }
+  @Get('/boat_details/:boat_details_id')
+  getBoatDetailsByBDID(@Param('boat_details_id') BDID: BoatDetails_Id_Dto) {
+    return this.boatDetailsService.getBoatDetailsByBDID(BDID.boat_details_id);
+  }
 
-    @Post('/create')
-    createBoatDetail(@Body() boatDetail) {
-        const check = this.boatDetailService.getBoatDetailById(boatDetail.boat_id);
-        if (check) {
-            return "Boat detail already exists"
-        }
-        return this.boatDetailService.createBoatDetail(mapBoatDetailToBoatDetailInterface(boatDetail));
-    }
+  //   @Get('/boat/fleet_owner/:fleet_owner')  to be revised
 
-    @Put('/update/:id')
-    updateBoatDetail(@Body() boatDetail, @Param('id') id: number) {
-        const check = this.boatDetailService.getBoatDetailById(id);
-        if (!check) {
-            return "Boat detail does not exist"
-        }
-        return this.boatDetailService.updateBoatDetail(id, mapBoatDetailToBoatDetailInterface(boatDetail));
-    }
+  @Post('/create/boat_details')
+  createBoatDetails(@Body() newBoatDetails: CreateBoatDetailsDto) {
+    return this.boatDetailsService.createBoatDetails(newBoatDetails);
+  }
 
-    @Delete('/delete/:id')
-    deleteBoatDetail(@Param('id') id: number) {
-        const check = this.boatDetailService.getBoatDetailById(id);
-        if (!check) {
-            return "Boat detail does not exist"
-        }
-        return this.boatDetailService.deleteBoatDetail(id);
-    }
+  @Delete('/delete/boat_details/:boat_details_id')
+  deleteBoatDetails(@Param('boat_details_id') BDID: BoatDetails_Id_Dto) {
+    return this.boatDetailsService.deleteBoatDetails(BDID.boat_details_id);
+  }
 }

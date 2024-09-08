@@ -1,107 +1,188 @@
-import {Injectable, NotFoundException} from "@nestjs/common";
-import {PrismaService} from "../prisma/prisma.service";
-import {BoatDetailInterface} from "./interface/boat_detail.interface";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { BoatSuccessResponse, GetAllBoatDetailsInterface } from './interface';
+import { CreateBoatDetailsDto } from './dto';
 
 @Injectable()
-export class BoatDetailService {
-    constructor(private readonly prisma: PrismaService) {
+export class BoatDetailsServices {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async getAllBoatDetails(): Promise<GetAllBoatDetailsInterface[]> {
+    const boat_details = await this.prisma.boat_details.findMany({
+      select: {
+        boat_id: true,
+        fleet_owner: true,
+        fleet_size: true,
+        fleet_crew: true,
+        fleet_max_weight: true,
+        fleet_length: true,
+        fleet_registration: true,
+        fleet_senses: {
+          select: {
+            fleet_senses_id: true,
+          },
+        },
+        landing: {
+          select: {
+            landing_id: true,
+          },
+        },
+      },
+    });
+
+    if (!boat_details || boat_details.length === 0) {
+      throw new NotFoundException('No boat details found');
     }
 
-    async getAllBoatDetails(): Promise<BoatDetailInterface[]> {
-        try {
-            const boat_details = await this.prisma.boat_details.findMany();
-            if (!boat_details)
-                throw new NotFoundException("Boat details not found");
-            return boat_details;
-        } catch (error) {
-            throw new Error(error);
-        }
+    return boat_details;
+  }
+
+  async getBoatDetailsByBDID(
+    boat_details_id: number,
+  ): Promise<GetAllBoatDetailsInterface> {
+    const boat_details = await this.prisma.boat_details.findUnique({
+      where: { boat_id: boat_details_id },
+      select: {
+        boat_id: true,
+        fleet_owner: true,
+        fleet_size: true,
+        fleet_crew: true,
+        fleet_max_weight: true,
+        fleet_length: true,
+        fleet_registration: true,
+        fleet_senses: {
+          select: {
+            fleet_senses_id: true,
+          },
+        },
+        landing: {
+          select: {
+            landing_id: true,
+          },
+        },
+      },
+    });
+
+    return boat_details;
+  }
+
+  async getBoatDetailByFleetOwner(
+    fleet_owner: string,
+  ): Promise<GetAllBoatDetailsInterface> {
+    const boat_details = await this.prisma.boat_details.findFirst({
+      where: { fleet_owner: fleet_owner },
+      select: {
+        boat_id: true,
+        fleet_owner: true,
+        fleet_size: true,
+        fleet_crew: true,
+        fleet_max_weight: true,
+        fleet_length: true,
+        fleet_registration: true,
+        fleet_senses: {
+          select: {
+            fleet_senses_id: true,
+          },
+        },
+        landing: {
+          select: {
+            landing_id: true,
+          },
+        },
+      },
+    });
+
+    return boat_details;
+  }
+
+  async createBoatDetails(
+    newBoatDetails: CreateBoatDetailsDto,
+  ): Promise<BoatSuccessResponse<any>> {
+    const {
+      boat_id,
+      fleet_owner,
+      fleet_size,
+      fleet_crew,
+      fleet_max_weight,
+      fleet_length,
+      fleet_registration,
+      fleet_senses_id = [],
+      landing_id = [],
+    } = newBoatDetails;
+
+    await this.validateIds(fleet_senses_id, landing_id);
+
+    const createdBoatDetails = await this.prisma.boat_details.create({
+      data: {
+        boat_id,
+        fleet_owner: fleet_owner || 'Unknown',
+        fleet_size,
+        fleet_crew,
+        fleet_max_weight,
+        fleet_length,
+        fleet_registration,
+        fleet_senses: {
+          connect: fleet_senses_id.map((id) => ({ fleet_senses_id: id })),
+        },
+        landing: {
+          connect: landing_id.map((id) => ({ landing_id: id })),
+        },
+      },
+    });
+
+    return {
+      message: 'Boat details created successfully',
+      data: createdBoatDetails,
+    };
+  }
+
+  async updateBoatDetails() {} // Bede es2al charbel 3an chaghle abel ma na3mela.
+
+  async deleteBoatDetails(
+    BoatDetailsId: number,
+  ): Promise<BoatSuccessResponse<any>> {
+    const boatDetails = await this.prisma.boat_details.findUnique({
+      where: { boat_id: BoatDetailsId },
+    });
+
+    if (!boatDetails) {
+      throw new NotFoundException('Boat details not found');
     }
 
-    async getBoatDetailById(boat_id: number): Promise<BoatDetailInterface> {
-        try {
-            const boat_detail = await this.prisma.boat_details.findUnique(
-                {where: {boat_id: boat_id}}
-            );
-            if (!boat_detail) {
-                throw new NotFoundException("Boat detail not found.")
-            }
-            return boat_detail;
-        } catch (error) {
-            throw new Error(error);
-        }
+    await this.prisma.boat_details.delete({
+      where: { boat_id: BoatDetailsId },
+    });
+
+    return {
+      message: 'Boat details deleted successfully',
+      data: null,
+    };
+  }
+
+  // ----------------------------- Utility Functions ----------------------------- //
+  private async validateIds(
+    fleetSensesIds: number[],
+    landingIds: number[],
+  ): Promise<void> {
+    const [validFleetSenses, validLanding] = await Promise.all([
+      this.prisma.fleet_senses.findMany({
+        where: {
+          fleet_senses_id: { in: fleetSensesIds },
+        },
+      }),
+      this.prisma.landing.findMany({
+        where: {
+          landing_id: { in: landingIds },
+        },
+      }),
+    ]);
+
+    if (validFleetSenses.length !== fleetSensesIds.length) {
+      throw new Error('One or more fleet senses IDs are invalid');
     }
 
-    async createBoatDetail(boatDetail: BoatDetailInterface): Promise<BoatDetailInterface> {
-        try {
-            const boat_detail = await this.prisma.boat_details.findFirst({
-                where: {
-                    fleet_size: boatDetail.fleet_size,
-                    fleet_registration: boatDetail.fleet_registration,
-                    fleet_crew: boatDetail.fleet_crew,
-                    fleet_max_weight: boatDetail.fleet_max_weigh,
-                    fleet_length: boatDetail.fleet_length,
-                    fleet_owner: boatDetail.fleet_owner
-                }
-            })
-
-            if (boat_detail)
-                throw new NotFoundException("Boat detail already exists")
-            const newBoatDetail = await this.prisma.boat_details.create({
-                data: {
-                    fleet_size: boatDetail.fleet_size,
-                    fleet_registration: boatDetail.fleet_registration,
-                    fleet_crew: boatDetail.fleet_crew,
-                    fleet_max_weight: boatDetail.fleet_max_weigh,
-                    fleet_length: boatDetail.fleet_length,
-                    fleet_owner: boatDetail.fleet_owner
-                }
-            })
-            return newBoatDetail;
-        } catch (error) {
-            throw new Error(error);
-        }
+    if (validLanding.length !== landingIds.length) {
+      throw new Error('One or more landing IDs are invalid');
     }
-
-    async updateBoatDetail(boat_id: number, boatDetail: BoatDetailInterface): Promise<BoatDetailInterface> {
-        try {
-            const boat_detail = await this.prisma.boat_details.findUnique({
-                where: {boat_id: boat_id},
-            })
-
-            if (!boat_detail)
-                throw new NotFoundException("Boat detail not found")
-            const updatedBoatDetail = await this.prisma.boat_details.update({
-                where: {boat_id: boat_id},
-                data: {
-                    fleet_size: boatDetail.fleet_size,
-                    fleet_registration: boatDetail.fleet_registration,
-                    fleet_crew: boatDetail.fleet_crew,
-                    fleet_max_weight: boatDetail.fleet_max_weigh,
-                    fleet_length: boatDetail.fleet_length,
-                    fleet_owner: boatDetail.fleet_owner
-                }
-            })
-            return updatedBoatDetail;
-        } catch (error) {
-            throw new Error(error);
-        }
-    }
-
-    async deleteBoatDetail(boat_id: number): Promise<BoatDetailInterface> {
-        try {
-            const boat_detail = await this.prisma.boat_details.findUnique({
-                where: {boat_id: boat_id},
-            })
-
-            if (!boat_detail)
-                throw new NotFoundException("Boat detail not found")
-            const deletedBoatDetail = await this.prisma.boat_details.delete({
-                where: {boat_id: boat_id}
-            })
-            return deletedBoatDetail;
-        } catch (error) {
-            throw new Error(error);
-        }
-    }
+  }
 }

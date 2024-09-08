@@ -1,12 +1,10 @@
-import {Module} from "@nestjs/common";
-import {BoatDetailService} from "./boat_detail.service";
-import {BoatDetailController} from "./boat_detail.controller";
-
+import { Module } from '@nestjs/common';
+import { BoatDetailsServices } from './boat_detail.service';
+import { BoatDetailsController } from './boat_detail.controller';
 
 @Module({
-    imports: [],
-    controllers: [BoatDetailController],
-    providers: [BoatDetailService],
+  imports: [], // Later lal jwt authentication
+  controllers: [BoatDetailsController],
+  providers: [BoatDetailsServices],
 })
-export class BoatDetailModule {
-}
+export class BoatDetailsModule {}

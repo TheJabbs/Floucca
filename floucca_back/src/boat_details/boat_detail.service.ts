@@ -154,8 +154,7 @@ export class BoatDetailsServices {
     });
 
     return {
-      message: 'Boat details deleted successfully',
-      data: null,
+      message: 'Boat details deleted successfully'
     };
   }
 

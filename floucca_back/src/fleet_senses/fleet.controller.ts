@@ -1,7 +1,7 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {FleetService} from "./fleet.service";
 import {FleetIdDto} from "./DTO/FleetId.dto";
-import {CreateFleetDto} from "./DTO";
+import {CreateFleetDto, DateRangeDto} from "./DTO";
 
 @Controller('api/dev/fleet_senses')
 export class FleetController {
@@ -16,6 +16,13 @@ export class FleetController {
     @Get('/fleet_senses/:fleet_senses_id')
     getFleetSensesByFSID(@Param('fleet_senses_id') FSID: FleetIdDto) {
         return this.fleetService.getFleetById(FSID.fleet_senses_id);
+    }
+
+    @Get('/fleet_senses/:fleet_senses_id/gear_usage/:start/:end')
+    getAllFleetByDate(@Param() params: DateRangeDto) {
+        const startDate = new Date(params.start);
+        const endDate = new Date(params.end);
+        return this.fleetService.getAllFleetByDate(startDate, endDate);
     }
 
     @Post('/create/fleet_senses')

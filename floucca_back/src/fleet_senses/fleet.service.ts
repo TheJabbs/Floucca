@@ -108,6 +108,34 @@ export class FleetService {
     }
 
 
+    async getAllFleetByDate(start: Date, end: Date): Promise<GetAllFleetInterface[]> {
+        const fleet = await this.prisma.fleet_senses.findMany({
+            where: {
+                form: {
+                    creation_time: {
+                        gte: start,
+                        lte: end
+                    }
+                }
+            },
+            include: {
+                form: true,
+                gear_usage: {
+                    select: {
+                        gear_code: true,
+                        months: true
+                    }
+                }
+            }
+        });
+
+        if (!fleet || fleet.length === 0) {
+            throw new NotFoundException('No fleet senses found');
+        }
+
+        return fleet;
+    }
+
 
 //Validate
     async validate(form_id: number, boat_details_id: number): Promise<boolean> {
@@ -129,4 +157,3 @@ export class FleetService {
 
 
 }
-;

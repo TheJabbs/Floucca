@@ -37,34 +37,41 @@ export class BoatDetailsServices {
     return boat_details;
   }
 
-  async getBoatDetailsByBDID(
-    boat_details_id: number,
-  ): Promise<GetAllBoatDetailsInterface> {
-    const boat_details = await this.prisma.boat_details.findUnique({
-      where: { boat_id: boat_details_id },
-      select: {
-        boat_id: true,
-        fleet_owner: true,
-        fleet_size: true,
-        fleet_crew: true,
-        fleet_max_weight: true,
-        fleet_length: true,
-        fleet_registration: true,
-        fleet_senses: {
-          select: {
-            fleet_senses_id: true,
-          },
-        },
-        landing: {
-          select: {
-            landing_id: true,
-          },
+async getBoatDetailsByBDID(
+  boat_details_id: number,
+): Promise<GetAllBoatDetailsInterface> {
+  console.log(boat_details_id);
+  const boat_details = await this.prisma.boat_details.findUnique({
+    where: {
+      boat_id: boat_details_id,
+    },
+    select: {
+      boat_id: true,
+      fleet_owner: true,
+      fleet_size: true,
+      fleet_crew: true,
+      fleet_max_weight: true,
+      fleet_length: true,
+      fleet_registration: true,
+      fleet_senses: {
+        select: {
+          fleet_senses_id: true,
         },
       },
-    });
+      landing: {
+        select: {
+          landing_id: true,
+        },
+      },
+    },
+  });
 
-    return boat_details;
+  if (!boat_details) {
+    throw new NotFoundException('Boat details not found');
   }
+
+  return boat_details;
+}
 
   async getBoatDetailByFleetOwner(
     fleet_owner: string,

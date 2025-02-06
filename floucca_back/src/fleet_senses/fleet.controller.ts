@@ -18,10 +18,10 @@ export class FleetController {
         return this.fleetService.getFleetById(FSID.fleet_senses_id);
     }
 
-    @Get('/fleet_senses/:fleet_senses_id/gear_usage/:start/:end')
-    getAllFleetByDate(@Param() params: DateRangeDto) {
-        const startDate = new Date(params.start);
-        const endDate = new Date(params.end);
+    @Get('/fleet_senses/gear_usage/:start/:end')
+    getAllFleetByDate(@Param('start') start: string, @Param('end') end: string) {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
         return this.fleetService.getAllFleetByDate(startDate, endDate);
     }
 

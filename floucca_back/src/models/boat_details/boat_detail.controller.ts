@@ -12,8 +12,9 @@ export class BoatDetailsController {
   }
 
   @Get('/boat_details/:boat_details_id')
-  getBoatDetailsByBDID(@Param('boat_details_id', ) BDID: number) {
-    return this.boatDetailsService.getBoatDetailsByBDID(BDID);
+  getBoatDetailsByBDID(@Param('boat_details_id', ) BDID: BoatDetails_Id_Dto) {
+    console.log(BDID);
+    return this.boatDetailsService.getBoatDetailsByBDID(BDID.boat_details_id);
   }
 
   //   @Get('/boat/fleet_owner/:fleet_owner')  to be revised

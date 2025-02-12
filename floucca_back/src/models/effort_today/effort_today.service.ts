@@ -1,9 +1,9 @@
 import {Injectable} from "@nestjs/common";
-import {PrismaService} from "../prisma/prisma.service";
 import {EffortTodayInterface} from "./interface/effort_today.interface";
 import {CreateEffortTodayInterface} from "./interface/create_update_effort_today.interface";
 import {EffortTodayDto} from "./dto/effort_today.Dto";
 import {mapEffortToday} from "./mapper/effort_today.mapper";
+import {PrismaService} from "../../prisma/prisma.service";
 
 @Injectable()
 export class EffortTodayService {

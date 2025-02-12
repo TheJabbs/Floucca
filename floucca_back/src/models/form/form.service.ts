@@ -1,8 +1,8 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
-import {PrismaService} from "../prisma/prisma.service";
 import {CreateFormDto} from "./DTO/CreateForm.dto";
 import {FormResInterface, GetAllFormInterface} from './interface/index'
 import {UpdateFormDto} from "./DTO/UpdateForm.dto";
+import {PrismaService} from "../../prisma/prisma.service";
 
 @Injectable()
 export class FormService {

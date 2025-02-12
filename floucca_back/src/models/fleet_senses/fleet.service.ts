@@ -1,9 +1,9 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
-import {PrismaService} from "../prisma/prisma.service";
 import {GetAllFleetInterface} from "./Interface/GetAllFleetInterface";
 import {CreateFleetDto} from "./DTO/CreateFleet.dto";
 import {FleetResponse} from "./Interface/FleetResponse.interface";
 import {FleetIdDto} from "./DTO/FleetId.dto";
+import {PrismaService} from "../../prisma/prisma.service";
 
 @Injectable()
 export class FleetService {

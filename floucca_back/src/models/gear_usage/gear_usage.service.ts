@@ -1,7 +1,7 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
-import {PrismaService} from "../prisma/prisma.service";
-import {GearUsageResInterface, GetAllGearUsageInterface} from "./interface/index"
-import {CreateGearUsageDto, UpdateGearUsageDto} from "./DTO/index"
+import {GearUsageResInterface, GetAllGearUsageInterface} from "./interface"
+import {CreateGearUsageDto, UpdateGearUsageDto} from "./DTO"
+import {PrismaService} from "../../prisma/prisma.service";
 
 @Injectable()
 export class GearUsageService {

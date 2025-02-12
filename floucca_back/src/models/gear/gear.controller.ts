@@ -1,5 +1,4 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
-import {PrismaService} from "../prisma/prisma.service";
 import {GearService} from "./gear.service";
 import {GearIdDto} from "./DTO/GearId.dto";
 import {CreateGearDto} from "./DTO/CreateGear.dto";

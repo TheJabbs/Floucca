@@ -1,7 +1,7 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
-import {PrismaService} from "../prisma/prisma.service";
 import {CoopInterface} from "./interface/coop.interface";
 import {mapCoopToReturnCoopInterface} from "./mapper/coop.mapper";
+import {PrismaService} from "../../prisma/prisma.service";
 
 @Injectable()
 export class CoopService {

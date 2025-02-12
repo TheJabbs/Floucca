@@ -1,7 +1,8 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
-import {GearUsageResInterface, GetAllGearUsageInterface} from "./interface"
+import { GetAllGearUsageInterface} from "./interface"
 import {CreateGearUsageDto, UpdateGearUsageDto} from "./DTO"
 import {PrismaService} from "../../prisma/prisma.service";
+import {ResponseMessage} from "../../shared/interface/response.interface";
 
 @Injectable()
 export class GearUsageService {
@@ -30,7 +31,7 @@ export class GearUsageService {
         return gearUsage;
     }
 
-    async createGearUsage(gearUsage: CreateGearUsageDto): Promise<GearUsageResInterface<any>> {
+    async createGearUsage(gearUsage: CreateGearUsageDto): Promise<ResponseMessage<any>> {
         if(!await this.validate(gearUsage.fleet_senses_id, gearUsage.gear_code)){
             return {
                 message: 'Fleet or gear not found'
@@ -51,7 +52,7 @@ export class GearUsageService {
         };
     }
 
-    async updateGearUsage(id: number, gearUsage: UpdateGearUsageDto): Promise<GearUsageResInterface<any>> {
+    async updateGearUsage(id: number, gearUsage: UpdateGearUsageDto): Promise<ResponseMessage<any>> {
         const checkGearUsage = await this.prisma.gear_usage.findUnique({
             where: {gear_usage_id: id}
         });
@@ -84,7 +85,7 @@ export class GearUsageService {
         };
     }
 
-    async deleteGearUsage(id: number): Promise<GearUsageResInterface<any>> {
+    async deleteGearUsage(id: number): Promise<ResponseMessage<any>> {
         const checkGearUsage = await this.prisma.gear_usage.findUnique({
             where: {gear_usage_id: id}
         });

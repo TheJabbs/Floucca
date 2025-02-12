@@ -1,6 +1,7 @@
 import {CreateGearUsageDto, UpdateGearUsageDto, GearUsageIdDto} from "./DTO/index"
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {GearUsageService} from "./gear_usage.service";
+import {idDTO} from "../../shared/dto/id.dto";
 
 @Controller('api/dev/gear_usage')
 export class GearUsageController {
@@ -13,8 +14,8 @@ export class GearUsageController {
     }
 
     @Get('/gear_usage/:gear_usage_id')
-    getGearUsageByGearUsageId(@Param('gear_usage_id') gearUsageId: GearUsageIdDto) {
-        return this.gearUsageService.getGearUsageById(gearUsageId.usage_id);
+    getGearUsageByGearUsageId(@Param('gear_usage_id') gearUsageId: idDTO) {
+        return this.gearUsageService.getGearUsageById(gearUsageId.id);
     }
 
     @Post('/create/gear_usage')
@@ -23,13 +24,13 @@ export class GearUsageController {
     }
 
     @Put('/update/gear_usage/:gear_usage_id')
-    updateGearUsage(@Param('gear_usage_id') gearUsageId: GearUsageIdDto, @Body() updatedGearUsage: UpdateGearUsageDto) {
-        return this.gearUsageService.updateGearUsage(gearUsageId.usage_id, updatedGearUsage);
+    updateGearUsage(@Param('gear_usage_id') gearUsageId: idDTO, @Body() updatedGearUsage: UpdateGearUsageDto) {
+        return this.gearUsageService.updateGearUsage(gearUsageId.id, updatedGearUsage);
     }
 
     @Delete('/delete/gear_usage/:gear_usage_id')
-    deleteGearUsage(@Param('gear_usage_id') gearUsageId: GearUsageIdDto) {
-        return this.gearUsageService.deleteGearUsage(gearUsageId.usage_id);
+    deleteGearUsage(@Param('gear_usage_id') gearUsageId: idDTO) {
+        return this.gearUsageService.deleteGearUsage(gearUsageId.id);
     }
 }
 

@@ -2,6 +2,7 @@ import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {FleetService} from "./fleet.service";
 import {FleetIdDto} from "./DTO/FleetId.dto";
 import {CreateFleetDto, DateRangeDto} from "./DTO";
+import {idDTO} from "../../shared/dto/id.dto";
 
 @Controller('api/dev/fleet_senses')
 export class FleetController {
@@ -14,8 +15,8 @@ export class FleetController {
     }
 
     @Get('/fleet_senses/:fleet_senses_id')
-    getFleetSensesByFSID(@Param('fleet_senses_id') FSID: FleetIdDto) {
-        return this.fleetService.getFleetById(FSID.fleet_senses_id);
+    getFleetSensesByFSID(@Param('fleet_senses_id') FSID: idDTO) {
+        return this.fleetService.getFleetById(FSID.id);
     }
 
     @Get('/fleet_senses/gear_usage/:start/:end')
@@ -31,13 +32,13 @@ export class FleetController {
     }
 
     @Delete('/delete/fleet_senses/:fleet_senses_id')
-    deleteFleetSenses(@Param('fleet_senses_id') FSID: FleetIdDto) {
-        return this.fleetService.deleteFleet(FSID.fleet_senses_id);
+    deleteFleetSenses(@Param('fleet_senses_id') FSID: idDTO) {
+        return this.fleetService.deleteFleet(FSID.id);
     }
 
     @Put('/update/fleet_senses/:fleet_senses_id')
-    updateFleetSenses(@Param('fleet_senses_id') FSID: FleetIdDto, @Body() updatedFleet: CreateFleetDto) {
-        return this.fleetService.updateFleet(FSID.fleet_senses_id, updatedFleet);
+    updateFleetSenses(@Param('fleet_senses_id') FSID: idDTO, @Body() updatedFleet: CreateFleetDto) {
+        return this.fleetService.updateFleet(FSID.id, updatedFleet);
     }
 
 }

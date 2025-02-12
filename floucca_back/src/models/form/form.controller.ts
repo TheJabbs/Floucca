@@ -1,6 +1,7 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {FormService} from "./form.service";
 import {CreateFormDto, FormIdDto, UpdateFormDto,} from "./DTO/index";
+import {idDTO} from "../../shared/dto/id.dto";
 
 @Controller('api/dev/form')
 export class FormController {
@@ -13,8 +14,8 @@ export class FormController {
     }
 
     @Get('/form/:form_id')
-    getFormById(@Param('form_id') form_id: FormIdDto) {
-        return this.formService.getFormById(form_id.form_id);
+    getFormById(@Param('form_id') form_id: idDTO) {
+        return this.formService.getFormById(form_id.id);
     }
 
     @Post('/create/form')
@@ -23,13 +24,13 @@ export class FormController {
     }
 
     @Delete('/delete/form/:form_id')
-    deleteForm(@Param('form_id') form_id: FormIdDto) {
-        return this.formService.deleteForm(form_id.form_id);
+    deleteForm(@Param('form_id') form_id: idDTO) {
+        return this.formService.deleteForm(form_id.id);
     }
 
     @Put('/update/form/:form_id')
-    updateForm(@Param('form_id') form_id: FormIdDto, @Body() updatedForm: UpdateFormDto) {
-        return this.formService.updateForm(form_id.form_id, updatedForm);
+    updateForm(@Param('form_id') form_id: idDTO, @Body() updatedForm: UpdateFormDto) {
+        return this.formService.updateForm(form_id.id, updatedForm);
     }
 
 }

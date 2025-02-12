@@ -1,5 +1,6 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from "@nestjs/common";
 import {FishService} from "./fish.service";
+import {idDTO} from "../../shared/dto/id.dto";
 
 @Controller('/api/fish')
 export class FishController {
@@ -12,8 +13,8 @@ export class FishController {
     }
 
     @Get('/:id')
-    getFishById(@Param('id') id: number) {
-        return this.fishService.getFishById(id);
+    getFishById(@Param('id') id: idDTO) {
+        return this.fishService.getFishById(id.id);
     }
 
     @Post('/create')
@@ -22,13 +23,13 @@ export class FishController {
     }
 
     @Put('/update/:id')
-    updateFish(@Body() fish, @Param('id') id: number) {
-        return this.fishService.updateFish(id, fish);
+    updateFish(@Body() fish, @Param('id') id: idDTO) {
+        return this.fishService.updateFish(id.id, fish);
     }
 
     @Delete('/delete/:id')
-    deleteFish(@Param('id') id: number) {
-        return this.fishService.deleteFish(id);
+    deleteFish(@Param('id') id: idDTO) {
+        return this.fishService.deleteFish(id.id);
     }
 
 

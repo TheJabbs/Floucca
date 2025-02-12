@@ -1,9 +1,9 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import {GetAllGearInterface} from "./interface/GetAllGear.interface";
 import {CreateGearDto} from "./DTO/CreateGear.dto";
-import {GearResponse} from "./interface/GearResponse.interface";
 import Any = jasmine.Any;
 import {PrismaService} from "../../prisma/prisma.service";
+import {ResponseMessage} from "../../shared/interface/response.interface";
 
 @Injectable()
 export class GearService {
@@ -45,7 +45,7 @@ export class GearService {
         return gear;
     }
 
-    async createGear(gear: CreateGearDto): Promise<GearResponse<any>> {
+    async createGear(gear: CreateGearDto): Promise<ResponseMessage<any>> {
         const checkGear = await this.getGearById(gear.gear_code);
         if (checkGear) {
             return {
@@ -65,7 +65,7 @@ export class GearService {
 
     }
 
-    async updateGear(id: number, gear: CreateGearDto): Promise<GearResponse<Any>> {
+    async updateGear(id: number, gear: CreateGearDto): Promise<ResponseMessage<Any>> {
         const checkGear = await this.getGearById(id);
         if (!checkGear) {
             return {
@@ -83,7 +83,7 @@ export class GearService {
         }
     }
 
-    async deleteGear(id: number): Promise<GearResponse<Any>> {
+    async deleteGear(id: number): Promise<ResponseMessage<Any>> {
         const checkGear = await this.getGearById(id);
         if (!checkGear) {
             return {

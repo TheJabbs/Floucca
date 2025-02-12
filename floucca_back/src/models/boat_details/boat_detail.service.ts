@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BoatSuccessResponse, GetAllBoatDetailsInterface } from './interface';
 import { CreateBoatDetailsDto } from './dto';
+import {GetAllBoatDetailsInterface} from "./interface";
+import {ResponseMessage} from "../../shared/interface/response.interface";
 
 @Injectable()
 export class BoatDetailsServices {
@@ -104,7 +105,7 @@ async getBoatDetailsByBDID(
 
   async createBoatDetails(
     newBoatDetails: CreateBoatDetailsDto,
-  ): Promise<BoatSuccessResponse<any>> {
+  ): Promise<ResponseMessage<any>> {
     const {
       boat_id,
       fleet_owner,
@@ -147,7 +148,7 @@ async getBoatDetailsByBDID(
 
   async deleteBoatDetails(
     BoatDetailsId: number,
-  ): Promise<BoatSuccessResponse<any>> {
+  ): Promise<ResponseMessage<any>> {
     const boatDetails = await this.prisma.boat_details.findUnique({
       where: { boat_id: BoatDetailsId },
     });

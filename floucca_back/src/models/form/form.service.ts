@@ -1,8 +1,9 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import {CreateFormDto} from "./DTO/CreateForm.dto";
-import {FormResInterface, GetAllFormInterface} from './interface/index'
+import { GetAllFormInterface} from './interface/index'
 import {UpdateFormDto} from "./DTO/UpdateForm.dto";
 import {PrismaService} from "../../prisma/prisma.service";
+import {ResponseMessage} from "../../shared/interface/response.interface";
 
 @Injectable()
 export class FormService {
@@ -31,7 +32,7 @@ export class FormService {
         return form;
     }
 
-    async createForm(form: CreateFormDto): Promise<FormResInterface<any>> {
+    async createForm(form: CreateFormDto): Promise<ResponseMessage<any>> {
         if(!await this.validate(form.user_id, form.port_id)){
             return {
                 message: 'User or port not found'
@@ -54,7 +55,7 @@ export class FormService {
         }
     }
 
-    async deleteForm(id: number): Promise<FormResInterface<any>> {
+    async deleteForm(id: number): Promise<ResponseMessage<any>> {
 
         const check = await this.prisma.form.findUnique({
             where: {form_id: id}
@@ -77,7 +78,7 @@ export class FormService {
         }
     }
 
-    async updateForm(id: number, form: UpdateFormDto): Promise<FormResInterface<any>> {
+    async updateForm(id: number, form: UpdateFormDto): Promise<ResponseMessage<any>> {
         const check = await this.prisma.form.findUnique({
             where: {form_id: id}
         });

@@ -2,6 +2,7 @@ import {Body, Controller, Delete, Get, Param, Post, Put} from "@nestjs/common";
 import {CoopService} from "./coop.service";
 import {CoopDto} from "./dto/coop.Dto";
 import {mapCoopToReturnCoopInterface} from "./mapper/coop.mapper";
+import {idDTO} from "../../shared/dto/id.dto";
 
 @Controller('api/coop')
 export class CoopController {
@@ -14,8 +15,8 @@ export class CoopController {
     }
 
     @Get('/:id')
-    getCoopById(@Param('id') id: number) {
-        return this.coopService.getCoopById(id);
+    getCoopById(@Param('id') id: idDTO) {
+        return this.coopService.getCoopById(id.id);
     }
 
     @Post('/create')
@@ -30,21 +31,21 @@ export class CoopController {
     }
 
     @Put('/update/:id')
-    updateCoop(@Body() coop : CoopDto, @Param('id') id: number){
-        const check = this.coopService.getCoopById(id);
+    updateCoop(@Body() coop : CoopDto, @Param('id') id: idDTO){
+        const check = this.coopService.getCoopById(id.id);
         if (!check){
             return "Coop does not exist"
         }
-        return this.coopService.updateCoop(id,mapCoopToReturnCoopInterface(coop));
+        return this.coopService.updateCoop(id.id,mapCoopToReturnCoopInterface(coop));
     }
 
     @Delete('/delete/:id')
-    deleteCoop(@Param('id') id: number){
-        const check = this.coopService.getCoopById(id);
+    deleteCoop(@Param('id') id: idDTO){
+        const check = this.coopService.getCoopById(id.id);
         if (!check){
             return "Coop does not exist"
         }
-        return this.coopService.deleteCoop(id);
+        return this.coopService.deleteCoop(id.id);
     }
 
 

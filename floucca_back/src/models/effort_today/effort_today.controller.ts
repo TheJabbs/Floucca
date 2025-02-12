@@ -1,6 +1,7 @@
 import {EffortTodayService} from "./effort_today.service";
 import {Body, Controller, Delete, Get, Param, Post, Put} from "@nestjs/common";
 import {EffortTodayDto} from "./dto/effort_today.Dto";
+import {idDTO} from "../../shared/dto/id.dto";
 
 @Controller('api/effort_today')
 export class EffortTodayController {
@@ -13,8 +14,8 @@ export class EffortTodayController {
     }
 
     @Get('/:id')
-    getEffortTodayById(@Param('id') id: number) {
-        return this.effortTodayService.getEffortTodayById(id);
+    getEffortTodayById(@Param('id') id: idDTO) {
+        return this.effortTodayService.getEffortTodayById(id.id);
     }
 
     @Post('/create')
@@ -23,20 +24,20 @@ export class EffortTodayController {
     }
 
     @Put('/update/:id')
-    updateEffortToday(@Body() effort_today: EffortTodayDto, @Param('id') id: number) {
-        const check = this.effortTodayService.getEffortTodayById(id);
+    updateEffortToday(@Body() effort_today: EffortTodayDto, @Param('id') id: idDTO) {
+        const check = this.effortTodayService.getEffortTodayById(id.id);
         if (!check) {
             return "Effort today does not exist"
         }
-        return this.effortTodayService.updateEffortToday(id, effort_today);
+        return this.effortTodayService.updateEffortToday(id.id, effort_today);
     }
 
     @Delete('/delete/:id')
-    deleteEffortToday(@Param('id') id: number) {
-        const check = this.effortTodayService.getEffortTodayById(id);
+    deleteEffortToday(@Param('id') id: idDTO) {
+        const check = this.effortTodayService.getEffortTodayById(id.id);
         if (!check) {
             return "Effort today does not exist"
         }
-        return this.effortTodayService.deleteEffortToday(id);
+        return this.effortTodayService.deleteEffortToday(id.id);
     }
 }

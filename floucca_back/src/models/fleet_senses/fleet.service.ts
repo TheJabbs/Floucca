@@ -1,9 +1,9 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import {GetAllFleetInterface} from "./Interface/GetAllFleetInterface";
 import {CreateFleetDto} from "./DTO/CreateFleet.dto";
-import {FleetResponse} from "./Interface/FleetResponse.interface";
 import {FleetIdDto} from "./DTO/FleetId.dto";
 import {PrismaService} from "../../prisma/prisma.service";
+import {ResponseMessage} from "../../shared/interface/response.interface";
 
 @Injectable()
 export class FleetService {
@@ -56,7 +56,7 @@ export class FleetService {
         return fleet;
     }
 
-    async createFleet(fleet: CreateFleetDto): Promise<FleetResponse<any>> {
+    async createFleet(fleet: CreateFleetDto): Promise<ResponseMessage<any>> {
         if (!await this.validate(fleet.form_id, fleet.boat_details_id)) {
             return {
                 message: "Form or boat details not found"
@@ -76,7 +76,7 @@ export class FleetService {
 
     }
 
-    async updateFleet(id: number, fleet: CreateFleetDto): Promise<FleetResponse<any>> {
+    async updateFleet(id: number, fleet: CreateFleetDto): Promise<ResponseMessage<any>> {
         if (!await this.validate(fleet.form_id, fleet.boat_details_id)) {
             return {
                 message: "Form or boat details not found"
@@ -92,7 +92,7 @@ export class FleetService {
         });
     }
 
-    async deleteFleet(id: number): Promise<FleetResponse<any>> {
+    async deleteFleet(id: number): Promise<ResponseMessage<any>> {
         const check = await this.prisma.fleet_senses.findUnique({
             where: {fleet_senses_id: id}
         });

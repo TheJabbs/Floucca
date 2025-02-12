@@ -7,8 +7,5 @@ export class EffortTodayDto {
     hours_fished: number;
     @IsNotEmpty()
     @IsInt()
-    detail_id: number;
-    @IsNotEmpty()
-    @IsInt()
     landing_id: number;
 }

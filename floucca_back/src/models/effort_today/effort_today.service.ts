@@ -38,7 +38,6 @@ export class EffortTodayService {
             const newEffortToday = await this.prisma.effort_today.create({
                 data: {
                     hours_fished: effort_today.hours_fished,
-                    detail_id: effort_today.detail_id,
                     landing_id: effort_today.landing_id
                 }
             });
@@ -54,7 +53,6 @@ export class EffortTodayService {
                 where: {effort_today_id: id},
                 data: {
                     hours_fished: effort_today.hours_fished,
-                    detail_id: effort_today.detail_id,
                     landing_id: effort_today.landing_id
                 }
             });

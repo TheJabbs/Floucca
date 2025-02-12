@@ -1,7 +1,9 @@
-import {IsNumber, IsPositive} from "class-validator";
+import {IsInt, Min} from "class-validator";
+import {Transform} from "class-transformer";
 
 export class idDTO{
-    @IsPositive()
-    @IsNumber()
+    @Transform(({ value }) => parseInt(value, 10))  // Convert string to integer
+    @IsInt({ message: 'The id must be an integer.' })
+    @Min(1, { message: 'The id must be a positive integer.' })
     id: number;
 }

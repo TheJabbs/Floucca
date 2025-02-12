@@ -1,45 +1,46 @@
 import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class TypeTransformPipe implements PipeTransform {
-    transform(value: any, metadata: ArgumentMetadata): any {
-        if (typeof value !== 'string') {
+    async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
+        if (!metadata.metatype) {
             return value;
         }
 
-        // Try to transform the value
-        const transformedValue = this.parseValue(value);
+        if (this.toValidate(metadata.metatype)) {
+            const object = plainToInstance(metadata.metatype, { id: value });
+            const errors = await validate(object);
 
-        if (transformedValue === undefined) {
-            throw new BadRequestException(`Invalid parameter: "${value}"`);
+            if (errors.length > 0) {
+                const errorMessages = errors.map(err => Object.values(err.constraints).join(', ')).join('; ');
+                throw new BadRequestException(`Validation failed: ${errorMessages}`);
+            }
+
+            return object;
         }
 
-        return transformedValue;
+        return this.parseValue(value);
     }
 
+    private toValidate(metatype: any): boolean {
+        const types: any[] = [String, Boolean, Number, Array, Object];
+        return !types.includes(metatype);
+    }
+
+
     private parseValue(value: string): any {
-        // Handle boolean values
         if (value.toLowerCase() === 'true') return true;
         if (value.toLowerCase() === 'false') return false;
 
         const numberValue = parseFloat(value);
-        if (!isNaN(numberValue) && value.trim() === `${numberValue}`) {
-            return numberValue;
-        }
+        if (!isNaN(numberValue) && value.trim() === `${numberValue}`) return numberValue;
 
-        if ((value.startsWith('{') && value.endsWith('}')) || (value.startsWith('[') && value.endsWith(']'))) {
-            try {
-                return JSON.parse(value);
-            } catch {
-                return undefined;
-            }
+        try {
+            return JSON.parse(value);
+        } catch {
+            return value;
         }
-
-        const dateValue = new Date(value);
-        if (!isNaN(dateValue.getTime())) {
-            return dateValue;
-        }
-
-        return value;
     }
 }

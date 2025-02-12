@@ -14,7 +14,6 @@ export class BoatDetailsController {
 
   @Get('/boat_details/:boat_details_id')
   getBoatDetailsByBDID(@Param('boat_details_id', ) BDID: idDTO) {
-    console.log(BDID);
     return this.boatDetailsService.getBoatDetailsByBDID(BDID.id);
   }
 

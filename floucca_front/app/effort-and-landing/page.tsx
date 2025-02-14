@@ -1,7 +1,10 @@
-'use client'
+'use client';
 
 import React, { useState } from 'react';
 import FishingDetails from "@/components/forms-c/fishing-details-form";
+import EffortTodayForm from "@/components/forms-c/effort-today-form";
+import BoatInfo from "@/components/forms-c/boat-form"; 
+import EffortLastWeek from "@/components/forms-c/effort-last-week-form"; // ✅ Import EffortLastWeek
 
 interface Location {
   id: string;
@@ -25,24 +28,72 @@ interface Gear {
   gearName: string;
 }
 
+interface EffortToday {
+  hoursFished: number;
+  gearUsed: Gear[];
+}
+
+interface BoatData {
+  ownerName: string;
+  registrationNumber: string;
+  boatName: string;
+  horsePower: number;
+  length: number;
+  capacity: number;
+}
+
+interface EffortLastWeekEntry {
+  gearId: number;
+  timesUsed: number;
+}
+
 function Page() {
-  // populated by  map component 
+  // populated by map component
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([
     { id: '1', coordinates: { lat: 34.123, lng: 35.456 } },
     { id: '2', coordinates: { lat: 34.234, lng: 35.567 } },
   ]);
 
-  // populated by effort today component 
-  const [selectedGears, setSelectedGears] = useState<Gear[]>([
-    { gearId: 1, gearName: "Trawl Net" },
-    { gearId: 2, gearName: "Gill Net" },
-  ]);
+  // Store Boat Details
+  const [boatData, setBoatData] = useState<BoatData>({
+    ownerName: '',
+    registrationNumber: '',
+    boatName: '',
+    horsePower: 0,
+    length: 0,
+    capacity: 0,
+  });
 
-  // state for fish entries
+  // Store effort today (hours fished & gear used)
+  const [effortToday, setEffortToday] = useState<EffortToday>({
+    hoursFished: 0,
+    gearUsed: [],
+  });
+
+  // Store fish data
   const [fishData, setFishData] = useState<FishEntry[]>([]);
 
+  // Store effort last week (gears & times used)
+  const [effortLastWeek, setEffortLastWeek] = useState<EffortLastWeekEntry[]>([]);
+
+  // Update Boat Details
+  const handleBoatChange = (boatDetails: BoatData) => {
+    setBoatData(boatDetails);
+  };
+
+  // Update effort today (hours fished & selected gear)
+  const handleEffortChange = (effort: EffortToday) => {
+    setEffortToday(effort);
+  };
+
+  // Update fish data
   const handleFishChange = (entries: FishEntry[]) => {
     setFishData(entries);
+  };
+
+  // Update effort last week data
+  const handleEffortLastWeekChange = (entries: EffortLastWeekEntry[]) => {
+    setEffortLastWeek(entries);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -55,7 +106,9 @@ function Page() {
 
     // Prepare the form data for submission
     const formData = {
-      // Other form sections to be added later
+      boatData,   
+      effortToday,
+      effortLastWeek,  // ✅ Now includes effort last week!
       fishingDetails: fishData,
     };
 
@@ -64,9 +117,7 @@ function Page() {
     // API call will go here
     // fetch('/api/landings', {
     //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
+    //   headers: { 'Content-Type': 'application/json' },
     //   body: JSON.stringify(formData),
     // });
   };
@@ -75,15 +126,21 @@ function Page() {
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Landing Form</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Other form components will be added here */}
-        {/* <BoatDetails /> */}
-        {/* <EffortToday /> */}
-        {/* <EffortLastWeek /> */}
-        {/* <MapComponent /> */}
         
+        {/* ✅ Boat Information Form */}
+        <BoatInfo onChange={handleBoatChange} />
+
+        {/* ✅ Effort Today Form */}
+        <EffortTodayForm availableGears={effortToday.gearUsed} onChange={handleEffortChange} />
+
+        {/* ✅ Effort Last Week Form */}
+        <EffortLastWeek onChange={handleEffortLastWeekChange} />
+
+        {/* <MapComponent /> */}
+
         <FishingDetails
           selectedLocations={selectedLocations}
-          selectedGears={selectedGears}
+          selectedGears={effortToday.gearUsed}
           onChange={handleFishChange}
         />
 

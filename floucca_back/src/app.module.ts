@@ -8,12 +8,13 @@ import {FleetModule} from "./models/fleet_senses/fleet.module";
 import {FormModule} from "./models/form/form.module";
 import {GearModule} from "./models/gear/gear.module";
 import {GearUsageModule} from "./models/gear_usage/gear_usage.module";
+import {GearDetailService} from "./models/gear_detail/gear_detail.service";
 
 
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,
     EffortTodayModule, FishModule, FishModule, FleetModule,
-    FormModule, GearModule, GearUsageModule],
+    FormModule, GearModule, GearUsageModule, GearDetailService],
   providers: [],
 })
 export class AppModule {}

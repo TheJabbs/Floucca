@@ -3,6 +3,7 @@
 import React, {useState} from 'react';
 import BoatInfo from "@/components/forms-c/boat-form";
 import GearInfo from "@/components/forms-c/gear-form";
+import MapWithMarkers from "@/components/forms-c/MapWithMarker";
 
 
 
@@ -45,16 +46,21 @@ function Page() {
     return (
         <div className="container mx-auto p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-                <BoatInfo required={true} onChange={handleBoatChange}/>
-                <GearInfo/>
-                <button
-                    type="submit"
-                    className="submit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    Submit
-                </button>
+                <div className="container mx-auto p-6">
+                    <MapWithMarkers/>
+                    <BoatInfo required={true} onChange={handleBoatChange}/>
+                </div>
+                    <GearInfo/>
+                    <button
+                        type="submit"
+                        className="submit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        Submit
+                    </button>
+
             </form>
-        </div>);
+        </div>
+);
 }
 
 export default Page;

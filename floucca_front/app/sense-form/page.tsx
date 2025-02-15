@@ -33,12 +33,14 @@ function Page() {
           }
 
         // Prepare the combined form data for submission
-        const formData = {
-            boatInfo: boatData,
-            gearData: gearData,
+        const FleetSensesFormDTO = {
+            FleetSensesFormDTO: {
+                boatInfo: boatData,
+                gearData: gearData,
+            }
         };
 
-        console.log('Submitting form data:', formData);
+        console.log('Submitting form data:', FleetSensesFormDTO);
         // fetch('/api/submit', {
         //   method: 'POST',
         //   headers: {

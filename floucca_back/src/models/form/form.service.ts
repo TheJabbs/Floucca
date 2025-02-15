@@ -122,7 +122,11 @@ export class FormService {
         where: { port_id: port_id }
     }) : null;
 
-    return !!user || !!port;
+    const period = await this.prisma.period.findFirst({
+        where: { period_date: new Date() }
+    })
+
+    return !!user || !!port || period.period_status === "B";
 }
 
 

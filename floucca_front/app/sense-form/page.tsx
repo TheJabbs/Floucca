@@ -6,15 +6,15 @@ import GearInfo from "@/components/forms-c/gear-form";
 
 function Page() {
     const [boatData, setBoatData] = useState({
-        ownerName: '',
-        registrationNumber: '',
-        boatName: '',
-        horsePower: 0,
-        length: 0,
-        capacity: 0,
+        fleet_owner: '',
+        fleet_registration: 0,
+        fleet_size: 0,
+        fleet_crew: 0,
+        fleet_max_weight: 0,
+        fleet_length: 0,
     });
 
-    const [gearData, setGearData] = useState<{ gearId: number; months: number[] }[]>([]);
+    const [gearData, setGearData] = useState<{ gear_code: number; months: number[] }[]>([]);
 
     const handleBoatChange = (data: typeof boatData) => {
         setBoatData(data);

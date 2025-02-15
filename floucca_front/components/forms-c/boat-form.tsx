@@ -6,23 +6,23 @@ import FormInput from '../utils/form-input';
 interface BoatInfoProps {
     required?: boolean;
     onChange: (boatData: {
-        ownerName: string;
-        registrationNumber: string;
-        boatName: string;
-        horsePower: number;
-        length: number;
-        capacity: number;
+        fleet_owner: string;
+        fleet_registration: number;
+        fleet_size: number;
+        fleet_crew: number;
+        fleet_max_weight: number;
+        fleet_length: number;
     }) => void;
 }
 
 const BoatInfo: React.FC<BoatInfoProps> = ({ required = false, onChange }) => {
     const [boatData, setBoatData] = useState({
-        ownerName: '',
-        registrationNumber: '',
-        boatName: '',
-        horsePower: 0,
-        length: 0,
-        capacity: 0,
+        fleet_owner: '',
+        fleet_registration: 0,
+        fleet_size: 0,
+        fleet_crew: 0,
+        fleet_max_weight: 0,
+        fleet_length: 0,
     });
 
     useEffect(() => {
@@ -33,7 +33,7 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required = false, onChange }) => {
         const { name, value } = e.target;
         setBoatData((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: name === 'fleet_owner' ? value : Number(value),
         }));
     };
 
@@ -43,53 +43,55 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required = false, onChange }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput
                     label="Boat Owner Name"
-                    name="ownerName"
+                    name="fleet_owner"
                     required={required}
                     placeholder="Enter owner's name"
-                    value={boatData.ownerName}
+                    value={boatData.fleet_owner}
                     onChange={handleChange}
                 />
                 <FormInput
                     label="Boat Registration Number"
-                    name="registrationNumber"
+                    name="fleet_registration"
                     required={required}
                     placeholder="Enter registration number"
-                    value={boatData.registrationNumber}
-                    onChange={handleChange}
-                />
-                <FormInput
-                    label="Boat Name"
-                    name="boatName"
-                    required={required}
-                    placeholder="Enter boat name"
-                    value={boatData.boatName}
-                    onChange={handleChange}
-                />
-                <FormInput
-                    label="Boat Horse Power"
-                    name="horsePower"
-                    required={required}
-                    placeholder="Enter horse power"
                     type="number"
-                    value={boatData.horsePower.toString()}
+                    value={boatData.fleet_registration.toString()}
                     onChange={handleChange}
                 />
                 <FormInput
-                    label="Boat Length (in meters)"
-                    name="length"
+                    label="Boat Fleet Size"
+                    name="fleet_size"
+                    required={required}
+                    placeholder="Enter fleet size"
+                    type='number'
+                    value={boatData.fleet_size.toString()}
+                    onChange={handleChange}
+                />
+                <FormInput
+                    label="Fleet Crew Count"
+                    name="fleet_crew"
+                    required={required}
+                    placeholder="Enter crew count"
+                    type="number"
+                    value={boatData.fleet_crew.toString()}
+                    onChange={handleChange}
+                />
+                <FormInput
+                    label="Boat Maximum Weight (in Kg)"
+                    name="fleet_max_weight"
+                    required={required}
+                    placeholder="Enter max weight"
+                    type="number"
+                    value={boatData.fleet_max_weight.toString()}
+                    onChange={handleChange}
+                />
+                <FormInput
+                    label="Boat Length (meters)"
+                    name="fleet_length"
                     required={required}
                     placeholder="Enter length"
                     type="number"
-                    value={boatData.length.toString()}
-                    onChange={handleChange}
-                />
-                <FormInput
-                    label="Boat Capacity (in kg)"
-                    name="capacity"
-                    required={required}
-                    placeholder="Enter capacity"
-                    type="number"
-                    value={boatData.capacity.toString()}
+                    value={boatData.fleet_length.toString()}
                     onChange={handleChange}
                 />
             </div>

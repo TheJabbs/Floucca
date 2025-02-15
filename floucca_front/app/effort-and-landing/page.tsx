@@ -1,7 +1,21 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import FishingDetails from "@/components/forms-c/fishing-details-form";
+import dynamic from 'next/dynamic';
+
+// Dynamically import MapWithMarkers with no SSR
+const MapWithMarkers = dynamic(
+  () => import('@/components/forms-c/map-with-markers'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-full w-full flex items-center justify-center bg-gray-100">
+        Loading map...
+      </div>
+    )
+  }
+);
 
 interface Location {
   id: string;
@@ -26,40 +40,47 @@ interface Gear {
 }
 
 function Page() {
-  // populated by  map component 
-  const [selectedLocations, setSelectedLocations] = useState<Location[]>([
-    { id: '1', coordinates: { lat: 34.123, lng: 35.456 } },
-    { id: '2', coordinates: { lat: 34.234, lng: 35.567 } },
-  ]);
-
-  // populated by effort today component 
-  const [selectedGears, setSelectedGears] = useState<Gear[]>([
+  const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
+  const [selectedGears] = useState<Gear[]>([
     { gearId: 1, gearName: "Trawl Net" },
     { gearId: 2, gearName: "Gill Net" },
   ]);
-
-  // state for fish entries
   const [fishData, setFishData] = useState<FishEntry[]>([]);
 
-  const handleFishChange = (entries: FishEntry[]) => {
+  const handleMarkersUpdate = useCallback((markers: { id: number; lat: number; lng: number }[]) => {
+    const locations = markers.map(marker => ({
+      id: marker.id.toString(),
+      coordinates: {
+        lat: marker.lat,
+        lng: marker.lng,
+      },
+    }));
+    setSelectedLocations(locations);
+  }, []);
+
+  const handleFishChange = useCallback((entries: FishEntry[]) => {
     setFishData(entries);
-  };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (fishData.length === 0) {
-      alert('Please add at least one fish entry');
+      alert("Please add at least one fish entry");
       return;
     }
 
-    // Prepare the form data for submission
+    if (selectedLocations.length === 0) {
+      alert("Please select at least one fishing location on the map");
+      return;
+    }
+
     const formData = {
-      // Other form sections to be added later
+      locationDetails: selectedLocations,
       fishingDetails: fishData,
     };
 
-    console.log('Submitting form data:', formData);
+    console.log("Submitting form data:", formData);
 
     // API call will go here
     // fetch('/api/landings', {
@@ -75,12 +96,16 @@ function Page() {
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Landing Form</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Other form components will be added here */}
-        {/* <BoatDetails /> */}
-        {/* <EffortToday /> */}
-        {/* <EffortLastWeek /> */}
-        {/* <MapComponent /> */}
-        
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Select Fishing Locations</h2>
+          <p className="text-sm text-gray-600">
+            Click on the map to add fishing locations. Click a marker to remove it.
+          </p>
+          <div className="h-[500px] w-full border rounded-lg overflow-hidden">
+            <MapWithMarkers onMarkersChange={handleMarkersUpdate} />
+          </div>
+        </div>
+
         <FishingDetails
           selectedLocations={selectedLocations}
           selectedGears={selectedGears}

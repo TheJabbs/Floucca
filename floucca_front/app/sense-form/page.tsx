@@ -39,7 +39,6 @@ function Page() {
         };
 
         console.log('Submitting form data:', formData);
-
         // fetch('/api/submit', {
         //   method: 'POST',
         //   headers: {

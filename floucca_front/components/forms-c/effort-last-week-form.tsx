@@ -24,16 +24,15 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ onChange }) => {
   const [availableGears, setAvailableGears] = useState<Gear[]>([]);
 
   useEffect(() => {
-    // TODO: Replace this with an API call to fetch available gears when backend is connected
     const fetchGears = async () => {
       try {
-        const sampleGears: Gear[] = [
-          { gear_code: 1, gear_name: "Trawl Net" },
-          { gear_code: 2, gear_name: "Gill Net" },
-          { gear_code: 3, gear_name: "Long Line" },
-          { gear_code: 4, gear_name: "Trap" }
-        ];
-        setAvailableGears(sampleGears);
+        const response = await fetch(process.env.GET_ALL_GEARS || "");
+        if (!response.ok) {
+          throw new Error('Failed to fetch gears');
+        }
+        const gears = await response.json();
+        console.log("The gears are: ", gears);
+        setAvailableGears(gears);
       } catch (error) {
         console.error('Error fetching gears:', error);
       }

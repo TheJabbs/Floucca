@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {TypeTransformPipe} from "./pipes/TypeTransformPipe";
-import {startAuto} from "./auto/shceduler";
+import { TypeTransformPipe } from './pipes/TypeTransformPipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -9,8 +8,6 @@ async function bootstrap() {
   app.enableCors();
   app.useGlobalPipes(new TypeTransformPipe());
 
-  // Start the auto scheduler
-  startAuto();
 
 
   await app.listen(3000);

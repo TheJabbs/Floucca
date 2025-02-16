@@ -50,7 +50,7 @@ model fish {
   fish_quantity Int?
   specie        specie  @relation(fields: [specie_code], references: [specie_code], onDelete: Cascade, map: "fish_ibfk_1")
   landing       landing @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "fish_ibfk_2")
-  gear          gear?   @relation(fields: [gear_code], references: [gear_code], onUpdate: SetNull, map: "fish_ibfk_3")
+  gear          gear?   @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "fish_ibfk_3")
 
   @@index([specie_code], map: "fish_ibfk_1")
   @@index([landing_id], map: "fish_ibfk_2")
@@ -91,7 +91,7 @@ model form {
 model gear {
   gear_code      Int            @id @default(autoincrement())
   gear_name      String         @db.VarChar(30)
-  equipment_id   Int
+  equipment_id   String         @db.VarChar(10)
   equipment_name String         @db.VarChar(50)
   fish           fish[]
   gear_details   gear_details[]
@@ -102,9 +102,9 @@ model gear {
 model gear_details {
   detail_id       Int          @id @default(autoincrement())
   gear_code       Int
-  effort_today_id Int
   detail_name     String       @db.VarChar(50)
   detail_value    String       @db.VarChar(200)
+  effort_today_id Int
   effort_today    effort_today @relation(fields: [effort_today_id], references: [effort_today_id], onDelete: NoAction, onUpdate: NoAction, map: "effort_today_ibfk_1")
   gear            gear         @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "gear_details_ibfk_1")
 

@@ -1,4 +1,4 @@
-import {IsNumber, IsPositive, IsString} from "class-validator";
+import {IsNumber, IsPositive, IsString, Length} from "class-validator";
 
 export class CreateGearDto {
     @IsNumber()
@@ -8,9 +8,9 @@ export class CreateGearDto {
     @IsString()
     gear_name: string;
 
-    @IsNumber()
-    @IsPositive()
-    equipment_id: number;
+    @IsString()
+    @Length(3,5)
+    equipment_id: string;
 
     @IsString()
     equipment_name: string;

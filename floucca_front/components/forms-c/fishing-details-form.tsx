@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import AddButton from '../utils/form-button';
 
 interface FishEntry {
   locationId: string;
-  gearId: number;
-  specieId: number;
-  weight: number;
-  length: number;
-  quantity: number;
+  gear_code: number;
+  specie_code: number;
+  fish_weight: number;
+  fish_length: number;
+  fish_quantity: number;
 }
 
 interface Location {
@@ -20,37 +20,46 @@ interface Location {
   };
 }
 
+interface GearUsed {
+  gear_code: number;
+  specs?: string;
+}
+
+interface Species {
+  specie_code: number;
+  specie_name: string;
+}
+
 interface FishingDetailsProps {
-  selectedLocations: Location[]; //coordinates from map
-  selectedGears: { gearId: number; gearName: string }[]; //gear from effort today
+  selectedLocations: Location[];
+  usedGears: GearUsed[]; // ⬅️ Selected gears from EffortTodayForm
   onChange: (entries: FishEntry[]) => void;
 }
 
 const FishingDetails: React.FC<FishingDetailsProps> = ({
   selectedLocations,
-  selectedGears,
+  usedGears = [],
   onChange
 }) => {
   const [fishEntries, setFishEntries] = useState<FishEntry[]>([]);
-  const [availableSpecies, setAvailableSpecies] = useState<{ specie_code: number; specie_name: string }[]>([]);
+  const [availableSpecies, setAvailableSpecies] = useState<Species[]>([]);
   const [currentEntry, setCurrentEntry] = useState<FishEntry>({
     locationId: '',
-    gearId: 0,
-    specieId: 0,
-    weight: 0,
-    length: 0,
-    quantity: 0
+    gear_code: 0,
+    specie_code: 0,
+    fish_weight: 0,
+    fish_length: 0,
+    fish_quantity: 0
   });
 
   useEffect(() => {
-    // Fetch species from API
+    // TODO: Replace with API call
     const fetchSpecies = async () => {
       try {
-        // replace with API call
         const sampleSpecies = [
-          { specie_code: 1, specie_name: "Tuna" },
-          { specie_code: 2, specie_name: "Sardine" },
-          { specie_code: 3, specie_name: "Sea Bass" },
+          { specie_code: 1, specie_name: 'Tuna' },
+          { specie_code: 2, specie_name: 'Sardine' },
+          { specie_code: 3, specie_name: 'Sea Bass' },
         ];
         setAvailableSpecies(sampleSpecies);
       } catch (error) {
@@ -69,47 +78,32 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     const { name, value } = e.target;
     setCurrentEntry(prev => ({
       ...prev,
-      [name]: name === 'locationId' || name === 'gearId' || name === 'specieId' 
-        ? value 
+      [name]: name === 'locationId' || name === 'gear_code' || name === 'specie_code'
+        ? value
         : Number(value)
     }));
   };
 
-  const isValidEntry = () => {
-    return (
-      currentEntry.locationId !== '' &&
-      currentEntry.gearId !== 0 &&
-      currentEntry.specieId !== 0 &&
-      currentEntry.weight > 0 &&
-      currentEntry.length > 0 &&
-      currentEntry.quantity > 0
-    );
-  };
-
   const addFishEntry = () => {
-    if (!isValidEntry()) return;
-    
+    if (!currentEntry.locationId || !currentEntry.gear_code || !currentEntry.specie_code) return;
+
     setFishEntries(prev => [...prev, currentEntry]);
     setCurrentEntry({
       locationId: '',
-      gearId: 0,
-      specieId: 0,
-      weight: 0,
-      length: 0,
-      quantity: 0
+      gear_code: 0,
+      specie_code: 0,
+      fish_weight: 0,
+      fish_length: 0,
+      fish_quantity: 0
     });
-  };
-
-  const removeFishEntry = (index: number) => {
-    setFishEntries(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">Today's Fishing Details</h2>
-      
-      {/* Location and Gear Selection Row */}
+
       <div className="flex gap-4">
+        {/* Location Selection */}
         <select
           name="locationId"
           value={currentEntry.locationId}
@@ -124,28 +118,27 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
           ))}
         </select>
 
+        {/* Gear Selection from Effort Today */}
         <select
-          name="gearId"
-          value={currentEntry.gearId}
+          name="gear_code"
+          value={currentEntry.gear_code}
           onChange={handleInputChange}
           className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value={0}>Select Gear Used</option>
-          {selectedGears.map(gear => (
-            <option key={gear.gearId} value={gear.gearId}>
-              {gear.gearName}
+          {usedGears.map(gear => (
+            <option key={gear.gear_code} value={gear.gear_code}>
+              {gear.specs ? `${gear.gear_code} (${gear.specs})` : `Gear ${gear.gear_code}`}
             </option>
           ))}
         </select>
       </div>
 
-      {/* Fish Details Section */}
+      {/* Fish Details */}
       <div className="space-y-4">
-        <h3 className="font-medium">Fish Details</h3>
-        
         <select
-          name="specieId"
-          value={currentEntry.specieId}
+          name="specie_code"
+          value={currentEntry.specie_code}
           onChange={handleInputChange}
           className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
@@ -157,65 +150,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
           ))}
         </select>
 
-        <div className="flex gap-3">
-          <input
-            type="number"
-            name="weight"
-            placeholder="Weight (Kg)"
-            value={currentEntry.weight || ''}
-            onChange={handleInputChange}
-            min={0}
-            step="0.1"
-            className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          
-          <input
-            type="number"
-            name="length"
-            placeholder="Length(cm)"
-            value={currentEntry.length || ''}
-            onChange={handleInputChange}
-            min={0}
-            step="0.1"
-            className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          
-          <input
-            type="number"
-            name="quantity"
-            placeholder="Quantity"
-            value={currentEntry.quantity || ''}
-            onChange={handleInputChange}
-            min={1}
-            className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <AddButton 
-          onClick={addFishEntry}
-          disabled={!isValidEntry()}
-        />
-      </div>
-
-      {/* Display added entries */}
-      <div className="space-y-3">
-        {fishEntries.map((entry, index) => (
-          <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-md">
-            <span className="font-medium">
-              {availableSpecies.find(s => s.specie_code === Number(entry.specieId))?.specie_name}
-            </span>
-            <span className="text-gray-600">
-              Weight: {entry.weight}kg, Length: {entry.length}cm, Quantity: {entry.quantity}
-            </span>
-            <button
-              type="button"
-              onClick={() => removeFishEntry(index)}
-              className="ml-auto text-red-500 hover:text-red-700"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
+        <AddButton onClick={addFishEntry} />
       </div>
     </div>
   );

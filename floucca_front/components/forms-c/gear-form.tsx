@@ -4,7 +4,6 @@ import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import AddButton from '../utils/form-button';
 
-// TODO: Replace with actual API call when backend is connected
 const fetchGears = async () => {
   return [
     { gear_code: 1, gear_name: 'Trawl Net' },
@@ -17,7 +16,7 @@ const fetchGears = async () => {
 interface GearEntry {
   gear_code: number;
   months?: number[];
-  times_used?: number;
+  times_used: number; // Ensure it's always defined
   specs?: string;
 }
 
@@ -32,26 +31,30 @@ interface GearFormProps {
 }
 
 const GearForm: React.FC<GearFormProps> = ({ mode, onChange }) => {
-  const { register, control, handleSubmit, watch, setValue, getValues, reset } = useForm<{ gearEntry: GearEntry }>(
-    {
-      defaultValues: {
-        gearEntry: { gear_code: 0, months: [], times_used: 1, specs: '' },
-      },
-    }
-  );
+  const { register, control, handleSubmit, watch, setValue, getValues, reset } = useForm<{ gearEntry: GearEntry }>({
+    defaultValues: {
+      gearEntry: { gear_code: 0, months: [], times_used: mode === 'effortLastWeek' ? 1 : 0, specs: '' },
+    },
+  });
 
   const [availableGears, setAvailableGears] = React.useState<Gear[]>([]);
 
   useEffect(() => {
-    fetchGears().then(setAvailableGears); // Fetch gears from API when backend is available
+    fetchGears().then(setAvailableGears);
   }, []);
 
   useEffect(() => {
-    onChange(getValues('gearEntry') ? [getValues('gearEntry')] : []);
+    const gearEntry = getValues('gearEntry');
+
+    if (mode === 'effortLastWeek' && gearEntry.times_used === undefined) {
+      setValue('gearEntry.times_used', 1); // Default to 1 for Effort Last Week
+    }
+
+    onChange(gearEntry ? [gearEntry] : []);
   }, [watch('gearEntry'), onChange]);
 
   const addGear = (data: { gearEntry: GearEntry }) => {
-    setValue('gearEntry', { ...data.gearEntry });
+    setValue('gearEntry', { ...data.gearEntry, times_used: data.gearEntry.times_used ?? 1 });
     reset();
   };
 
@@ -131,20 +134,6 @@ const GearForm: React.FC<GearFormProps> = ({ mode, onChange }) => {
 
         <AddButton onClick={handleSubmit(addGear)} />
       </form>
-
-      <div className="space-y-3 mt-6">
-        {!watch('gearEntry.gear_code') && <p className="text-gray-500 italic">No gear added yet.</p>}
-        {watch('gearEntry.gear_code') && (
-          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-md">
-            <span className="font-medium">
-              {availableGears.find((g) => g.gear_code === watch('gearEntry.gear_code'))?.gear_name}
-            </span>
-            {mode === 'fleetSenses' && <span className="text-gray-600">Months: {watch('gearEntry.months')?.join(', ')}</span>}
-            {mode === 'effortLastWeek' && <span className="text-gray-600">Times Used: {watch('gearEntry.times_used')}</span>}
-            {mode === 'effortToday' && <span className="text-gray-600">Specs: {watch('gearEntry.specs')}</span>}
-          </div>
-        )}
-      </div>
     </div>
   );
 };

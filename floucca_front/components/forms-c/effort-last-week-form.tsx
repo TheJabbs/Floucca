@@ -1,124 +1,46 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import AddButton from '../utils/form-button';
+import React, { useState } from 'react';
+import GearForm from '../forms-c/gear-form';
 
-interface GearUsageEntry {
-  gearId: number;
-  timesUsed: number;
-}
-
-interface Gear {
+interface GearEntry {
   gear_code: number;
-  gear_name: string;
+  times_used: number; 
 }
 
 interface EffortLastWeekProps {
-  onChange: (gearUsage: GearUsageEntry[]) => void;
+  onChange: (gearEntries: GearEntry[]) => void;
 }
 
 const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ onChange }) => {
-  const [gearUsage, setGearUsage] = useState<GearUsageEntry[]>([]);
-  const [selectedGearId, setSelectedGearId] = useState<number | null>(null);
-  const [timesUsed, setTimesUsed] = useState<number>(1);
-  const [availableGears, setAvailableGears] = useState<Gear[]>([]);
+  const [gearEntries, setGearEntries] = useState<GearEntry[]>([]);
 
-  useEffect(() => {
-    const fetchGears = async () => {
-      try {
-        const response = await fetch(process.env.GET_ALL_GEARS || "");
-        if (!response.ok) {
-          throw new Error('Failed to fetch gears');
-        }
-        const gears = await response.json();
-        console.log("The gears are: ", gears);
-        setAvailableGears(gears);
-      } catch (error) {
-        console.error('Error fetching gears:', error);
-      }
-    };
+  const handleGearChange = (entries: GearEntry[]) => {
+    const fixedEntries = entries.map(entry => ({
+      ...entry,
+      times_used: entry.times_used ?? 1,  // Default value if undefined
+    }));
 
-    fetchGears();
-  }, []);
-
-  useEffect(() => {
-    onChange(gearUsage);
-  }, [gearUsage, onChange]);
-
-  const addGearUsage = () => {
-    if (!selectedGearId || gearUsage.length >= 20) return;
-
-    const gearToAdd = availableGears.find(gear => gear.gear_code === selectedGearId);
-    if (gearToAdd && !gearUsage.some(entry => entry.gearId === selectedGearId)) {
-      setGearUsage(prev => [...prev, { gearId: selectedGearId, timesUsed }]);
-    }
-
-    setSelectedGearId(null);
-    setTimesUsed(1);
-  };
-
-  const removeGearUsage = (gearId: number) => {
-    setGearUsage(prev => prev.filter(entry => entry.gearId !== gearId));
+    setGearEntries(fixedEntries);
+    onChange(fixedEntries);
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">Effort Last Week</h2>
 
-      <div className="flex gap-4">
-        {/* Gear Selection Dropdown */}
-        <select
-          value={selectedGearId ?? ''}
-          onChange={(e) => setSelectedGearId(Number(e.target.value))}
-          className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select Gear</option>
-          {availableGears.map(gear => (
-            <option key={gear.gear_code} value={gear.gear_code}>
-              {gear.gear_name}
-            </option>
-          ))}
-        </select>
+      {/* Use GearForm with mode="effortLastWeek" */}
+      <GearForm mode="effortLastWeek" onChange={handleGearChange} />
 
-        {/* Times Used Input */}
-        <input
-          type="number"
-          value={timesUsed}
-          onChange={(e) => setTimesUsed(Math.max(1, Math.min(7, Number(e.target.value))))}
-          min={1}
-          max={7}
-          className="w-20 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        {/* Add Button (Disabled if 20 gears added) */}
-        <AddButton onClick={addGearUsage} disabled={!selectedGearId || gearUsage.length >= 20} />
-      </div>
-
-      {/* Display Added Gears */}
       <div className="space-y-3">
-        {gearUsage.map((entry, index) => (
+        {gearEntries.length === 0 && <p className="text-gray-500 italic">No gear added yet.</p>}
+        {gearEntries.map((entry, index) => (
           <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-md">
-            <span className="font-medium">
-              {availableGears.find(g => g.gear_code === entry.gearId)?.gear_name}
-            </span>
-            <span className="text-gray-600">
-              Times Used: {entry.timesUsed}
-            </span>
-            <button
-              type="button"
-              onClick={() => removeGearUsage(entry.gearId)}
-              className="ml-auto text-red-500 hover:text-red-700"
-            >
-              Remove
-            </button>
+            <span className="font-medium">Gear Code: {entry.gear_code}</span>
+            <span className="text-gray-600">Times Used: {entry.times_used}</span>
           </div>
         ))}
       </div>
-
-      {/* Message when limit is reached */}
-      {gearUsage.length >= 20 && (
-        <p className="text-red-500">You can only add up to 20 gears.</p>
-      )}
     </div>
   );
 };

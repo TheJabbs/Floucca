@@ -3,6 +3,9 @@ import {FleetService} from "./fleet.service";
 import {FleetIdDto} from "./DTO/FleetId.dto";
 import {CreateFleetDto, DateRangeDto} from "./DTO";
 import {idDTO} from "../../shared/dto/id.dto";
+import {CreateFleetFormDto} from "./DTO/CreateFleetForm.dto";
+import {transformFormGearUsageToGearUsage} from "../../utils/transformation/formGearUsageToGearUsage.mapper";
+import {SenseFormContentInterface} from "./Interface/senseFormContent.interface";
 
 @Controller('api/dev/fleet_senses')
 export class FleetController {
@@ -42,8 +45,16 @@ export class FleetController {
     }
 
     @Post("/form/create")
-    createSenseForm(){
+    createSenseForm(@Body() senseForm : CreateFleetFormDto){
+        const form = senseForm.formDto;
+        const boatDetails = senseForm.boatDetailDto
+        const gearUsage = transformFormGearUsageToGearUsage(senseForm.gearUsageDto);
 
+        const senseFormContent : SenseFormContentInterface = {
+            form : form,
+            boatDetails : boatDetails,
+            gearUsage: gearUsage
+        }
     }
 
 }

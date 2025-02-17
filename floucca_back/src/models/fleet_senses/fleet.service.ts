@@ -4,6 +4,9 @@ import {CreateFleetDto} from "./DTO/CreateFleet.dto";
 import {FleetIdDto} from "./DTO/FleetId.dto";
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
+import {idDTO} from "../../shared/dto/id.dto";
+import {CreateFormDto} from "../form/DTO";
+import {SenseFormContentInterface} from "./Interface/senseFormContent.interface";
 
 @Injectable()
 export class FleetService {
@@ -153,6 +156,65 @@ export class FleetService {
 
         return !(!form || !boat);
 
+    }
+
+    async createFleetSensesForm(content : SenseFormContentInterface): Promise<ResponseMessage<any>> {
+        const newestPeriod = await this.prisma.period.findFirst({
+            orderBy: {
+                period_date: 'desc'
+            }
+        });
+
+        content.form.period_date = newestPeriod.period_date;
+
+        const form = await this.prisma.form.create({
+            data: content.form
+        });
+
+        if(form){
+            const boatDetails = await this.prisma.boat_details.create({
+                data: content.boatDetails
+            });
+
+            if(boatDetails){
+                const sense = await this.prisma.fleet_senses.create({
+                    data: {
+                        boat_details_id: boatDetails.boat_id,
+                        form_id: form.form_id
+                    }
+                });
+
+                if(sense){
+                    for (const gear of content.gearUsage) {
+                        await this.prisma.gear_usage.create({
+                            data: {
+                                fleet_senses_id: sense.fleet_senses_id,
+                                gear_code: gear.gear_code,
+                                months: gear.months
+                            }
+                        });
+                    }
+                }
+            }else{
+                await this.prisma.form.delete({
+                    where: {
+                        form_id: form.form_id
+                    }
+                })
+                throw new NotFoundException('Boat details not created');
+            }
+        }else{
+            await this.prisma.form.delete({
+                where: {
+                    form_id: form.form_id
+                }
+            })
+            throw new NotFoundException('Form not created');
+        }
+
+        return {
+            message: 'Fleet senses form created'
+        }
     }
 
 

@@ -1,8 +1,10 @@
 import {IsNumber} from "class-validator";
+import {Optional} from "@nestjs/common";
 
 export class CreateFleetDto {
     @IsNumber()
     boat_details_id: number
     @IsNumber()
-    form_id: number
+    @Optional()
+    form_id?: number
 }

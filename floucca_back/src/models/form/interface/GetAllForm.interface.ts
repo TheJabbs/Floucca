@@ -3,7 +3,6 @@ export interface GetAllFormInterface {
     user_id: number,
     port_id: number,
     period_date: Date,
-    form_type: string,
     fisher_name: string,
     creation_time: Date,
     landing?: {

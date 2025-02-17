@@ -10,7 +10,5 @@ export class CreateFormDto {
     @IsDate()
     period_date : Date;
     @IsString()
-    form_type: string;
-    @IsString()
     fisher_name : string
 }

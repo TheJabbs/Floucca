@@ -74,7 +74,6 @@ model form {
   user_id       Int?
   port_id       Int
   period_date   DateTime       @db.Date
-  form_type     String         @db.VarChar(10)
   fisher_name   String         @default("unknown") @db.VarChar(100)
   creation_time DateTime?      @default(now()) @db.DateTime(0)
   fleet_senses  fleet_senses[]

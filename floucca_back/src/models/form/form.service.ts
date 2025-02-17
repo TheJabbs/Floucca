@@ -44,8 +44,7 @@ export class FormService {
                 user_id: form.user_id,
                 port_id: form.port_id,
                 period_date: form.period_date,
-                form_type: form.form_type,
-                fisher_name: form.fisher_name
+                fisher_name: form.fisher_name,
             }
         });
 
@@ -101,7 +100,6 @@ export class FormService {
                 user_id: form.user_id,
                 port_id: form.port_id,
                 period_date: form.period_date,
-                form_type: form.form_type,
                 fisher_name: form.fisher_name
             }
         });

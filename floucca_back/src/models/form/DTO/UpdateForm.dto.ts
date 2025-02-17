@@ -15,8 +15,5 @@ export class UpdateFormDto {
     period_date : Date;
     @IsString()
     @Optional()
-    form_type: string;
-    @IsString()
-    @Optional()
     fisher_name : string
 }

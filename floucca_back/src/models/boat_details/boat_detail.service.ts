@@ -106,41 +106,13 @@ async getBoatDetailsByBDID(
   async createBoatDetails(
     newBoatDetails: CreateBoatDetailsDto,
   ): Promise<ResponseMessage<any>> {
-    const {
-      boat_id,
-      fleet_owner,
-      fleet_size,
-      fleet_crew,
-      fleet_max_weight,
-      fleet_length,
-      fleet_registration,
-      fleet_senses_id = [],
-      landing_id = [],
-    } = newBoatDetails;
-
-    await this.validateIds(fleet_senses_id, landing_id);
-
-    const createdBoatDetails = await this.prisma.boat_details.create({
-      data: {
-        boat_id,
-        fleet_owner: fleet_owner || 'Unknown',
-        fleet_size,
-        fleet_crew,
-        fleet_max_weight,
-        fleet_length,
-        fleet_registration,
-        fleet_senses: {
-          connect: fleet_senses_id.map((id) => ({ fleet_senses_id: id })),
-        },
-        landing: {
-          connect: landing_id.map((id) => ({ landing_id: id })),
-        },
-      },
-    });
+    const boat = await this.prisma.boat_details.create({
+      data: newBoatDetails
+    })
 
     return {
       message: 'Boat details created successfully',
-      data: createdBoatDetails,
+      data: boat
     };
   }
 

@@ -48,6 +48,10 @@ export class FleetController {
     createSenseForm(@Body() senseForm : CreateFleetFormDto){
         const form = senseForm.formDto;
         const boatDetails = senseForm.boatDetailDto
+
+        console.log(senseForm.gearUsageDto);
+
+
         const gearUsage = transformFormGearUsageToGearUsage(senseForm.gearUsageDto);
 
         const senseFormContent : SenseFormContentInterface = {
@@ -55,6 +59,8 @@ export class FleetController {
             boatDetails : boatDetails,
             gearUsage: gearUsage
         }
+
+        return this.fleetService.createFleetSensesForm(senseFormContent);
     }
 
 }

@@ -7,9 +7,7 @@ import {
 } from 'class-validator';
 
 export class CreateBoatDetailsDto {
-  @IsInt()
-  @IsPositive()
-  boat_id: number;
+
 
   @IsString()
   @IsNotEmpty()
@@ -35,13 +33,5 @@ export class CreateBoatDetailsDto {
   @IsInt()
   fleet_registration?: number;
 
-  @IsNotEmpty()
-  @IsInt({ each: true })
-  @IsOptional()
-  fleet_senses_id?: number[];
 
-  @IsNotEmpty()
-  @IsInt({ each: true })
-  @IsOptional()
-  landing_id?: number[];
 }

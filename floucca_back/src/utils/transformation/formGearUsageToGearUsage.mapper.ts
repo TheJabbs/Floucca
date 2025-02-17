@@ -1,15 +1,23 @@
-import {FormGearUsageDto} from "../../models/gear_usage/DTO/FormGearUsage.dto";
-import {CreateGearUsageDto} from "../../models/gear_usage/DTO";
+import { FormGearUsageDto } from '../../models/gear_usage/DTO/FormGearUsage.dto';
+import { CreateGearUsageDto } from '../../models/gear_usage/DTO';
 
 export function transformFormGearUsageToGearUsage(formGearUsage: FormGearUsageDto[]): CreateGearUsageDto[] {
+    if (!Array.isArray(formGearUsage)) {
+        throw new TypeError('Expected an array of FormGearUsageDto');
+    }
+
     const gearUsage: CreateGearUsageDto[] = [];
     formGearUsage.forEach((formGear) => {
-        formGear.months.forEach((month) => {
-            gearUsage.push({
-                gear_code: formGear.gear_code,
-                months: month
+        if (Array.isArray(formGear.months)) {
+            formGear.months.forEach((month) => {
+                gearUsage.push({
+                    gear_code: formGear.gear_code,
+                    months: month
+                });
             });
-        });
+        } else {
+            throw new TypeError('Expected months to be an array');
+        }
     });
 
     return gearUsage;

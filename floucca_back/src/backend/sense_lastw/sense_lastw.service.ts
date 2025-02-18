@@ -21,7 +21,7 @@ export class SenseLastwService {
 
     async getSenseLastwById(id: number): Promise<GetAllSenseLastw> {
         const sense_lastw = await this.prisma.sense_lastw.findUnique({
-            where: { id: id },
+            where: { sense_lastW_id: id },
         });
 
         if (!sense_lastw) {
@@ -32,14 +32,22 @@ export class SenseLastwService {
     }
 
     async createSenseLastw(sense_lastw: CreateSenseLastwDto): Promise<ResponseMessage<any>> {
-        const newSenseLastw = await this.prisma.sense_lastw.create({
-            data: sense_lastw,
-        });
+        if(!await this.validate(sense_lastw)) {
+            const newSenseLastw = await this.prisma.sense_lastw.create({
+                data: sense_lastw,
+            });
+            return {
+                message: 'Sense lastw record created successfully',
+                data: newSenseLastw,
+            };
+        }
 
         return {
-            message: 'Sense lastw record created successfully',
-            data: newSenseLastw,
-        };
+            message: 'Invalid sense lastw record',
+            data: null,
+        }
+
+
     }
 
     async deleteSenseLastw(id: number): Promise<ResponseMessage<any>> {
@@ -53,7 +61,7 @@ export class SenseLastwService {
         }
 
         await this.prisma.sense_lastw.delete({
-            where: { id: id },
+            where: { sense_lastW_id: id },
         });
 
         return {
@@ -71,15 +79,35 @@ export class SenseLastwService {
                 data: null,
             };
         }
+        if(!await this.validate(sense_lastw)) {
+            const updatedSenseLastw = await this.prisma.sense_lastw.update({
+                where: {sense_lastW_id: id},
+                data: sense_lastw,
+            });
 
-        const updatedSenseLastw = await this.prisma.sense_lastw.update({
-            where: { id: id },
-            data: sense_lastw,
-        });
-
-        return {
-            message: 'Sense lastw record updated successfully',
-            data: updatedSenseLastw,
-        };
+            return {
+                message: 'Sense lastw record updated successfully',
+                data: updatedSenseLastw,
+            };
+        }
+    }
+    //================================================================================================
+    async validate(d: any): Promise<boolean> {
+        if(d.gear_code){
+            const gear = await this.prisma.gear.findUnique({
+                where: { gear_code: d.gear_code }
+            });
+            if (!gear) {
+                return false;
+            }
+        }
+        if(d.landing_id){
+            const landing = await this.prisma.landing.findUnique({
+                where: { landing_id: d.landing_id }
+            });
+            if (!landing) {
+                return false;
+            }
+        }
     }
 }

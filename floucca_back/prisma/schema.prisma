@@ -1,0 +1,226 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model boat_details {
+  boat_id            Int            @id @default(autoincrement())
+  fleet_owner        String         @default("Unknown") @db.VarChar(30)
+  fleet_size         Int?
+  fleet_crew         Int?
+  fleet_max_weight   Float?         @db.Float
+  fleet_length       Float?         @db.Float
+  fleet_registration Int?
+  fleet_senses       fleet_senses[]
+  landing            landing[]
+}
+
+model coop {
+  coop_code   Int         @id
+  region_code Int
+  coop_name   String      @db.VarChar(50)
+  region      region      @relation(fields: [region_code], references: [region_code], onDelete: Cascade, map: "coop_ibfk_1")
+  ports       ports[]
+  user_coop   user_coop[]
+
+  @@index([region_code], map: "coop_ibfk_1")
+}
+
+model effort_today {
+  effort_today_id Int            @id @default(autoincrement())
+  landing_id      Int
+  hours_fished    Float          @db.Float
+  landing         landing        @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "effort_today_ibfk_2")
+  gear_details    gear_details[]
+
+  @@index([landing_id], map: "effort_today_ibfk_2")
+}
+
+model fish {
+  fish_id       Int     @id @default(autoincrement())
+  specie_code   Int
+  landing_id    Int
+  gear_code     Int?
+  fish_weight   Float?  @db.Float
+  fish_length   Float?  @db.Float
+  fish_quantity Int?
+  specie        specie  @relation(fields: [specie_code], references: [specie_code], onDelete: Cascade, map: "fish_ibfk_1")
+  landing       landing @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "fish_ibfk_2")
+  gear          gear?   @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "fish_ibfk_3")
+
+  @@index([specie_code], map: "fish_ibfk_1")
+  @@index([landing_id], map: "fish_ibfk_2")
+  @@index([gear_code], map: "fish_ibfk_3")
+}
+
+model fleet_senses {
+  fleet_senses_id Int          @id @default(autoincrement())
+  boat_details_id Int
+  form_id         Int
+  boat_details    boat_details @relation(fields: [boat_details_id], references: [boat_id], onDelete: Cascade, map: "fleet_senses_ibfk_1")
+  form            form         @relation(fields: [form_id], references: [form_id], onDelete: Cascade, map: "fleet_senses_ibfk_2")
+  gear_usage      gear_usage[]
+
+  @@index([boat_details_id], map: "fleet_senses_ibfk_1")
+  @@index([form_id], map: "fleet_senses_ibfk_2")
+}
+
+model form {
+  form_id       Int            @id @default(autoincrement())
+  user_id       Int?
+  port_id       Int
+  period_date   DateTime       @db.Date
+  fisher_name   String         @default("unknown") @db.VarChar(100)
+  creation_time DateTime?      @default(now()) @db.DateTime(0)
+  fleet_senses  fleet_senses[]
+  users         users?         @relation(fields: [user_id], references: [user_id], map: "form_ibfk_1")
+  ports         ports          @relation(fields: [port_id], references: [port_id], onDelete: Cascade, map: "form_ibfk_2")
+  period        period         @relation(fields: [period_date], references: [period_date], onDelete: Cascade, map: "form_ibfk_3")
+  landing       landing[]
+
+  @@index([user_id], map: "form_ibfk_1")
+  @@index([port_id], map: "form_ibfk_2")
+  @@index([period_date], map: "form_ibfk_3")
+}
+
+model gear {
+  gear_code      Int            @id @default(autoincrement())
+  gear_name      String         @db.VarChar(30)
+  equipment_id   String         @db.VarChar(10)
+  equipment_name String         @db.VarChar(50)
+  fish           fish[]
+  gear_details   gear_details[]
+  gear_usage     gear_usage[]
+  sense_lastw    sense_lastw[]
+}
+
+model gear_details {
+  detail_id       Int          @id @default(autoincrement())
+  gear_code       Int
+  detail_name     String       @db.VarChar(50)
+  detail_value    String       @db.VarChar(200)
+  effort_today_id Int
+  effort_today    effort_today @relation(fields: [effort_today_id], references: [effort_today_id], onDelete: NoAction, onUpdate: NoAction, map: "effort_today_ibfk_1")
+  gear            gear         @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "gear_details_ibfk_1")
+
+  @@index([gear_code], map: "gear_details_ibfk_1")
+  @@index([effort_today_id], map: "effort_today_ibfk_1_idx")
+}
+
+model gear_usage {
+  gear_usage_id   Int          @id @default(autoincrement())
+  fleet_senses_id Int
+  gear_code       Int
+  months          Int          @default(0)
+  gear            gear         @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "gear_usage_ibfk_1")
+  fleet_senses    fleet_senses @relation(fields: [fleet_senses_id], references: [fleet_senses_id], onDelete: Cascade, map: "gear_usage_ibfk_2")
+
+  @@index([gear_code], map: "gear_usage_ibfk_1")
+  @@index([fleet_senses_id], map: "gear_usage_ibfk_2")
+}
+
+model landing {
+  landing_id      Int            @id @default(autoincrement())
+  form_id         Int
+  boat_details_id Int
+  longitude       Decimal        @db.Decimal(9, 6)
+  latitude        Decimal        @db.Decimal(9, 6)
+  effort_today    effort_today[]
+  fish            fish[]
+  form            form           @relation(fields: [form_id], references: [form_id], onDelete: Cascade, map: "landing_ibfk_1")
+  boat_details    boat_details   @relation(fields: [boat_details_id], references: [boat_id], onDelete: NoAction, map: "landing_ibfk_2")
+  sense_lastw     sense_lastw[]
+
+  @@index([form_id], map: "landing_ibfk_1")
+  @@index([boat_details_id], map: "landing_ibfk_2")
+}
+
+model period {
+  period_date   DateTime @id @db.Date
+  period_status String   @default("B") @db.Char(1)
+  form          form[]
+}
+
+model ports {
+  port_id   Int    @id @default(autoincrement())
+  port_name String @db.VarChar(50)
+  coop_code Int
+  form      form[]
+  coop      coop   @relation(fields: [coop_code], references: [coop_code], onDelete: NoAction, onUpdate: NoAction, map: "ports_ibfk_1")
+
+  @@index([coop_code], map: "coop_code")
+}
+
+model region {
+  region_code Int    @id
+  region_name String @db.VarChar(50)
+  coop        coop[]
+}
+
+model roles {
+  role_id   Int         @id @default(autoincrement())
+  role_code String      @unique(map: "role_code") @db.VarChar(4)
+  role_name String      @db.VarChar(20)
+  user_role user_role[]
+}
+
+model sense_lastw {
+  sense_lastW_id Int     @id @default(autoincrement())
+  days_fished    Float   @db.Float
+  gear_code      Int
+  landing_id     Int
+  gear           gear    @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "sense_lastw_ibfk_1")
+  landing        landing @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "sense_lastw_ibfk_2")
+
+  @@index([gear_code], map: "sense_lastw_ibfk_1")
+  @@index([landing_id], map: "sense_lastw_ibfk_2")
+}
+
+model specie {
+  specie_code        Int     @id
+  specie_name        String  @db.VarChar(50)
+  specie_description String? @default("No description") @db.VarChar(500)
+  specie_avg_weight  Float   @db.Float
+  specie_avg_length  Float   @db.Float
+  fish               fish[]
+}
+
+model user_coop {
+  user_coop_id Int   @id @default(autoincrement())
+  user_id      Int
+  coop_code    Int
+  users        users @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_coop_ibfk_1")
+  coop         coop  @relation(fields: [coop_code], references: [coop_code], onDelete: Cascade, map: "user_coop_ibfk_2")
+
+  @@index([user_id], map: "user_coop_ibfk_1")
+  @@index([coop_code], map: "user_coop_ibfk_2")
+}
+
+model user_role {
+  user_role_id Int   @id @default(autoincrement())
+  user_id      Int
+  role_id      Int
+  users        users @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "user_role_ibfk_1")
+  roles        roles @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "user_role_ibfk_2")
+
+  @@index([user_id], map: "user_role_ibfk_1")
+  @@index([role_id], map: "user_role_ibfk_2")
+}
+
+model users {
+  user_id       Int         @id @default(autoincrement())
+  user_fname    String      @db.VarChar(20)
+  user_lname    String      @db.VarChar(20)
+  user_email    String?     @unique(map: "user_email") @db.VarChar(50)
+  user_phone    String?     @unique(map: "user_phone") @db.VarChar(20)
+  user_pass     String      @db.VarChar(250)
+  last_login    DateTime?   @db.DateTime(0)
+  creation_time DateTime?   @default(now()) @db.DateTime(0)
+  form          form[]
+  user_coop     user_coop[]
+  user_role     user_role[]
+}

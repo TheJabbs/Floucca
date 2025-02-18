@@ -49,7 +49,7 @@ export class FleetController {
         const form = senseForm.formDto;
         const boatDetails = senseForm.boatDetailDto
 
-        console.log(senseForm.gearUsageDto);
+        console.log(JSON.stringify(senseForm, null, 2));
 
 
         const gearUsage = transformFormGearUsageToGearUsage(senseForm.gearUsageDto);

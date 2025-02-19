@@ -1,9 +1,10 @@
 import {Injectable} from "@nestjs/common";
 import {EffortTodayInterface} from "./interface/effort_today.interface";
 import {CreateEffortTodayInterface} from "./interface/create_update_effort_today.interface";
-import {EffortTodayDto} from "./dto/effort_today.Dto";
-import {mapEffortToday} from "./mapper/effort_today.mapper";
+import {CreateEffortTodayDto} from "./dto/effort_today.Dto";
 import {PrismaService} from "../../prisma/prisma.service";
+import {UpdateEffortDto} from "./dto/updateEffort.dto";
+import {ResponseMessage} from "../../shared/interface/response.interface";
 
 @Injectable()
 export class EffortTodayService {
@@ -33,7 +34,7 @@ export class EffortTodayService {
         }
     }
 
-    async createEffortToday(effort_today: EffortTodayDto): Promise<CreateEffortTodayInterface> {
+    async createEffortToday(effort_today: CreateEffortTodayDto): Promise<ResponseMessage<any>> {
         try {
             const newEffortToday = await this.prisma.effort_today.create({
                 data: {
@@ -41,13 +42,16 @@ export class EffortTodayService {
                     landing_id: effort_today.landing_id
                 }
             });
-            return mapEffortToday(newEffortToday);
+            return {
+                message: "Effort today created successfully",
+                data: newEffortToday
+            }
         } catch (error) {
             throw new Error(error);
         }
     }
 
-    async updateEffortToday(id: number, effort_today: EffortTodayDto): Promise<CreateEffortTodayInterface> {
+    async updateEffortToday(id: number, effort_today: UpdateEffortDto): Promise<ResponseMessage<any>> {
         try {
             const updatedEffortToday = await this.prisma.effort_today.update({
                 where: {effort_today_id: id},
@@ -56,7 +60,10 @@ export class EffortTodayService {
                     landing_id: effort_today.landing_id
                 }
             });
-            return mapEffortToday(updatedEffortToday);
+            return {
+                message: "Effort today updated successfully",
+                data: updatedEffortToday
+            }
         } catch (error) {
             throw new Error(error);
         }

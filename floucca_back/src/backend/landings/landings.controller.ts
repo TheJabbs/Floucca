@@ -3,6 +3,7 @@ import {LandingsService} from "./landings.service";
 import {idDTO} from "../../shared/dto/id.dto";
 import {CreateLandingDto} from "./dto/createLandings.dto";
 import {UpdateLandingsDto} from "./dto/updateLandings.dto";
+import {CreateFormLandingDto} from "./dto/CreateFormLanding.dto";
 
 @Controller("api/dev/landings")
 export class LandingsController {
@@ -34,5 +35,9 @@ export class LandingsController {
         return this.service.updateLanding(landing_id.id, updatedLanding);
     }
 
+    @Post("/create/form")
+    createFormLanding(@Body() formLanding: CreateFormLandingDto) {
+        return this.service.createLandingForm(formLanding);
+    }
 
 }

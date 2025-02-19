@@ -165,6 +165,14 @@ export class FleetService {
             }
         });
 
+        if(!newestPeriod){
+            await this.prisma.period.create({
+                data: {
+                    period_date: new Date()
+                }
+            })
+        }
+
         content.form.period_date = newestPeriod.period_date;
 
         const form = await this.prisma.form.create({

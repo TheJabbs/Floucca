@@ -32,14 +32,16 @@ export class SenseLastwService {
     }
 
     async createSenseLastw(sense_lastw: CreateSenseLastwDto): Promise<ResponseMessage<any>> {
-        if(!await this.validate(sense_lastw)) {
-            const newSenseLastw = await this.prisma.sense_lastw.create({
-                data: sense_lastw,
-            });
-            return {
-                message: 'Sense lastw record created successfully',
-                data: newSenseLastw,
-            };
+        if(sense_lastw.landing_id || sense_lastw.gear_code) {
+            if (!await this.validate(sense_lastw)) {
+                const newSenseLastw = await this.prisma.sense_lastw.create({
+                    data: sense_lastw,
+                });
+                return {
+                    message: 'Sense lastw record created successfully',
+                    data: newSenseLastw,
+                };
+            }
         }
 
         return {

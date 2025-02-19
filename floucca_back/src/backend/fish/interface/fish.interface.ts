@@ -1,3 +1,5 @@
+import { Decimal } from "@prisma/client/runtime/library";
+
 export interface FishInterface{
     fish_id: number,
     specie_code: number;

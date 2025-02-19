@@ -1,7 +1,8 @@
 import {EffortTodayService} from "./effort_today.service";
 import {Body, Controller, Delete, Get, Param, Post, Put} from "@nestjs/common";
-import {EffortTodayDto} from "./dto/effort_today.Dto";
+import {CreateEffortTodayDto} from "./dto/effort_today.Dto";
 import {idDTO} from "../../shared/dto/id.dto";
+import {UpdateEffortDto} from "./dto/updateEffort.dto";
 
 @Controller('api/effort_today')
 export class EffortTodayController {
@@ -19,12 +20,12 @@ export class EffortTodayController {
     }
 
     @Post('/create')
-    createEffortToday(@Body() effort_today: EffortTodayDto) {
+    createEffortToday(@Body() effort_today: CreateEffortTodayDto) {
         return this.effortTodayService.createEffortToday(effort_today);
     }
 
     @Put('/update/:id')
-    updateEffortToday(@Body() effort_today: EffortTodayDto, @Param('id') id: idDTO) {
+    updateEffortToday(@Body() effort_today: UpdateEffortDto, @Param('id') id: idDTO) {
         const check = this.effortTodayService.getEffortTodayById(id.id);
         if (!check) {
             return "Effort today does not exist"

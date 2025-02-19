@@ -1,4 +1,4 @@
-import { IsInt, IsPositive, IsString, IsDate } from "class-validator";
+import {IsInt, IsPositive, IsString, IsDate, IsOptional} from "class-validator";
 
 export class CreateSenseLastwDto {
     @IsInt()
@@ -11,6 +11,7 @@ export class CreateSenseLastwDto {
 
     @IsInt()
     @IsPositive()
-    landing_id: number;
+    @IsOptional()
+    landing_id?: number;
 
 }

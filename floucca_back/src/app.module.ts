@@ -12,13 +12,14 @@ import {GearDetailService} from "./backend/gear_detail/gear_detail.service";
 import {GearDetailModule} from "./backend/gear_detail/gear_detail.module";
 import {ScheduleModule} from "./auto/schedule.module";
 import {SenseLastwModule} from "./backend/sense_lastw/sense_lastw.module";
+import {LandingsModule} from "./backend/landings/landings.module";
 
 
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,
     EffortTodayModule, FishModule, FishModule, FleetModule,
     FormModule, GearModule, GearUsageModule, GearDetailModule,
-  ScheduleModule, SenseLastwModule],
+  ScheduleModule, SenseLastwModule, LandingsModule],
   providers: [],
 })
 export class AppModule {}

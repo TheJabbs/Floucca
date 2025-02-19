@@ -1,6 +1,6 @@
 import {IsInt, IsNotEmpty, Max, Min} from "class-validator";
 
-export class EffortTodayDto {
+export class CreateEffortTodayDto {
     @IsNotEmpty()
     @Min(0)
     @Max(24)

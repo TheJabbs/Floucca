@@ -1,141 +1,181 @@
-'use client';
-
-import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import AddButton from '../utils/form-button';
-
-const fetchGears = async () => {
-  return [
-    { gear_code: 1, gear_name: 'Trawl Net' },
-    { gear_code: 2, gear_name: 'Gill Net' },
-    { gear_code: 3, gear_name: 'Long Line' },
-    { gear_code: 4, gear_name: 'Trap' },
-  ];
-};
-
-interface GearEntry {
-  gear_code: number;
-  months?: number[];
-  times_used: number; // Ensure it's always defined
-  specs?: string;
-}
 
 interface Gear {
   gear_code: number;
   gear_name: string;
+  equipment_id: string;
+  equipment_name: string;
 }
 
-interface GearFormProps {
-  mode: 'fleetSenses' | 'effortToday' | 'effortLastWeek' | 'fishingDetails';
-  onChange: (gearEntries: GearEntry[]) => void;
+interface GearSelectorProps {
+  onChange: (data: { gear_code: number; months: number[] }[]) => void;
+  required?: boolean;
 }
 
-const GearForm: React.FC<GearFormProps> = ({ mode, onChange }) => {
-  const { register, control, handleSubmit, watch, setValue, getValues, reset } = useForm<{ gearEntry: GearEntry }>({
-    defaultValues: {
-      gearEntry: { gear_code: 0, months: [], times_used: mode === 'effortLastWeek' ? 1 : 0, specs: '' },
-    },
+const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false }) => {
+  const [gears, setGears] = useState<Gear[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedGears, setSelectedGears] = useState<Array<{ 
+    gear_code: number; 
+    gear_name: string; 
+    months: number[] 
+  }>>([]);
+
+  const [currentSelection, setCurrentSelection] = useState({
+    gear_code: 0,
+    months: [] as number[]
   });
 
-  const [availableGears, setAvailableGears] = React.useState<Gear[]>([]);
-
   useEffect(() => {
-    fetchGears().then(setAvailableGears);
+    const fetchGears = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/dev/gear/all/gear');
+        if (!response.ok) throw new Error('Failed to fetch gears');
+        const data = await response.json();
+        setGears(data);
+      } catch (error) {
+        console.error('Error fetching gears:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGears();
   }, []);
 
-  useEffect(() => {
-    const gearEntry = getValues('gearEntry');
+  const availableGears = gears.filter(gear => 
+    !selectedGears.some(selected => selected.gear_code === gear.gear_code)
+  );
 
-    if (mode === 'effortLastWeek' && gearEntry.times_used === undefined) {
-      setValue('gearEntry.times_used', 1); // Default to 1 for Effort Last Week
-    }
-
-    onChange(gearEntry ? [gearEntry] : []);
-  }, [watch('gearEntry'), onChange]);
-
-  const addGear = (data: { gearEntry: GearEntry }) => {
-    setValue('gearEntry', { ...data.gearEntry, times_used: data.gearEntry.times_used ?? 1 });
-    reset();
+  const handleGearChange = (gearCode: number) => {
+    setCurrentSelection(prev => ({
+      ...prev,
+      gear_code: Number(gearCode)
+    }));
   };
+
+  const handleMonthToggle = (month: number) => {
+    setCurrentSelection(prev => {
+      const months = prev.months.includes(month)
+        ? prev.months.filter(m => m !== month)
+        : [...prev.months, month].sort((a, b) => a - b);
+      return { ...prev, months };
+    });
+  };
+
+  const handleAddGear = () => {
+    if (currentSelection.gear_code === 0 || currentSelection.months.length === 0) return;
+
+    const selectedGear = gears.find(g => g.gear_code === currentSelection.gear_code);
+    if (selectedGear) {
+      const newGear = {
+        gear_code: selectedGear.gear_code,
+        gear_name: `${selectedGear.gear_name} - ${selectedGear.equipment_name}`,
+        months: currentSelection.months
+      };
+      
+      const updatedGears = [...selectedGears, newGear];
+      setSelectedGears(updatedGears);
+      onChange(updatedGears);
+      
+      setCurrentSelection({ gear_code: 0, months: [] });
+    }
+  };
+
+  const handleRemoveGear = (index: number) => {
+    const updatedGears = selectedGears.filter((_, i) => i !== index);
+    setSelectedGears(updatedGears);
+    onChange(updatedGears);
+  };
+
+  if (isLoading) {
+    return <div>Loading gears...</div>;
+  }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">
-        {mode === 'fleetSenses' && 'Gear Used This Year'}
-        {mode === 'effortToday' && 'Gear Used Today'}
-        {mode === 'effortLastWeek' && 'Gear Used Last Week'}
-        {mode === 'fishingDetails' && 'Fishing Details - Gear Used'}
-      </h2>
-
-      <form onSubmit={handleSubmit(addGear)} className="flex flex-col gap-4">
-        <div>
-          <label className="block font-medium">Select Gear</label>
+      <h2 className="text-xl font-bold">Fleet Gear Usage</h2>
+      
+      <div className="flex items-start gap-3">
+        <div className="w-46">
+          <label className="block text-gray-700 text-sm font-semibold mb-1">
+            Select Gear {required && <span className="text-red-500">*</span>}
+          </label>
           <select
-            {...register('gearEntry.gear_code', { required: true })}
-            className="w-64 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={currentSelection.gear_code}
+            onChange={(e) => handleGearChange(Number(e.target.value))}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={availableGears.length === 0}
           >
-            <option value={0}>-- Select Gear --</option>
-            {availableGears.map((gear) => (
+            <option value={0}>Select Gear</option>
+            {availableGears.map(gear => (
               <option key={gear.gear_code} value={gear.gear_code}>
-                {gear.gear_name}
+                {gear.gear_name} - {gear.equipment_name}
               </option>
             ))}
           </select>
         </div>
 
-        {mode === 'fleetSenses' && (
-          <Controller
-            name="gearEntry.months"
-            control={control}
-            render={({ field }) => (
-              <div className="flex flex-wrap gap-2">
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                  <button
-                    key={month}
-                    type="button"
-                    onClick={() =>
-                      field.onChange(
-                        field.value?.includes(month)
-                          ? field.value.filter((m) => m !== month)
-                          : [...(field.value || []), month]
-                      )
-                    }
-                    className={`w-8 h-8 rounded-full flex items-center justify-center border text-sm ${
-                      field.value?.includes(month) ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
-                    }`}
-                  >
-                    {month}
-                  </button>
-                ))}
-              </div>
-            )}
-          />
-        )}
+        <div className="flex-1 mt-1">
+          <label className="block text-gray-700 text-sm font-semibold mb-1">
+            Select Months {required && <span className="text-red-500">*</span>}
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {MONTHS.map(month => (
+              <button
+                key={month}
+                type="button"
+                onClick={() => handleMonthToggle(month)}
+                className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors
+                  ${currentSelection.months.includes(month)
+                    ? 'bg-blue-500 border-blue-500 text-white'
+                    : 'border-gray-300 text-gray-600 hover:border-blue-400'
+                  }`}
+              >
+                {month}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        {mode === 'effortLastWeek' && (
-          <input
-            type="number"
-            min={1}
-            max={7}
-            placeholder="Times Used (1-7)"
-            className="w-24 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            {...register('gearEntry.times_used')}
+        <div className="mt-6">
+          <AddButton
+            onClick={handleAddGear}
+            disabled={currentSelection.gear_code === 0 || currentSelection.months.length === 0}
           />
-        )}
+        </div>
+      </div>
 
-        {mode === 'effortToday' && (
-          <input
-            type="text"
-            placeholder="Enter gear specs (e.g., Net 20m²)"
-            className="w-64 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            {...register('gearEntry.specs')}
-          />
-        )}
-
-        <AddButton onClick={handleSubmit(addGear)} />
-      </form>
+      {selectedGears.length > 0 ? (
+        <div className="space-y-3 mt-4">
+          {selectedGears.map((gear, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-4 p-3 bg-gray-50 rounded-md"
+            >
+              <span className="font-medium">{gear.gear_name}</span>
+              <span className="text-gray-600">
+                Months: {gear.months.join(', ')}
+              </span>
+              <button
+                onClick={() => handleRemoveGear(index)}
+                className="ml-auto text-red-500 hover:text-red-700"
+                type="button"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-500 italic mt-4">No gear added yet.</p>
+      )}
     </div>
   );
 };
 
-export default GearForm;
+export default GearSelector;

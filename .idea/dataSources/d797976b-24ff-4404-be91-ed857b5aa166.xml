@@ -1149,7 +1149,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </schema>
     <schema id="295" parent="1" name="floucca">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2025-02-16.15:07:18</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2025-02-19.18:48:13</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="296" parent="1" name="root">
@@ -1307,7 +1307,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="332" parent="303" name="boat_id">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>4</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1434,7 +1434,6 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </column>
     <column id="357" parent="306" name="landing_id">
       <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
     <column id="358" parent="306" name="gear_code">
@@ -1497,7 +1496,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="370" parent="307" name="fleet_senses_id">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>4</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1545,7 +1544,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="379" parent="308" name="form_id">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>9</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1619,7 +1618,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="393" parent="309" name="gear_code">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>2</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1672,7 +1671,6 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </column>
     <column id="403" parent="310" name="effort_today_id">
       <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
     <foreign-key id="404" parent="310" name="gear_details_ibfk_1">
@@ -1706,7 +1704,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="410" parent="311" name="gear_usage_id">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>12</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1767,12 +1765,10 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </column>
     <column id="421" parent="312" name="form_id">
       <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
     <column id="422" parent="312" name="boat_details_id">
       <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
     <column id="423" parent="312" name="longitude">
@@ -1939,12 +1935,10 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </column>
     <column id="455" parent="317" name="gear_code">
       <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
     <column id="456" parent="317" name="landing_id">
       <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
     <foreign-key id="457" parent="317" name="sense_lastw_ibfk_1">

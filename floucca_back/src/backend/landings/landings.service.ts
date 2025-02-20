@@ -101,6 +101,11 @@ export class LandingsService {
             data: l.form
         })
 
+        let fishError = 0;
+        let gearError = 0;
+        let senseError = 0;
+
+
         if(form){
             const boatDetails = await this.prisma.boat_details.create({
                 data: l.boat_details
@@ -128,8 +133,6 @@ export class LandingsService {
                             where: {gear_code: f.gear_code}
                         })
 
-                        let fishError = 0;
-
                         if(!gear) {
                             await this.prisma.fish.create({
                                 data: f
@@ -146,8 +149,6 @@ export class LandingsService {
                             where: {gear_code: l1.gear_code}
                         })
 
-                        let senseError = 0;
-
                         if(!gear) {
                             await this.prisma.sense_lastw.create({
                                 data: l1
@@ -159,8 +160,6 @@ export class LandingsService {
 
                     for (const g of l.gearDetail) {
                         g.effort_today_id = effort.effort_today_id;
-
-                        let gearError = 0;
 
                         const gear = await this.prisma.gear.findUnique({
                             where: {gear_code: g.gear_code}
@@ -193,7 +192,7 @@ export class LandingsService {
         }
 
         return {
-            message: 'Form landing created',
+            message: 'Form landing created: Fish error ' + fishError + " Sense error " + senseError + ' Gear error' + gearError,
             data: null
         }
     }

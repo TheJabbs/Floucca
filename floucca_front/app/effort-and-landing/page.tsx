@@ -1,51 +1,18 @@
 "use client";
-
-import React, { useState, useCallback } from "react";
-import BoatInfo from "@/components/forms-c/boat-form";
-import FishingDetails from "@/components/forms-c/fishing-details-form";
-import EffortTodayForm from "@/components/forms-c/effort-today-form";
-import EffortLastWeek from "@/components/forms-c/effort-last-week-form"; // ✅ Import EffortLastWeek
+import React, { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
-// Dynamically import MapWithMarkers with no SSR
+import { useForm } from "react-hook-form";
+import BoatInfo from "@/components/forms-c/boat-form";
+import EffortToday from "@/components/forms-c/effort-today-form";
+import EffortLastWeek from "@/components/forms-c/effort-last-week-form";
 const MapWithMarkers = dynamic(
   () => import("@/components/forms-c/map-with-markers"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-full w-full flex items-center justify-center bg-gray-100">
-        Loading map...
-      </div>
-    ),
-  }
+  { ssr: false }
 );
+import FishingDetails from "@/components/forms-c/fishing-details-form";
+import SubmitButton from "@/components/utils/submit-button";
 
-interface Location {
-  id: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-}
-
-interface FishEntry {
-  locationId: string;
-  gearId: number;
-  specieId: number;
-  weight: number;
-  length: number;
-  quantity: number;
-}
-
-interface Gear {
-  gearId: number;
-  gearName: string;
-}
-
-interface EffortToday {
-  hoursFished: number;
-  gearUsed: Gear[];
-}
-
+// Form interfaces
 interface BoatData {
   fleet_owner: string;
   fleet_registration: number;
@@ -55,144 +22,153 @@ interface BoatData {
   fleet_length: number;
 }
 
-interface EffortLastWeekEntry {
-  gearId: number;
-  timesUsed: number;
+interface EffortTodayData {
+  hours_fished: number;
+  gear_entries: {
+    gear_code: number;
+    gear_details: {
+      detail_name: string;
+      detail_value: string;
+    }[];
+  }[];
+}
+
+interface EffortLastWeekData {
+  gear_entries: {
+    gear_code: number;
+    days_used: number;
+  }[];
+}
+
+interface MapLocation {
+  id: number;
+  name: string;
+  lat: number;
+  lng: number;
+}
+
+interface FishingDetailsData {
+  fish_entries: {
+    location_id: number;
+    gear_code: number;
+    specie_code: number;
+    fish_weight: number;
+    fish_length: number;
+    fish_quantity: number;
+  }[];
+}
+
+interface LandingsForm {
+  LandingFormDTO: {
+    boatData: BoatData;
+    effortTodayData: EffortTodayData;
+    effortLastWeekData: EffortLastWeekData;
+    locations: MapLocation[];
+    fishingDetails: FishingDetailsData;
+  };
 }
 
 function Page() {
-  const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
-
-  const [selectedGears] = useState<Gear[]>([
-    { gearId: 1, gearName: "Trawl Net" },
-    { gearId: 2, gearName: "Gill Net" },
-  ]);
-
-  const [fishData, setFishData] = useState<FishEntry[]>([]);
-
-  // Store Boat Details
-  const [boatData, setBoatData] = useState<BoatData>({
-    fleet_owner: "",
-    fleet_registration: 0,
-    fleet_size: 0,
-    fleet_crew: 0,
-    fleet_max_weight: 0,
-    fleet_length: 0,
-  });
-
-  const handleMarkersUpdate = useCallback(
-    (markers: { id: number; lat: number; lng: number }[]) => {
-      const locations = markers.map((marker) => ({
-        id: marker.id.toString(),
-        coordinates: {
-          lat: marker.lat,
-          lng: marker.lng,
+  const {
+    handleSubmit,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm<LandingsForm>({
+    defaultValues: {
+      LandingFormDTO: {
+        boatData: {
+          fleet_owner: "",
+          fleet_registration: 0,
+          fleet_size: 0,
+          fleet_crew: 0,
+          fleet_max_weight: 0,
+          fleet_length: 0,
         },
-      }));
-      setSelectedLocations(locations);
+        effortTodayData: {
+          hours_fished: 0,
+          gear_entries: [],
+        },
+        effortLastWeekData: {
+          gear_entries: [],
+        },
+        locations: [],
+        fishingDetails: {
+          fish_entries: [],
+        },
+      },
     },
-    []
-  );
-
-  // Store effort today (hours fished & gear used)
-  const [effortToday, setEffortToday] = useState<EffortToday>({
-    hoursFished: 0,
-    gearUsed: [],
   });
 
-  // Store effort last week (gears & times used)
-  const [effortLastWeek, setEffortLastWeek] = useState<EffortLastWeekEntry[]>(
-    []
-  );
+  // Track dependencies for FishingDetails
+  const [selectedLocations, setSelectedLocations] = useState<MapLocation[]>([]);
+  const [selectedGears, setSelectedGears] = useState<{
+    gear_code: number;
+    gear_details: { detail_name: string; detail_value: string }[];
+  }[]>([]);
+  const [isValid, setIsValid] = useState(false);
 
-  // Update Boat Details
-  const handleBoatChange = (boatDetails: BoatData) => {
-    setBoatData(boatDetails);
-  };
+  // Handlers
+  const handleBoatInfoChange = useCallback((data: BoatData) => {
+    setValue("LandingFormDTO.boatData", data);
+    setIsValid(!!data.fleet_owner && Object.values(data).every(val => val != null));
+  }, [setValue]);
 
-  // Update effort today (hours fished & selected gear)
-  const handleEffortChange = (effort: EffortToday) => {
-    setEffortToday(effort);
-  };
+  const handleEffortTodayChange = useCallback((data: EffortTodayData) => {
+    setValue("LandingFormDTO.effortTodayData", data);
+    setSelectedGears(data.gear_entries);
+    setIsValid(data.hours_fished != null && data.gear_entries.length > 0);
+  }, [setValue]);
 
-  // Update fish data
-  const handleFishChange = (entries: FishEntry[]) => {
-    setFishData(entries);
-  };
+  const handleEffortLastWeekChange = useCallback((data: EffortLastWeekData) => {
+    setValue("LandingFormDTO.effortLastWeekData", data);
+    setIsValid(data.gear_entries.length > 0);
+  }, [setValue]);
 
-  // Update effort last week data
-  const handleEffortLastWeekChange = (entries: EffortLastWeekEntry[]) => {
-    setEffortLastWeek(entries);
-  };
+  const handleLocationsChange = useCallback((data: MapLocation[]) => {
+    setValue("LandingFormDTO.locations", data);
+    setSelectedLocations(data);
+    setIsValid(data.length > 0);
+  }, [setValue]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFishingDetailsChange = useCallback((data: FishingDetailsData) => {
+    setValue("LandingFormDTO.fishingDetails", data);
+  }, [setValue]);
 
-    if (fishData.length === 0) {
-      alert("Please add at least one fish entry");
-      return;
-    }
-
-    if (selectedLocations.length === 0) {
-      alert("Please select at least one fishing location on the map");
-      return;
-    }
-
-    const formData = {
-      locationDetails: selectedLocations,
-      boatData,
-      effortToday,
-      effortLastWeek,
-      fishingDetails: fishData,
-    };
-
+  const onSubmit = async (formData: LandingsForm) => {
     console.log("Submitting form data:", formData);
-
-    // API call will go here
-    // fetch('/api/landings', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(formData),
-    // });
   };
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Landing Form</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-
-        <BoatInfo onChange={handleBoatChange} />
-        <EffortTodayForm
-          availableGears={effortToday.gearUsed}
-          onChange={handleEffortChange}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <BoatInfo
+          required={true}
+          onChange={handleBoatInfoChange}
         />
-        <EffortLastWeek onChange={handleEffortLastWeekChange} />
-
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Select Fishing Locations</h2>
-          <p className="text-sm text-gray-600">
-            Click on the map to add fishing locations. Click a marker to remove
-            it.
-          </p>
-          <div className="h-[500px] w-full border rounded-lg overflow-hidden">
-            <MapWithMarkers onMarkersChange={handleMarkersUpdate} />
-          </div>
-        </div>
-
+        <EffortToday
+          required={true}
+          onChange={handleEffortTodayChange}
+        />
+        <EffortLastWeek
+          required={true}
+          onChange={handleEffortLastWeekChange}
+        />
+        <MapWithMarkers
+          required={true}
+          onChange={handleLocationsChange}
+        />
         <FishingDetails
+          required={true}
           selectedLocations={selectedLocations}
-          selectedGears={effortToday.gearUsed}
-          onChange={handleFishChange}
+          todaysGears={selectedGears}
+          onChange={handleFishingDetailsChange}
         />
-
-        <div className="mt-6">
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Submit
-          </button>
-        </div>
+        <SubmitButton
+          isSubmitting={isSubmitting}
+          disabled={!isValid}
+          label="Submit"
+        />
       </form>
     </div>
   );

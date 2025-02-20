@@ -1,68 +1,100 @@
-'use client'
+"use client";
 
-import React, {useState} from 'react';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import BoatInfo from "@/components/forms-c/boat-form";
-import GearInfo from "@/components/forms-c/gear-form";
+import GearSelector from "@/components/forms-c/gear-form";
+import SubmitButton from "@/components/utils/submit-button";
+
+interface BoatData {
+  fleet_owner: string;
+  fleet_registration: number;
+  fleet_size: number;
+  fleet_crew: number;
+  fleet_max_weight: number;
+  fleet_length: number;
+}
+
+interface GearFormValues {
+  gear_code: number;
+  months: number[];
+}
+
+interface FleetSensesForm {
+  boatData: BoatData;
+  gearData: GearFormValues[];
+}
 
 function Page() {
-    const [boatData, setBoatData] = useState({
-        fleet_owner: '',
+  const {
+    handleSubmit,
+    setValue,
+    getValues,
+    formState: { isSubmitting },
+  } = useForm<FleetSensesForm>({
+    defaultValues: {
+      boatData: {
+        fleet_owner: "",
         fleet_registration: 0,
         fleet_size: 0,
         fleet_crew: 0,
         fleet_max_weight: 0,
         fleet_length: 0,
-    });
+      },
+      gearData: [],
+    },
+  });
 
-    const [gearData, setGearData] = useState<{ gear_code: number; months: number[] }[]>([]);
+  const [isValid, setIsValid] = useState(false);
 
-    const handleBoatChange = (data: typeof boatData) => {
-        setBoatData(data);
-    };
+  const handleBoatChange = (data: BoatData) => {
+    setValue("boatData", data);
+    checkFormValidity(data, null);
+  };
 
-    const handleGearChange = (data: typeof gearData) => {
-        setGearData(data);
-    };
+  const handleGearChange = (data: GearFormValues[]) => {
+    setValue("gearData", data);
+    checkFormValidity(null, data);
+  };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+  const checkFormValidity = (
+    boatData: BoatData | null,
+    gearData: GearFormValues[] | null
+  ) => {
+    const currentBoatData = boatData || (getValues()?.boatData as BoatData);
+    const currentGearData =
+      gearData || (getValues()?.gearData as GearFormValues[]);
 
-        if (gearData.length === 0) {
-            alert('Please add at least one gear entry');
-            return;
-          }
+    const isBoatValid = Object.values(currentBoatData).every(
+      (val) => val !== null && val !== undefined && val !== ""
+    );
+    const isGearValid =
+      currentGearData?.length > 0 &&
+      currentGearData.every((gear) => gear.gear_code && gear.months.length > 0);
 
-        // Prepare the combined form data for submission
-        const FleetSensesFormDTO = {
-            FleetSensesFormDTO: {
-                boatInfo: boatData,
-                gearData: gearData,
-            }
-        };
+    setIsValid(isBoatValid && isGearValid);
+  };
 
-        console.log('Submitting form data:', FleetSensesFormDTO);
-        // fetch('/api/submit', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(formData),
-        // });
-    };
+  const onSubmit = async (formData: FleetSensesForm) => {
+    console.log("Submitting form data:", formData);
+  };
 
-    return (
-        <div className="container mx-auto p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <BoatInfo required={true} onChange={handleBoatChange}/>
-                <GearInfo onChange={handleGearChange}/>
-                <button
-                    type="submit"
-                    className="submit-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    Submit
-                </button>
-            </form>
-        </div>);
+  return (
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Fleet Senses Form</h1>
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <BoatInfo required={true} onChange={handleBoatChange} />
+        <GearSelector onChange={handleGearChange} />
+        <SubmitButton
+          isSubmitting={isSubmitting}
+          disabled={!isValid}
+          label="Submit"
+        />
+      </form>
+    </div>
+  );
 }
 
 export default Page;

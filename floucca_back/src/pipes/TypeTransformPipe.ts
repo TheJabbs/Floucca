@@ -5,7 +5,8 @@ import { validate } from 'class-validator';
 @Injectable()
 export class TypeTransformPipe implements PipeTransform {
     async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
-        if (!metadata.metatype) {
+        // Only apply transformation if the value is from route parameters (`param`)
+        if (metadata.type !== 'param' || !metadata.metatype) {
             return value;
         }
 
@@ -14,7 +15,9 @@ export class TypeTransformPipe implements PipeTransform {
             const errors = await validate(object);
 
             if (errors.length > 0) {
-                const errorMessages = errors.map(err => Object.values(err.constraints).join(', ')).join('; ');
+                const errorMessages = errors
+                    .map(err => Object.values(err.constraints).join(', '))
+                    .join('; ');
                 throw new BadRequestException(`Validation failed: ${errorMessages}`);
             }
 
@@ -28,7 +31,6 @@ export class TypeTransformPipe implements PipeTransform {
         const types: any[] = [String, Boolean, Number, Array, Object];
         return !types.includes(metatype);
     }
-
 
     private parseValue(value: string): any {
         if (value.toLowerCase() === 'true') return true;

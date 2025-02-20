@@ -133,7 +133,11 @@ export class LandingsService {
                             where: {gear_code: f.gear_code}
                         })
 
-                        if(!gear) {
+                        const specie = await this.prisma.specie.findUnique({
+                            where: {specie_code: f.specie_code}
+                        })
+
+                        if(gear && specie) {
                             await this.prisma.fish.create({
                                 data: f
                             })
@@ -149,7 +153,7 @@ export class LandingsService {
                             where: {gear_code: l1.gear_code}
                         })
 
-                        if(!gear) {
+                        if(gear) {
                             await this.prisma.sense_lastw.create({
                                 data: l1
                             })
@@ -165,7 +169,7 @@ export class LandingsService {
                             where: {gear_code: g.gear_code}
                         })
 
-                        if(!gear) {
+                        if(gear) {
                             await this.prisma.gear_details.create({
                                 data: g
                             })

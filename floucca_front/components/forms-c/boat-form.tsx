@@ -1,10 +1,15 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import FormInput from '../utils/form-input';
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import FormInput from "../utils/form-input";
 
-interface BoatData {
+interface BoatInfoProps {
+  required?: boolean;
+  onChange: (boatData: BoatFormValues) => void;
+}
+
+interface BoatFormValues {
   fleet_owner: string;
   fleet_registration: number;
   fleet_size: number;
@@ -13,124 +18,85 @@ interface BoatData {
   fleet_length: number;
 }
 
-interface BoatInfoProps {
-  required?: boolean;
-  onChange: (boatData: BoatData) => void;
-}
-
-const BoatInfo: React.FC<BoatInfoProps> = ({ required = false, onChange }) => {
+const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
   const {
-    control,
-    handleSubmit,
+    register,
     watch,
     formState: { errors },
-  } = useForm<BoatData>({
+  } = useForm<BoatFormValues>({
     defaultValues: {
-      fleet_owner: '',
-      fleet_registration: 0,
-      fleet_size: 0,
-      fleet_crew: 0,
-      fleet_max_weight: 0,
-      fleet_length: 0,
+      fleet_owner: "",
+      fleet_registration: undefined,
+      fleet_size: undefined,
+      fleet_crew: undefined,
+      fleet_max_weight: undefined,
+      fleet_length: undefined,
     },
   });
 
+  // Watch the form data and trigger onChange
+  const formData = watch();
   useEffect(() => {
-    onChange(watch());
-  }, [watch(), onChange]);
+    onChange(formData);
+  }, [formData, onChange]);
 
   return (
     <div className="boat-info">
       <h2 className="text-xl font-bold mb-4">Boat Information</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Fleet Owner */}
-        <Controller
+        <FormInput
+          label="Boat Owner Name"
           name="fleet_owner"
-          control={control}
-          rules={{ required: required ? 'Owner name is required' : false }}
-          render={({ field }) => (
-            <FormInput
-              label="Boat Owner Name"
-              {...field}
-              placeholder="Enter owner's name"
-              error={errors.fleet_owner?.message}
-            />
-          )}
+          required={required}
+          placeholder="Enter owner's name"
+          register={register}
+          error={errors.fleet_owner?.message}
         />
 
-        <Controller
+        <FormInput
+          label="Boat Registration Number"
           name="fleet_registration"
-          control={control}
-          rules={{ required: required ? 'Registration is required' : false, min: 1 }}
-          render={({ field }) => (
-            <FormInput
-              label="Boat Registration Number"
-              {...field}
-              type="number"
-              placeholder="Enter registration number"
-              error={errors.fleet_registration?.message}
-            />
-          )}
+          required={required}
+          placeholder="Enter registration number"
+          type="number"
+          register={register}
+          error={errors.fleet_registration?.message}
         />
-
-        <Controller
+        <FormInput
+          label="Boat Fleet Size"
           name="fleet_size"
-          control={control}
-          rules={{ required: required ? 'Fleet size is required' : false, min: 1 }}
-          render={({ field }) => (
-            <FormInput
-              label="Boat Fleet Size"
-              {...field}
-              type="number"
-              placeholder="Enter fleet size"
-              error={errors.fleet_size?.message}
-            />
-          )}
+          required={required}
+          placeholder="Enter fleet size"
+          type="number"
+          register={register}
+          error={errors.fleet_size?.message}
         />
-
-        <Controller
+        <FormInput
+          label="Fleet Crew Count"
           name="fleet_crew"
-          control={control}
-          rules={{ required: required ? 'Crew count is required' : false, min: 1 }}
-          render={({ field }) => (
-            <FormInput
-              label="Fleet Crew Count"
-              {...field}
-              type="number"
-              placeholder="Enter crew count"
-              error={errors.fleet_crew?.message}
-            />
-          )}
+          required={required}
+          placeholder="Enter crew count"
+          register={register}
+          type="number"
+          error={errors.fleet_crew?.message}
         />
-
-        <Controller
+        <FormInput
+          label="Boat Maximum Weight (kg)"
           name="fleet_max_weight"
-          control={control}
-          rules={{ required: required ? 'Max weight is required' : false, min: 1 }}
-          render={({ field }) => (
-            <FormInput
-              label="Boat Maximum Weight (kg)"
-              {...field}
-              type="number"
-              placeholder="Enter max weight"
-              error={errors.fleet_max_weight?.message}
-            />
-          )}
+          required={required}
+          placeholder="Enter max weight"
+          register={register}
+          type="number"
+          error={errors.fleet_max_weight?.message}
         />
-
-        <Controller
+        <FormInput
+          label="Boat Length (meters)"
           name="fleet_length"
-          control={control}
-          rules={{ required: required ? 'Length is required' : false, min: 1 }}
-          render={({ field }) => (
-            <FormInput
-              label="Boat Length (m)"
-              {...field}
-              type="number"
-              placeholder="Enter length"
-              error={errors.fleet_length?.message}
-            />
-          )}
+          required={required}
+          placeholder="Enter length"
+          register={register}
+          type="number"
+          error={errors.fleet_length?.message}
         />
       </div>
     </div>

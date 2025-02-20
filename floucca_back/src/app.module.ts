@@ -1,23 +1,25 @@
 import { Module } from '@nestjs/common';
 import {PrismaModule} from "./prisma/prisma.module";
-import {CoopModule} from "./models/coop/coop.module";
-import {BoatDetailsModule} from "./models/boat_details/boat_detail.module";
-import {EffortTodayModule} from "./models/effort_today/effort_today.module";
-import {FishModule} from "./models/fish/fish.module";
-import {FleetModule} from "./models/fleet_senses/fleet.module";
-import {FormModule} from "./models/form/form.module";
-import {GearModule} from "./models/gear/gear.module";
-import {GearUsageModule} from "./models/gear_usage/gear_usage.module";
-import {GearDetailService} from "./models/gear_detail/gear_detail.service";
-import {GearDetailModule} from "./models/gear_detail/gear_detail.module";
+import {CoopModule} from "./backend/coop/coop.module";
+import {BoatDetailsModule} from "./backend/boat_details/boat_detail.module";
+import {EffortTodayModule} from "./backend/effort_today/effort_today.module";
+import {FishModule} from "./backend/fish/fish.module";
+import {FleetModule} from "./backend/fleet_senses/fleet.module";
+import {FormModule} from "./backend/form/form.module";
+import {GearModule} from "./backend/gear/gear.module";
+import {GearUsageModule} from "./backend/gear_usage/gear_usage.module";
+import {GearDetailService} from "./backend/gear_detail/gear_detail.service";
+import {GearDetailModule} from "./backend/gear_detail/gear_detail.module";
 import {ScheduleModule} from "./auto/schedule.module";
+import {SenseLastwModule} from "./backend/sense_lastw/sense_lastw.module";
+import {LandingsModule} from "./backend/landings/landings.module";
 
 
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,
     EffortTodayModule, FishModule, FishModule, FleetModule,
     FormModule, GearModule, GearUsageModule, GearDetailModule,
-  ScheduleModule],
+  ScheduleModule, SenseLastwModule, LandingsModule],
   providers: [],
 })
 export class AppModule {}

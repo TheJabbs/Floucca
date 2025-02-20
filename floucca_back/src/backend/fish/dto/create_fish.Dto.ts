@@ -1,6 +1,7 @@
-import {IsNotEmpty, IsNumber} from "class-validator";
+import { Decimal } from "@prisma/client/runtime/library";
+import {IsDecimal, IsInt, IsNotEmpty, IsNumber, IsPositive} from "class-validator";
 
-export class FishDto {
+export class CreateFishDto {
     @IsNotEmpty()
     @IsNumber()
     specie_code: number;
@@ -10,7 +11,11 @@ export class FishDto {
     @IsNotEmpty()
     @IsNumber()
     gear_code: number;
+    @IsDecimal()
     fish_weight?: number;
+    @IsDecimal()
     fish_length?: number;
+    @IsPositive()
+    @IsInt()
     fish_quantity?: number
 }

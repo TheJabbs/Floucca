@@ -1,5 +1,5 @@
-import { FormGearUsageDto } from '../../models/gear_usage/DTO/FormGearUsage.dto';
-import { CreateGearUsageDto } from '../../models/gear_usage/DTO';
+import { FormGearUsageDto } from '../../backend/gear_usage/DTO/FormGearUsage.dto';
+import { CreateGearUsageDto } from '../../backend/gear_usage/DTO';
 
 export function transformFormGearUsageToGearUsage(formGearUsage: FormGearUsageDto[]): CreateGearUsageDto[] {
     if (!Array.isArray(formGearUsage)) {

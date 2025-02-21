@@ -11,6 +11,8 @@ const MapWithMarkers = dynamic(
 );
 import FishingDetails from "@/components/forms-c/fishing-details-form";
 import SubmitButton from "@/components/utils/submit-button";
+import PortDropdown from "@/components/forms-c/port-dropdown"; 
+
 
 // Form interfaces
 interface BoatData {
@@ -65,6 +67,7 @@ interface LandingsForm {
     effortLastWeekData: EffortLastWeekData;
     locations: MapLocation[];
     fishingDetails: FishingDetailsData;
+    port: string; 
   };
 }
 
@@ -95,9 +98,12 @@ function Page() {
         fishingDetails: {
           fish_entries: [],
         },
+        port: "",
       },
     },
   });
+
+  const [selectedPort, setSelectedPort] = useState<string>("");
 
   // Track dependencies for FishingDetails
   const [selectedLocations, setSelectedLocations] = useState<MapLocation[]>([]);
@@ -134,6 +140,11 @@ function Page() {
     setValue("LandingFormDTO.fishingDetails", data);
   }, [setValue]);
 
+  const handlePortChange = (portId: string) => {
+    setSelectedPort(portId);
+    setValue("LandingFormDTO.port", portId); 
+  };
+
   const onSubmit = async (formData: LandingsForm) => {
     console.log("Submitting form data:", formData);
   };
@@ -164,6 +175,8 @@ function Page() {
           todaysGears={selectedGears}
           onChange={handleFishingDetailsChange}
         />
+                <PortDropdown selectedPort={selectedPort} onPortChange={handlePortChange} />
+
         <SubmitButton
           isSubmitting={isSubmitting}
           disabled={!isValid}

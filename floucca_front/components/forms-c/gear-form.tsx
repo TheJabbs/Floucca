@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import AddButton from '../utils/form-button';
 import { getAllGears } from '@/app/services/gearService';
+import Dropdown from '../dropdown/dropdown';
 
 interface Gear {
   gear_code: number;
@@ -25,7 +26,6 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
     gear_name: string; 
     months: number[] 
   }>>([]);
-
   const [currentSelection, setCurrentSelection] = useState({
     gear_code: 0,
     months: [] as number[]
@@ -101,24 +101,17 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
       <h2 className="text-xl font-bold">Fleet Gear Usage</h2>
       
       <div className="flex items-start gap-3">
-        <div className="w-46">
-          <label className="block text-gray-700 text-sm font-semibold mb-1">
-            Select Gear {required && <span className="text-red-500">*</span>}
-          </label>
-          <select
-            value={currentSelection.gear_code}
-            onChange={(e) => handleGearChange(Number(e.target.value))}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={availableGears.length === 0}
-          >
-            <option value={0}>Select Gear</option>
-            {availableGears.map(gear => (
-              <option key={gear.gear_code} value={gear.gear_code}>
-                {gear.gear_name} - {gear.equipment_name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Dropdown
+          label="Select Gear"
+          options={availableGears.map(gear => ({
+            value: gear.gear_code,
+            label: `${gear.gear_name} - ${gear.equipment_name}`
+          }))}
+          selectedValue={currentSelection.gear_code}
+          onChange={handleGearChange}
+          required={required}
+          disabled={availableGears.length === 0}
+        />
 
         <div className="flex-1 mt-1">
           <label className="block text-gray-700 text-sm font-semibold mb-1">

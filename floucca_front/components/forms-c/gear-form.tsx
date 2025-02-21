@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import AddButton from '../utils/form-button';
+import { getAllGears } from '@/app/services/gearService';
 
 interface Gear {
   gear_code: number;
@@ -32,20 +33,19 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
 
   useEffect(() => {
     const fetchGears = async () => {
+      setIsLoading(true); 
       try {
-        const response = await fetch('http://localhost:3000/api/dev/gear/all/gear');
-        if (!response.ok) throw new Error('Failed to fetch gears');
-        const data = await response.json();
-        setGears(data);
+        const data = await getAllGears();  
+        setGears(data); 
       } catch (error) {
         console.error('Error fetching gears:', error);
       } finally {
-        setIsLoading(false);
+        setIsLoading(false);  
       }
     };
 
     fetchGears();
-  }, []);
+  }, []);  
 
   const availableGears = gears.filter(gear => 
     !selectedGears.some(selected => selected.gear_code === gear.gear_code)

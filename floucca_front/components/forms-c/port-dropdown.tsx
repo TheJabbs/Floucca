@@ -10,6 +10,8 @@ interface Port {
 interface PortDropdownProps {
     selectedPort: string;
     onPortChange: (portId: string) => void;
+    className?: string;
+
 }
 
 const PortDropdown: React.FC<PortDropdownProps> = ({ selectedPort, onPortChange }) => {

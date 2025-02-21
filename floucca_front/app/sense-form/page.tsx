@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import BoatInfo from "@/components/forms-c/boat-form";
 import GearSelector from "@/components/forms-c/gear-form";
 import SubmitButton from "@/components/utils/submit-button";
+import PortDropdown from "@/components/forms-c/port-dropdown";
 
 interface BoatData {
   fleet_owner: string;
@@ -23,6 +24,7 @@ interface GearFormValues {
 interface FleetSensesForm {
   boatData: BoatData;
   gearData: GearFormValues[];
+  port: string;
 }
 
 function Page() {
@@ -42,6 +44,7 @@ function Page() {
         fleet_length: 0,
       },
       gearData: [],
+      port: "",
     },
   });
 
@@ -49,21 +52,28 @@ function Page() {
 
   const handleBoatChange = (data: BoatData) => {
     setValue("boatData", data);
-    checkFormValidity(data, null);
+    checkFormValidity(data, null, getValues("port"));
   };
 
   const handleGearChange = (data: GearFormValues[]) => {
     setValue("gearData", data);
-    checkFormValidity(null, data);
+    checkFormValidity(null, data, getValues("port"));
+  };
+
+  const handlePortChange = (port: string) => {
+    setValue("port", port);
+    checkFormValidity(getValues("boatData"), getValues("gearData"), port);
   };
 
   const checkFormValidity = (
     boatData: BoatData | null,
-    gearData: GearFormValues[] | null
+    gearData: GearFormValues[] | null,
+    port: string
   ) => {
     const currentBoatData = boatData || (getValues()?.boatData as BoatData);
     const currentGearData =
       gearData || (getValues()?.gearData as GearFormValues[]);
+    const currentPort = port || getValues("port");
 
     const isBoatValid = Object.values(currentBoatData).every(
       (val) => val !== null && val !== undefined && val !== ""
@@ -71,8 +81,9 @@ function Page() {
     const isGearValid =
       currentGearData?.length > 0 &&
       currentGearData.every((gear) => gear.gear_code && gear.months.length > 0);
+    const isPortValid = currentPort !== "";
 
-    setIsValid(isBoatValid && isGearValid);
+    setIsValid(isBoatValid && isGearValid && isPortValid);
   };
 
   const onSubmit = async (formData: FleetSensesForm) => {
@@ -85,13 +96,12 @@ function Page() {
         <h1 className="text-2xl font-bold">Fleet Senses Form</h1>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="flex items-center mb-4">
+        <PortDropdown selectedPort={getValues("port")} onPortChange={handlePortChange} className="mr-auto" />
+        </div>
         <BoatInfo required={true} onChange={handleBoatChange} />
         <GearSelector onChange={handleGearChange} />
-        <SubmitButton
-          isSubmitting={isSubmitting}
-          disabled={!isValid}
-          label="Submit"
-        />
+        <SubmitButton isSubmitting={isSubmitting} disabled={!isValid} label="Submit" />
       </form>
     </div>
   );

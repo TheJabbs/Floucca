@@ -31,7 +31,7 @@ interface MapLocation {
 
 interface MapSelectionProps {
   required?: boolean;
-  onChange: (locations: MapLocation[]) => void;
+  onChange: (location: MapLocation | null) => void;
 }
 
 // Component to handle map clicks
@@ -48,48 +48,44 @@ function MapEvents({
   return null;
 }
 
-const MapSelection: React.FC<MapSelectionProps> = ({ onChange }) => {
-  const [markers, setMarkers] = useState<MapLocation[]>([]);
+const MapSelection: React.FC<MapSelectionProps> = ({ required = false, onChange }) => {
+  const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
 
-  // center on Leb approx coordinates
+  // center on Lebanon's approximate coordinates
   const defaultCenter: [number, number] = [34.1, 35.9];
   const defaultZoom = 8;
 
   const handleMapClick = (lat: number, lng: number) => {
-    const markerNumber = markers.length + 1;
-    const newMarker: MapLocation = {
-      id: Date.now(), // Using timestamp as a simple unique id
-      name: `Marker ${markerNumber}`,
+    const newLocation: MapLocation = {
+      id: Date.now(),
+      name: "Selected Location",
       lat,
       lng,
     };
-
-    const updatedMarkers = [...markers, newMarker];
-    setMarkers(updatedMarkers);
-    onChange(updatedMarkers);
+    
+    setSelectedLocation(newLocation);
+    onChange(newLocation);
   };
 
-  const removeMarker = (id: number) => {
-    const updatedMarkers = markers
-      .filter((marker) => marker.id !== id)
-      .map((marker, index) => ({
-        ...marker,
-        name: `Marker ${index + 1}`,
-      }));
-    setMarkers(updatedMarkers);
-    onChange(updatedMarkers);
+  const removeMarker = () => {
+    setSelectedLocation(null);
+    onChange(null);
   };
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold mb-4">Select Fishing Locations</h2>
+      <h2 className="text-xl font-bold mb-4">
+        Select Fishing Location
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </h2>
 
       {/* Instructions */}
       <div className="text-sm text-gray-600">
-        <p>Click on the map to add markers. Click on a marker to remove it.</p>
-        <p>Markers are automatically numbered in the order they are added.</p>
+        <p>Click on the map to set a marker. Click on the marker to remove it.</p>
+        <p>Only one location can be selected at a time.</p>
       </div>
-      <div className="relative h-[500px] w-full border rounded-lg overflow-hidden">
+
+      <div className="relative h-96 w-full border rounded-lg overflow-hidden">
         <MapContainer
           center={defaultCenter}
           zoom={defaultZoom}
@@ -101,52 +97,44 @@ const MapSelection: React.FC<MapSelectionProps> = ({ onChange }) => {
           />
           <MapEvents onMapClick={handleMapClick} />
 
-          {markers.map((marker) => (
+          {selectedLocation && (
             <Marker
-              key={marker.id}
-              position={[marker.lat, marker.lng]}
+              position={[selectedLocation.lat, selectedLocation.lng]}
               icon={icon}
               eventHandlers={{
-                click: () => removeMarker(marker.id),
+                click: removeMarker,
               }}
             >
               <Tooltip permanent direction="top" offset={[0, -20]}>
-                {marker.name}
+                {selectedLocation.name}
               </Tooltip>
             </Marker>
-          ))}
+          )}
         </MapContainer>
       </div>
 
-      {/* Markers List */}
+      {/* Selected Location Display */}
       <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-2">Selected Locations</h3>
-        {markers.length > 0 ? (
-          <div className="space-y-2">
-            {markers.map((marker) => (
-              <div
-                key={marker.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="font-medium">{marker.name}</span>
-                  <span className="text-gray-700">
-                    Lat: {marker.lat.toFixed(4)}, Lng: {marker.lng.toFixed(4)}
-                  </span>
-                </div>
-                <button
-                  onClick={() => removeMarker(marker.id)}
-                  className="text-red-500 hover:text-red-700"
-                  type="button"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
+        <h3 className="text-lg font-semibold mb-2">Selected Location</h3>
+        {selectedLocation ? (
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+            <div className="flex items-center gap-4">
+              <span className="font-medium">{selectedLocation.name}</span>
+              <span className="text-gray-700">
+                Lat: {selectedLocation.lat.toFixed(4)}, Lng: {selectedLocation.lng.toFixed(4)}
+              </span>
+            </div>
+            <button
+              onClick={removeMarker}
+              className="text-red-500 hover:text-red-700"
+              type="button"
+            >
+              Remove
+            </button>
           </div>
         ) : (
           <p className="text-gray-500 italic">
-            No locations selected. Click on the map to add markers.
+            No location selected. Click on the map to add a marker.
           </p>
         )}
       </div>

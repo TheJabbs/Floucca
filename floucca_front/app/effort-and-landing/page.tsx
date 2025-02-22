@@ -62,12 +62,12 @@ interface FishingDetailsData {
 
 interface LandingsForm {
   LandingFormDTO: {
+    port: string; 
     boatData: BoatData;
     effortTodayData: EffortTodayData;
     effortLastWeekData: EffortLastWeekData;
-    locations: MapLocation[];
+    location: MapLocation | null;
     fishingDetails: FishingDetailsData;
-    port: string; 
   };
 }
 
@@ -79,6 +79,7 @@ function Page() {
   } = useForm<LandingsForm>({
     defaultValues: {
       LandingFormDTO: {
+        port: "",
         boatData: {
           fleet_owner: "",
           fleet_registration: 0,
@@ -94,11 +95,10 @@ function Page() {
         effortLastWeekData: {
           gear_entries: [],
         },
-        locations: [],
+        location: null,
         fishingDetails: {
           fish_entries: [],
         },
-        port: "",
       },
     },
   });
@@ -106,7 +106,7 @@ function Page() {
   const [selectedPort, setSelectedPort] = useState<string>("");
 
   // Track dependencies for FishingDetails
-  const [selectedLocations, setSelectedLocations] = useState<MapLocation[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [selectedGears, setSelectedGears] = useState<{
     gear_code: number;
     gear_details: { detail_name: string; detail_value: string }[];
@@ -130,10 +130,10 @@ function Page() {
     setIsValid(data.gear_entries.length > 0);
   }, [setValue]);
 
-  const handleLocationsChange = useCallback((data: MapLocation[]) => {
-    setValue("LandingFormDTO.locations", data);
-    setSelectedLocations(data);
-    setIsValid(data.length > 0);
+  const handleLocationsChange = useCallback((data: MapLocation|null) => {
+    setValue("LandingFormDTO.location", data);
+    setSelectedLocation(data);
+    setIsValid(!!data);
   }, [setValue]);
 
   const handleFishingDetailsChange = useCallback((data: FishingDetailsData) => {
@@ -153,6 +153,7 @@ function Page() {
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Landing Form</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <PortDropdown selectedPort={selectedPort} onPortChange={handlePortChange} />
         <BoatInfo
           required={true}
           onChange={handleBoatInfoChange}
@@ -171,11 +172,9 @@ function Page() {
         />
         <FishingDetails
           required={true}
-          selectedLocations={selectedLocations}
           todaysGears={selectedGears}
           onChange={handleFishingDetailsChange}
         />
-                <PortDropdown selectedPort={selectedPort} onPortChange={handlePortChange} />
 
         <SubmitButton
           isSubmitting={isSubmitting}

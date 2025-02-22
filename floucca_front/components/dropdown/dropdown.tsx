@@ -29,7 +29,7 @@ const Dropdown = <T extends string | number>({
       disabled={disabled}
     >
       <option value={''} disabled>
-        -- Select {label} --
+        {label}
       </option>
       {options.map((option) => (
         <option key={option.value} value={option.value}>

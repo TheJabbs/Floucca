@@ -7,16 +7,8 @@ import AddButton from "../utils/form-button";
 
 interface FishingDetailsProps {
   required?: boolean;
-  selectedLocations: MapLocation[];
   todaysGears: GearEntry[];
   onChange: (fishingData: FishingDetailsData) => void;
-}
-
-interface MapLocation {
-  id: number;
-  name: string;
-  lat: number;
-  lng: number;
 }
 
 interface GearEntry {
@@ -59,7 +51,6 @@ const FISH_SPECIES = [
 
 const FishingDetails: React.FC<FishingDetailsProps> = ({
   required = false,
-  selectedLocations,
   todaysGears,
   onChange,
 }) => {
@@ -133,9 +124,6 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     );
   };
 
-  const getLocationName = (id: number) =>
-    selectedLocations.find((loc) => loc.id === id)?.name || "";
-
   const getGearName = (code: number) => {
     const gear = todaysGears.find((g) => g.gear_code === code);
     return gear ? `Gear ${gear.gear_code}` : "";
@@ -150,25 +138,6 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       <h2 className="text-xl font-bold">Fishing Details Today</h2>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Location Selection */}
-        <div className="form-group">
-          <label className="block text-gray-700 text-sm font-semibold mb-1">
-            Fishing Location{" "}
-            {required && <span className="text-red-500">*</span>}
-          </label>
-          <select
-            {...register("current.location_id")}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value={0}>Select Location</option>
-            {selectedLocations.map((location) => (
-              <option key={location.id} value={location.id}>
-                {location.name} (Lat: {location.lat.toFixed(4)}, Lng:{" "}
-                {location.lng.toFixed(4)})
-              </option>
-            ))}
-          </select>
-        </div>
 
         {/* Gear Selection */}
         <div className="form-group">
@@ -257,10 +226,6 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
               className="flex items-center gap-4 p-3 bg-gray-50 rounded-md"
             >
               <div className="flex-1 grid grid-cols-2 gap-4">
-                <div>
-                  <span className="font-medium">Location:</span>{" "}
-                  {getLocationName(entry.location_id)}
-                </div>
                 <div>
                   <span className="font-medium">Gear:</span>{" "}
                   {getGearName(entry.gear_code)}

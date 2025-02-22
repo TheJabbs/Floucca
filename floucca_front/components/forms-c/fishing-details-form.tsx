@@ -155,7 +155,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       
       <div className="bg-blue-50 p-3 rounded-md mb-4">
         <p className="text-sm text-blue-800">
-          Selected Location: {selectedLocation.name} (Lat: {selectedLocation.lat.toFixed(4)}, Lng: {selectedLocation.lng.toFixed(4)})
+          {selectedLocation.name} (Lat: {selectedLocation.lat.toFixed(4)}, Lng: {selectedLocation.lng.toFixed(4)})
         </p>
       </div>
 

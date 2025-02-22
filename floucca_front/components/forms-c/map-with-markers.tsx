@@ -112,32 +112,6 @@ const MapSelection: React.FC<MapSelectionProps> = ({ required = false, onChange 
           )}
         </MapContainer>
       </div>
-
-      {/* Selected Location Display */}
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-2">Selected Location</h3>
-        {selectedLocation ? (
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-            <div className="flex items-center gap-4">
-              <span className="font-medium">{selectedLocation.name}</span>
-              <span className="text-gray-700">
-                Lat: {selectedLocation.lat.toFixed(4)}, Lng: {selectedLocation.lng.toFixed(4)}
-              </span>
-            </div>
-            <button
-              onClick={removeMarker}
-              className="text-red-500 hover:text-red-700"
-              type="button"
-            >
-              Remove
-            </button>
-          </div>
-        ) : (
-          <p className="text-gray-500 italic">
-            No location selected. Click on the map to add a marker.
-          </p>
-        )}
-      </div>
     </div>
   );
 };

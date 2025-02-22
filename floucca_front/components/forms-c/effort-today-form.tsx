@@ -59,7 +59,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
   const {
     register,
     control,
-    watch,
+    getValues,
     formState: { errors },
   } = useForm<EffortTodayData>({
     defaultValues: {
@@ -73,14 +73,18 @@ const EffortToday: React.FC<EffortTodayProps> = ({
     name: "gear_entries",
   });
 
-  const formData = watch();
-  useEffect(() => {
-    onChange(formData);
-  }, [formData, onChange]);
+  // Update parent form when fields or hours_fished changes
+  const updateParentForm = () => {
+    const currentData = {
+      hours_fished: getValues('hours_fished'),
+      gear_entries: fields
+    };
+    onChange(currentData);
+  };
 
-  const remainingGears = GEARS.filter(
-    (gear) => !fields.some((entry) => entry.gear_code === gear.gear_code)
-  );
+  useEffect(() => {
+    updateParentForm();
+  }, [fields.length]); // Only depend on fields.length to prevent too many updates
 
   const handleGearChange = (gearCode: number) => {
     setCurrentGearCode(Number(gearCode));
@@ -114,6 +118,22 @@ const EffortToday: React.FC<EffortTodayProps> = ({
     // Reset selections
     setCurrentGearCode(0);
     setCurrentSpecs({});
+    
+    // Update parent form after adding gear
+    updateParentForm();
+  };
+
+  const handleRemove = (index: number) => {
+    remove(index);
+    updateParentForm();
+  };
+
+  const handleHoursFishedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue >= 0) {
+      updateParentForm();
+    }
   };
 
   const getCurrentGearSpecs = (): GearSpec[] => {
@@ -156,13 +176,14 @@ const EffortToday: React.FC<EffortTodayProps> = ({
             value={currentGearCode}
             onChange={(e) => handleGearChange(Number(e.target.value))}
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={remainingGears.length === 0}
+            disabled={fields.length === GEARS.length}
           >
             <option value={0}>Select Gear</option>
-            {remainingGears.map((gear) => (
-              <option key={gear.gear_code} value={gear.gear_code}>
-                {gear.gear_name}
-              </option>
+            {GEARS.filter(gear => !fields.some(field => field.gear_code === gear.gear_code))
+              .map((gear) => (
+                <option key={gear.gear_code} value={gear.gear_code}>
+                  {gear.gear_name}
+                </option>
             ))}
           </select>
 
@@ -219,7 +240,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
                     .join(", ")}
                 </span>
                 <button
-                  onClick={() => remove(index)}
+                  onClick={() => handleRemove(index)}
                   className="ml-auto text-red-500 hover:text-red-700"
                   type="button"
                 >

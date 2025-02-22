@@ -32,11 +32,7 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ required = false, onCha
     days_used: 1,
   });
 
-  const {
-    control,
-    watch,
-    formState: { errors },
-  } = useForm<EffortLastWeekData>({
+  const { control } = useForm<EffortLastWeekData>({
     defaultValues: {
       gear_entries: [],
     },
@@ -47,10 +43,10 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ required = false, onCha
     name: "gear_entries",
   });
 
-  const formData = watch();
+  // Update parent when fields change
   useEffect(() => {
-    onChange(formData);
-  }, [formData, onChange]);
+    onChange({ gear_entries: fields });
+  }, [fields, onChange]);
 
   const remainingGears = GEARS.filter(
     (gear) => !fields.some((entry) => entry.gear_code === gear.gear_code)
@@ -86,6 +82,10 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ required = false, onCha
       gear_code: 0,
       days_used: 1,
     });
+  };
+
+  const handleRemove = (index: number) => {
+    remove(index);
   };
 
   const getGearName = (gear_code: number) => {
@@ -160,7 +160,7 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ required = false, onCha
                   last week
                 </span>
                 <button
-                  onClick={() => remove(index)}
+                  onClick={() => handleRemove(index)}
                   className="ml-auto text-red-500 hover:text-red-700"
                   type="button"
                 >

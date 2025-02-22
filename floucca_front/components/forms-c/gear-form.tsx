@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import AddButton from '../utils/form-button';
-import { getAllGears } from '@/services/gearService';
+import { getAllGears } from '@/app/services/gearService';
 import Dropdown from '../dropdown/dropdown';
 
 interface Gear {

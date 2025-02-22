@@ -71,6 +71,15 @@ interface LandingsForm {
   };
 }
 
+interface FormValidation {
+  port: boolean;
+  boatInfo: boolean;
+  effortToday: boolean;
+  effortLastWeek: boolean;
+  location: boolean;
+  fishingDetails: boolean;
+}
+
 function Page() {
   const {
     handleSubmit,
@@ -111,38 +120,64 @@ function Page() {
     gear_code: number;
     gear_details: { detail_name: string; detail_value: string }[];
   }[]>([]);
-  const [isValid, setIsValid] = useState(false);
+
+  const [formValidation, setFormValidation] = useState<FormValidation>({
+    port: false,
+    boatInfo: false,
+    effortToday: false,
+    effortLastWeek: false,
+    location: false,
+    fishingDetails: false,
+  });
+
+  const updateValidation = (section: keyof FormValidation, isValid: boolean) => {
+    setFormValidation(prev => ({
+      ...prev,
+      [section]: isValid
+    }));
+  };
+
+  const isFormValid = () => {
+    return Object.values(formValidation).every(value => value);
+  };
+
 
   // Handlers
   const handleBoatInfoChange = useCallback((data: BoatData) => {
     setValue("LandingFormDTO.boatData", data);
-    setIsValid(!!data.fleet_owner && Object.values(data).every(val => val != null));
+    const isValid = !!data.fleet_owner && Object.values(data).every(val => val != null && val !== 0);
+    updateValidation('boatInfo', isValid);
   }, [setValue]);
 
   const handleEffortTodayChange = useCallback((data: EffortTodayData) => {
     setValue("LandingFormDTO.effortTodayData", data);
     setSelectedGears(data.gear_entries);
-    setIsValid(data.hours_fished != null && data.gear_entries.length > 0);
+    const isValid = data.hours_fished>0 && data.gear_entries.length > 0;
+    updateValidation('effortToday',isValid);
   }, [setValue]);
 
   const handleEffortLastWeekChange = useCallback((data: EffortLastWeekData) => {
     setValue("LandingFormDTO.effortLastWeekData", data);
-    setIsValid(data.gear_entries.length > 0);
+    const isValid = data.gear_entries.length > 0;
+    updateValidation('effortLastWeek', isValid);
   }, [setValue]);
 
   const handleLocationsChange = useCallback((data: MapLocation|null) => {
     setValue("LandingFormDTO.location", data);
     setSelectedLocation(data);
-    setIsValid(!!data);
+    updateValidation('location', !!data);
   }, [setValue]);
 
   const handleFishingDetailsChange = useCallback((data: FishingDetailsData) => {
     setValue("LandingFormDTO.fishingDetails", data);
+    const isValid = data.fish_entries.length > 0;
+    updateValidation('fishingDetails', isValid);
   }, [setValue]);
 
   const handlePortChange = (portId: string) => {
     setSelectedPort(portId);
     setValue("LandingFormDTO.port", portId); 
+    updateValidation('port', !!portId);
   };
 
   const onSubmit = async (formData: LandingsForm) => {
@@ -179,7 +214,7 @@ function Page() {
 
         <SubmitButton
           isSubmitting={isSubmitting}
-          disabled={!isValid}
+          disabled={!isFormValid()}
           label="Submit"
         />
       </form>

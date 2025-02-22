@@ -34,11 +34,18 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
     },
   });
 
-  // Watch the form data and trigger onChange
-  const formData = watch();
+  // Set up the subscription in a useEffect
   useEffect(() => {
-    onChange(formData);
-  }, [formData, onChange]);
+    const subscription = watch((value, { name, type }) => {
+      // Only trigger onChange when we have all values
+      if (value.fleet_owner !== undefined) {
+        onChange(value as BoatFormValues);
+      }
+    });
+    
+    // Cleanup subscription
+    return () => subscription.unsubscribe();
+  }, [watch, onChange]);
 
   return (
     <div className="boat-info">

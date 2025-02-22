@@ -1,9 +1,7 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
-import AddButton from "../utils/form-button";
+import { Plus,Trash2, AlertCircle } from "lucide-react";
 
 interface EffortTodayProps {
   required?: boolean;
@@ -29,7 +27,6 @@ interface EffortTodayData {
   gear_entries: GearEntry[];
 }
 
-// replace with actual data from the backend
 const GEARS = [
   {
     gear_code: 1,
@@ -59,7 +56,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
   const {
     register,
     control,
-    watch,
+    getValues,
     formState: { errors },
   } = useForm<EffortTodayData>({
     defaultValues: {
@@ -73,14 +70,17 @@ const EffortToday: React.FC<EffortTodayProps> = ({
     name: "gear_entries",
   });
 
-  const formData = watch();
-  useEffect(() => {
-    onChange(formData);
-  }, [formData, onChange]);
+  const updateParentForm = () => {
+    const currentData = {
+      hours_fished: getValues('hours_fished'),
+      gear_entries: fields
+    };
+    onChange(currentData);
+  };
 
-  const remainingGears = GEARS.filter(
-    (gear) => !fields.some((entry) => entry.gear_code === gear.gear_code)
-  );
+  useEffect(() => {
+    updateParentForm();
+  }, [fields.length]);
 
   const handleGearChange = (gearCode: number) => {
     setCurrentGearCode(Number(gearCode));
@@ -100,7 +100,6 @@ const EffortToday: React.FC<EffortTodayProps> = ({
     const selectedGear = GEARS.find((g) => g.gear_code === currentGearCode);
     if (!selectedGear) return;
 
-    // Convert specs to gear details format
     const gearDetails = Object.entries(currentSpecs).map(([name, value]) => ({
       detail_name: name,
       detail_value: value,
@@ -111,9 +110,9 @@ const EffortToday: React.FC<EffortTodayProps> = ({
       gear_details: gearDetails,
     });
 
-    // Reset selections
     setCurrentGearCode(0);
     setCurrentSpecs({});
+    updateParentForm();
   };
 
   const getCurrentGearSpecs = (): GearSpec[] => {
@@ -130,106 +129,130 @@ const EffortToday: React.FC<EffortTodayProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold mb-4">Effort Today</h2>
-
-      <div className="mb-6">
-        <FormInput
-          label="Hours Fished Today"
-          name="hours_fished"
-          required={required}
-          placeholder="Enter hours fished"
-          type="number"
-          register={register}
-          error={errors.hours_fished?.message}
-        />
+    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+      <div className="flex items-center gap-3 text-gray-600">
+        <h2 className="text-xl font-semibold">Effort Today</h2>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {/* Gear Selection and Specs */}
+      <div className="space-y-6">
         <div>
-          <label className="block text-gray-700 text-sm font-semibold mb-1">
-            Select Gear Used Today
-            {required && <span className="text-red-500">*</span>}
-          </label>
-          <select
-            value={currentGearCode}
-            onChange={(e) => handleGearChange(Number(e.target.value))}
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={remainingGears.length === 0}
-          >
-            <option value={0}>Select Gear</option>
-            {remainingGears.map((gear) => (
-              <option key={gear.gear_code} value={gear.gear_code}>
-                {gear.gear_name}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2">
+            <FormInput
+              label="Hours Fished Today"
+              name="hours_fished"
+              placeholder="Enter hours fished"
+              required={required}
+              type="number"
+              register={register}
+              error={errors.hours_fished?.message}
+            />
+          </div>
+        </div>
 
-          <div className="space-y-3">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-gray-700">
+            <h3 className="font-medium">Fishing Gear Details</h3>
+          </div>
+
+          <div className="space-y-4">
+            <select
+              value={currentGearCode}
+              onChange={(e) => handleGearChange(Number(e.target.value))}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              disabled={fields.length === GEARS.length}
+            >
+              <option value={0}>Select Gear</option>
+              {GEARS.filter(gear => !fields.some(field => field.gear_code === gear.gear_code))
+                .map((gear) => (
+                  <option key={gear.gear_code} value={gear.gear_code}>
+                    {gear.gear_name}
+                  </option>
+              ))}
+            </select>
+
             {currentGearCode !== 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 bg-gray-50 rounded-md">
-                {getCurrentGearSpecs().map((spec) => (
-                  <div key={spec.name} className="flex items-center gap-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      {spec.name}:
-                    </label>
-                    <div className="flex-1">
-                      <input
-                        type={spec.type}
-                        value={currentSpecs[spec.name] || ""}
-                        onChange={(e) =>
-                          handleSpecChange(spec.name, e.target.value)
-                        }
-                        className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder={`Enter ${spec.name.toLowerCase()}`}
-                      />
+              <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {getCurrentGearSpecs().map((spec) => (
+                    <div key={spec.name} className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {spec.name}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type={spec.type}
+                          value={currentSpecs[spec.name] || ""}
+                          onChange={(e) => handleSpecChange(spec.name, e.target.value)}
+                          className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder={`Enter ${spec.name.toLowerCase()}`}
+                        />
+                        {spec.unit && (
+                          <span className="text-sm text-gray-500 w-12">{spec.unit}</span>
+                        )}
+                      </div>
                     </div>
-                    {spec.unit && (
-                      <span className="text-sm text-gray-500">{spec.unit}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
 
-            {currentGearCode !== 0 && (
-              <AddButton onClick={addGear} disabled={!areSpecsComplete()} />
+                <button
+                  onClick={addGear}
+                  disabled={!areSpecsComplete()}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  type="button"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Gear
+                </button>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Display Added Gears */}
         {fields.length > 0 ? (
-          <div className="space-y-3">
-            {fields.map((entry, index) => (
-              <div
-                key={entry.id}
-                className="flex items-center gap-4 p-3 bg-gray-50 rounded-md"
-              >
-                <span className="font-medium">
-                  {getGearName(entry.gear_code)}
-                </span>
-                <span className="text-gray-600">
-                  {entry.gear_details
-                    .map(
-                      (detail) =>
-                        `${detail.detail_name}: ${detail.detail_value}`
-                    )
-                    .join(", ")}
-                </span>
-                <button
-                  onClick={() => remove(index)}
-                  className="ml-auto text-red-500 hover:text-red-700"
-                  type="button"
+          <div className="space-y-4">
+            <h3 className="font-medium text-gray-700 flex items-center gap-2">
+              Added Gear
+            </h3>
+            <div className="divide-y divide-gray-100">
+              {fields.map((entry, index) => (
+                <div
+                  key={entry.id}
+                  className="p-4 hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  Remove
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h4 className="font-medium text-gray-900">
+                        {getGearName(entry.gear_code)}
+                      </h4>
+                      <div className="text-sm text-gray-600">
+                        {entry.gear_details
+                          .map((detail) => (
+                            <span key={detail.detail_name}>
+                              {detail.detail_name}: {detail.detail_value}
+                            </span>
+                          ))
+                          .reduce((prev, curr) => (
+                            <>{prev} • {curr}</>
+                          ))}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => remove(index)}
+                      className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
+                      type="button"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
-          <p className="text-gray-500 italic">No gear added yet.</p>
+          <div className="text-gray-500 italic text-center py-6 flex items-center justify-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            No gear added yet.
+          </div>
         )}
       </div>
     </div>

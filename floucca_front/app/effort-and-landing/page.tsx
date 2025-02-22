@@ -11,6 +11,8 @@ const MapWithMarkers = dynamic(
 );
 import FishingDetails from "@/components/forms-c/fishing-details-form";
 import SubmitButton from "@/components/utils/submit-button";
+import PortDropdown from "@/components/forms-c/port-dropdown"; 
+
 
 // Form interfaces
 interface BoatData {
@@ -60,12 +62,22 @@ interface FishingDetailsData {
 
 interface LandingsForm {
   LandingFormDTO: {
+    port: string; 
     boatData: BoatData;
     effortTodayData: EffortTodayData;
     effortLastWeekData: EffortLastWeekData;
-    locations: MapLocation[];
+    location: MapLocation | null;
     fishingDetails: FishingDetailsData;
   };
+}
+
+interface FormValidation {
+  port: boolean;
+  boatInfo: boolean;
+  effortToday: boolean;
+  effortLastWeek: boolean;
+  location: boolean;
+  fishingDetails: boolean;
 }
 
 function Page() {
@@ -76,6 +88,7 @@ function Page() {
   } = useForm<LandingsForm>({
     defaultValues: {
       LandingFormDTO: {
+        port: "",
         boatData: {
           fleet_owner: "",
           fleet_registration: 0,
@@ -91,7 +104,7 @@ function Page() {
         effortLastWeekData: {
           gear_entries: [],
         },
-        locations: [],
+        location: null,
         fishingDetails: {
           fish_entries: [],
         },
@@ -99,40 +112,73 @@ function Page() {
     },
   });
 
+  const [selectedPort, setSelectedPort] = useState<string>("");
+
   // Track dependencies for FishingDetails
-  const [selectedLocations, setSelectedLocations] = useState<MapLocation[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [selectedGears, setSelectedGears] = useState<{
     gear_code: number;
     gear_details: { detail_name: string; detail_value: string }[];
   }[]>([]);
-  const [isValid, setIsValid] = useState(false);
+
+  const [formValidation, setFormValidation] = useState<FormValidation>({
+    port: false,
+    boatInfo: false,
+    effortToday: false,
+    effortLastWeek: false,
+    location: false,
+    fishingDetails: false,
+  });
+
+  const updateValidation = (section: keyof FormValidation, isValid: boolean) => {
+    setFormValidation(prev => ({
+      ...prev,
+      [section]: isValid
+    }));
+  };
+
+  const isFormValid = () => {
+    return Object.values(formValidation).every(value => value);
+  };
+
 
   // Handlers
   const handleBoatInfoChange = useCallback((data: BoatData) => {
     setValue("LandingFormDTO.boatData", data);
-    setIsValid(!!data.fleet_owner && Object.values(data).every(val => val != null));
+    const isValid = !!data.fleet_owner && Object.values(data).every(val => val != null && val !== 0);
+    updateValidation('boatInfo', isValid);
   }, [setValue]);
 
   const handleEffortTodayChange = useCallback((data: EffortTodayData) => {
     setValue("LandingFormDTO.effortTodayData", data);
     setSelectedGears(data.gear_entries);
-    setIsValid(data.hours_fished != null && data.gear_entries.length > 0);
+    const isValid = data.hours_fished>0 && data.gear_entries.length > 0;
+    updateValidation('effortToday',isValid);
   }, [setValue]);
 
   const handleEffortLastWeekChange = useCallback((data: EffortLastWeekData) => {
     setValue("LandingFormDTO.effortLastWeekData", data);
-    setIsValid(data.gear_entries.length > 0);
+    const isValid = data.gear_entries.length > 0;
+    updateValidation('effortLastWeek', isValid);
   }, [setValue]);
 
-  const handleLocationsChange = useCallback((data: MapLocation[]) => {
-    setValue("LandingFormDTO.locations", data);
-    setSelectedLocations(data);
-    setIsValid(data.length > 0);
+  const handleLocationsChange = useCallback((data: MapLocation|null) => {
+    setValue("LandingFormDTO.location", data);
+    setSelectedLocation(data);
+    updateValidation('location', !!data);
   }, [setValue]);
 
   const handleFishingDetailsChange = useCallback((data: FishingDetailsData) => {
     setValue("LandingFormDTO.fishingDetails", data);
+    const isValid = data.fish_entries.length > 0;
+    updateValidation('fishingDetails', isValid);
   }, [setValue]);
+
+  const handlePortChange = (portId: string) => {
+    setSelectedPort(portId);
+    setValue("LandingFormDTO.port", portId); 
+    updateValidation('port', !!portId);
+  };
 
   const onSubmit = async (formData: LandingsForm) => {
     console.log("Submitting form data:", formData);
@@ -140,7 +186,13 @@ function Page() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Landing Form</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Landing Form</h1>
+        <div className="w-72"> {/* Set a fixed width for the dropdown container */}
+          <PortDropdown selectedPort={selectedPort} onPortChange={handlePortChange} />
+        </div>
+      </div>
+      
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <BoatInfo
           required={true}
@@ -160,13 +212,14 @@ function Page() {
         />
         <FishingDetails
           required={true}
-          selectedLocations={selectedLocations}
+          selectedLocation={selectedLocation}
           todaysGears={selectedGears}
           onChange={handleFishingDetailsChange}
         />
+
         <SubmitButton
           isSubmitting={isSubmitting}
-          disabled={!isValid}
+          disabled={!isFormValid()}
           label="Submit"
         />
       </form>

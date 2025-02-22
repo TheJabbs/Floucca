@@ -1,9 +1,7 @@
-"use client";
-
 import React, { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
-import AddButton from "../utils/form-button";
+import { Trash2, Plus} from "lucide-react";
 
 interface MapLocation {
   id: number;
@@ -48,7 +46,6 @@ interface FormValues {
   fish_entries: FishEntry[];
 }
 
-// to be changed ya shabeb
 const FISH_SPECIES = [
   { specie_code: 1, specie_name: "Tuna" },
   { specie_code: 2, specie_name: "Sardine" },
@@ -95,7 +92,6 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
 
   const addFishEntry = () => {
     const values = getValues("current");
-
     if (!isEntryValid(values) || !selectedLocation) return;
 
     append({
@@ -107,7 +103,6 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       fish_quantity: Number(values.fish_quantity),
     });
 
-    // Reset only the fish details, keep gear
     reset({
       current: {
         ...values,
@@ -137,143 +132,156 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
   };
 
   const getSpecieName = (code: number) =>
-    FISH_SPECIES.find((species) => species.specie_code === code)?.specie_name ||
-    "";
+    FISH_SPECIES.find((species) => species.specie_code === code)?.specie_name || "";
 
   if (!selectedLocation) {
     return (
-      <div className="space-y-3">
-        <h2 className="text-xl font-bold">Fishing Details Today</h2>
-        <p className="text-gray-500 italic">Please select a location on the map first.</p>
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex items-center gap-3 text-gray-600">
+          <h2 className="text-xl font-semibold">Fishing Details Today</h2>
+        </div>
+        <p className="mt-4 text-gray-500 italic flex items-center gap-2">
+          Please select a location on the map first.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-xl font-bold">Fishing Details Today</h2>
-      
-      <div className="bg-blue-50 p-3 rounded-md mb-4">
-        <p className="text-sm text-blue-800">
-          {selectedLocation.name} (Lat: {selectedLocation.lat.toFixed(4)}, Lng: {selectedLocation.lng.toFixed(4)})
-        </p>
+    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+      <div className="flex items-center gap-3 text-gray-600">
+        <h2 className="text-xl font-semibold">Fishing Details Today</h2>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        {/* Gear Selection */}
-        <div className="form-group">
-          <label className="block text-gray-700 text-sm font-semibold mb-1">
-            Fishing Gear {required && <span className="text-red-500">*</span>}
-          </label>
-          <select
-            {...register("current.gear_code")}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Gear</option>
-            {todaysGears.map((gear) => (
-              <option key={gear.gear_code} value={gear.gear_code}>
-                {getGearName(gear.gear_code)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Fish Species Selection */}
-        <div className="form-group">
-          <label className="block text-gray-700 text-sm font-semibold mb-1">
-            Fish Species {required && <span className="text-red-500">*</span>}
-          </label>
-          <select
-            {...register("current.specie_code")}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Species</option>
-            {FISH_SPECIES.map((species) => (
-              <option key={species.specie_code} value={species.specie_code}>
-                {species.specie_name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Fish Measurements */}
-        <div className="grid grid-cols-3 gap-3">
-          <FormInput
-            label="Weight"
-            name="current.fish_weight"
-            placeholder="(kg)"
-            type="number"
-            required={required}
-            register={register}
-            error={errors.current?.fish_weight?.message}
-          />
-
-          <FormInput
-            label="Length"
-            name="current.fish_length"
-            placeholder="(cm)"
-            type="number"
-            required={required}
-            register={register}
-            error={errors.current?.fish_length?.message}
-          />
-
-          <FormInput
-            label="Quantity"
-            name="current.fish_quantity"
-            placeholder="No. fish"
-            type="number"
-            required={required}
-            register={register}
-            error={errors.current?.fish_quantity?.message}
-          />
-        </div>
-
-        <div className="flex">
-          <AddButton
-            onClick={addFishEntry}
-            disabled={!isEntryValid(currentValues)}
-          >
-            + Add
-          </AddButton>
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+        <div className="flex items-center gap-2 text-blue-800">
+          <span className="font-medium">{selectedLocation.name}</span>
+          <span className="text-blue-600">
+            ({selectedLocation.lat.toFixed(4)}, {selectedLocation.lng.toFixed(4)})
+          </span>
         </div>
       </div>
 
-      {/* Display Added Fish Entries */}
-      {fields.length > 0 ? (
-        <div className="space-y-3 mt-6">
-          {fields.map((entry, index) => (
-            <div
-              key={entry.id}
-              className="flex items-center gap-4 p-3 bg-gray-50 rounded-md"
+      <div className="grid gap-6">
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="form-group">
+            <label className="block text-gray-700 text-sm font-medium mb-2">
+              Fishing Gear {required && <span className="text-red-500">*</span>}
+            </label>
+            <select
+              {...register("current.gear_code")}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
-              <div className="flex-1 grid grid-cols-2 gap-4">
-                <div>
-                  <span className="font-medium">Gear:</span>{" "}
-                  {getGearName(entry.gear_code)}
-                </div>
-                <div>
-                  <span className="font-medium">Species:</span>{" "}
-                  {getSpecieName(entry.specie_code)}
-                </div>
-                <div>
-                  <span className="font-medium">Details:</span>{" "}
-                  {entry.fish_weight}kg, {entry.fish_length}cm, Qty:{" "}
-                  {entry.fish_quantity}
+              <option value="">Select Gear</option>
+              {todaysGears.map((gear) => (
+                <option key={gear.gear_code} value={gear.gear_code}>
+                  {getGearName(gear.gear_code)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="block text-gray-700 text-sm font-medium mb-2">
+              Fish Species {required && <span className="text-red-500">*</span>}
+            </label>
+            <select
+              {...register("current.specie_code")}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="">Select Species</option>
+              {FISH_SPECIES.map((species) => (
+                <option key={species.specie_code} value={species.specie_code}>
+                  {species.specie_name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="space-y-1">
+            <FormInput
+              label="Weight (kg)"
+              name="current.fish_weight"
+              type="number"
+              required={required}
+              register={register}
+              error={errors.current?.fish_weight?.message}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <FormInput
+              label="Length (cm)"
+              name="current.fish_length"
+              type="number"
+              required={required}
+              register={register}
+              error={errors.current?.fish_length?.message}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <FormInput
+              label="Quantity"
+              name="current.fish_quantity"
+              type="number"
+              required={required}
+              register={register}
+              error={errors.current?.fish_quantity?.message}
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={addFishEntry}
+          disabled={!isEntryValid(currentValues)}
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          type="button"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Entry
+        </button>
+      </div>
+
+      {fields.length > 0 ? (
+        <div className="space-y-4 mt-6">
+          <h3 className="font-medium text-gray-700">Added Entries</h3>
+          <div className="divide-y divide-gray-100">
+            {fields.map((entry, index) => (
+              <div
+                key={entry.id}
+                className="p-4 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-900">{getSpecieName(entry.specie_code)}</span>
+                    </div>
+                      <span className="text-gray-600">
+                        {entry.fish_weight}kg, {entry.fish_quantity} fish
+                      </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600">{entry.fish_length}cm</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => remove(index)}
+                    className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
+                    type="button"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-              <button
-                onClick={() => remove(index)}
-                className="text-red-500 hover:text-red-700"
-                type="button"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
-        <p className="text-gray-500 italic">No fish entries added yet.</p>
+        <div className="text-gray-500 italic text-center py-1">
+          No fish entries added yet.
+        </div>
       )}
     </div>
   );

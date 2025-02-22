@@ -1,8 +1,6 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import AddButton from "../utils/form-button";
+import { History, Calendar, Plus, AlertCircle, Trash2 } from "lucide-react";
 
 interface EffortLastWeekProps {
   required?: boolean;
@@ -18,7 +16,6 @@ interface EffortLastWeekData {
   gear_entries: GearEntry[];
 }
 
-//replace with actual data from backend
 const GEARS = [
   { gear_code: 1, gear_name: "Fishing Net" },
   { gear_code: 2, gear_name: "Fishing Rod" },
@@ -26,7 +23,10 @@ const GEARS = [
   { gear_code: 4, gear_name: "Trap" },
 ];
 
-const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ required = false, onChange }) => {
+const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ 
+  required = false, 
+  onChange 
+}) => {
   const [currentGear, setCurrentGear] = useState<GearEntry>({
     gear_code: 0,
     days_used: 1,
@@ -43,7 +43,6 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ required = false, onCha
     name: "gear_entries",
   });
 
-  // Update parent when fields change
   useEffect(() => {
     onChange({ gear_entries: fields });
   }, [fields, onChange]);
@@ -84,93 +83,114 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ required = false, onCha
     });
   };
 
-  const handleRemove = (index: number) => {
-    remove(index);
-  };
-
   const getGearName = (gear_code: number) => {
     return GEARS.find((g) => g.gear_code === gear_code)?.gear_name || "";
   };
 
+  const isAddDisabled = 
+    currentGear.gear_code === 0 ||
+    currentGear.days_used < 1 ||
+    currentGear.days_used > 7;
+
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Effort Last Week</h2>
-      <div className="flex flex-col gap-4">
-        {/* Gear Selection and Days Used */}
-        <div className="flex items-start gap-4">
-          <div className="flex-1">
-            <label className="block text-gray-700 text-sm font-semibold mb-1">
-              Select Gear Used Last Week{required && <span className="text-red-500">*</span>}
-            </label>
-            <select
-              value={currentGear.gear_code}
-              onChange={(e) => handleGearChange(Number(e.target.value))}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={remainingGears.length === 0}
-            >
-              <option value={0}>Select Gear</option>
-              {remainingGears.map((gear) => (
-                <option key={gear.gear_code} value={gear.gear_code}>
-                  {gear.gear_name}
-                </option>
-              ))}
-            </select>
+    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+      <div className="flex items-center gap-3 text-gray-600">
+        <h2 className="text-xl font-semibold">Effort Last Week</h2>
+      </div>
+
+      <div className="space-y-6">
+        <div className=" p-4 rounded-lg border">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Select Gear Used Last Week
+                {required && <span className="text-red-500">*</span>}
+              </label>
+              <select
+                value={currentGear.gear_code}
+                onChange={(e) => handleGearChange(Number(e.target.value))}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                disabled={remainingGears.length === 0}
+              >
+                <option value={0}>Select Gear</option>
+                {remainingGears.map((gear) => (
+                  <option key={gear.gear_code} value={gear.gear_code}>
+                    {gear.gear_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Days Used Last Week
+                {required && <span className="text-red-500">*</span>}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={7}
+                  value={currentGear.days_used}
+                  onChange={handleDaysChange}
+                  placeholder="1 to 7"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-500 whitespace-nowrap">
+                  (1-7 days)
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-gray-700 text-sm font-semibold mb-1">
-              Days Used {required && <span className="text-red-500">*</span>}
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={7}
-              value={currentGear.days_used}
-              onChange={handleDaysChange}
-              placeholder="1 to 7"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="mt-6">
-            <AddButton
-              onClick={addGear}
-              disabled={
-                currentGear.gear_code === 0 ||
-                currentGear.days_used < 1 ||
-                currentGear.days_used > 7
-              }
-            />
-          </div>
+          <button
+            onClick={addGear}
+            disabled={isAddDisabled}
+            className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            type="button"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Gear Usage
+          </button>
         </div>
 
-        {/* Display Added Gears */}
         {fields.length > 0 ? (
-          <div className="space-y-3">
-            {fields.map((entry, index) => (
-              <div
-                key={entry.id}
-                className="flex items-center gap-4 p-3 bg-gray-50 rounded-md"
-              >
-                <span className="font-medium">
-                  {getGearName(entry.gear_code)}
-                </span>
-                <span className="text-gray-600">
-                  Used {entry.days_used} day{entry.days_used > 1 ? "s" : ""}{" "}
-                  last week
-                </span>
-                <button
-                  onClick={() => handleRemove(index)}
-                  className="ml-auto text-red-500 hover:text-red-700"
-                  type="button"
+          <div className="space-y-1">
+            <h3 className="font-medium text-gray-700 flex items-center gap-2">
+              Added Gear Usage
+            </h3>
+            <div className="divide-y divide-gray-100">
+              {fields.map((entry, index) => (
+                <div
+                  key={entry.id}
+                  className="p-4 hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  Remove
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h4 className="font-medium text-gray-900">
+                        {getGearName(entry.gear_code)}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Used for {entry.days_used} day{entry.days_used > 1 ? "s" : ""} last week
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => remove(index)}
+                      className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
+                      type="button"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
-          <p className="text-gray-500 italic">No gear added yet.</p>
+          <div className="text-gray-500 italic text-center py-1 flex items-center justify-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            No gear usage recorded yet.
+          </div>
         )}
       </div>
     </div>

@@ -1,8 +1,7 @@
-"use client";
-
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
+import { Anchor, Users, Scale, Ruler, FileText, Hash } from "lucide-react";
 
 interface BoatInfoProps {
   required?: boolean;
@@ -34,77 +33,117 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
     },
   });
 
-  // Set up the subscription in a useEffect
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
-      // Only trigger onChange when we have all values
       if (value.fleet_owner !== undefined) {
         onChange(value as BoatFormValues);
       }
     });
-    
-    // Cleanup subscription
+
     return () => subscription.unsubscribe();
   }, [watch, onChange]);
 
   return (
-    <div className="boat-info">
-      <h2 className="text-xl font-bold mb-4">Boat Information</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-100 p-4 rounded-lg">
-        <FormInput
-          label="Boat Owner Name"
-          name="fleet_owner"
-          required={required}
-          placeholder="Enter owner's name"
-          register={register}
-          error={errors.fleet_owner?.message}
-        />
+    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+      <div className="flex items-center gap-3 text-gray-600">
+        <h2 className="text-xl font-semibold">Boat Information</h2>
+      </div>
 
-        <FormInput
-          label="Boat Registration Number"
-          name="fleet_registration"
-          required={required}
-          placeholder="Enter registration number"
-          type="number"
-          register={register}
-          error={errors.fleet_registration?.message}
-        />
-        <FormInput
-          label="Boat Fleet Size"
-          name="fleet_size"
-          required={required}
-          placeholder="Enter fleet size"
-          type="number"
-          register={register}
-          error={errors.fleet_size?.message}
-        />
-        <FormInput
-          label="Fleet Crew Count"
-          name="fleet_crew"
-          required={required}
-          placeholder="Enter crew count"
-          register={register}
-          type="number"
-          error={errors.fleet_crew?.message}
-        />
-        <FormInput
-          label="Boat Maximum Weight (kg)"
-          name="fleet_max_weight"
-          required={required}
-          placeholder="Enter max weight"
-          register={register}
-          type="number"
-          error={errors.fleet_max_weight?.message}
-        />
-        <FormInput
-          label="Boat Length (meters)"
-          name="fleet_length"
-          required={required}
-          placeholder="Enter length"
-          register={register}
-          type="number"
-          error={errors.fleet_length?.message}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Boat Identity Section */}
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+          <div className="flex items-center gap-2 text-gray-800">
+            <FileText className="w-4 h-4" />
+            <h3 className="font-medium">Boat Identity</h3>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <FormInput
+                label="Boat Owner Name"
+                name="fleet_owner"
+                required={required}
+                placeholder="Enter owner's name"
+                register={register}
+                error={errors.fleet_owner?.message}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <FormInput
+                label="Boat Registration Number"
+                name="fleet_registration"
+                required={required}
+                placeholder="Enter registration number"
+                type="number"
+                register={register}
+                error={errors.fleet_registration?.message}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Fleet Details Section */}
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+          <div className="flex items-center gap-2 text-gray-800">
+            <Anchor className="w-4 h-4" />
+            <h3 className="font-medium">Fleet Details</h3>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <FormInput
+                label="Boat Fleet Size"
+                name="fleet_size"
+                required={required}
+                placeholder="Enter fleet size"
+                type="number"
+                register={register}
+                error={errors.fleet_size?.message}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <FormInput
+                label="Fleet Crew Count"
+                name="fleet_crew"
+                required={required}
+                placeholder="Enter crew count"
+                register={register}
+                type="number"
+                error={errors.fleet_crew?.message}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Boat Specifications Section */}
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-100 md:col-span-2">
+          <div className="flex items-center gap-2 text-gray-800">
+            <Scale className="w-4 h-4" />
+            <h3 className="font-medium">Boat Specifications</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center gap-2">
+              <FormInput
+                label="Boat Maximum Weight"
+                name="fleet_max_weight"
+                required={required}
+                placeholder="Enter max weight (kg)"
+                register={register}
+                type="number"
+                error={errors.fleet_max_weight?.message}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <FormInput
+                label="Boat Length"
+                name="fleet_length"
+                required={required}
+                placeholder="Enter length (meters)"
+                register={register}
+                type="number"
+                error={errors.fleet_length?.message}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

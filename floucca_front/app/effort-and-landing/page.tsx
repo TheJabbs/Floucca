@@ -172,6 +172,7 @@ function Page() {
         />
         <FishingDetails
           required={true}
+          selectedLocation={selectedLocation}
           todaysGears={selectedGears}
           onChange={handleFishingDetailsChange}
         />

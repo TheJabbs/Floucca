@@ -5,9 +5,17 @@ import { useFieldArray, useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
 import AddButton from "../utils/form-button";
 
+interface MapLocation {
+  id: number;
+  name: string;
+  lat: number;
+  lng: number;
+}
+
 interface FishingDetailsProps {
   required?: boolean;
   todaysGears: GearEntry[];
+  selectedLocation: MapLocation | null;
   onChange: (fishingData: FishingDetailsData) => void;
 }
 
@@ -31,7 +39,6 @@ interface FishingDetailsData {
 
 interface FormValues {
   current: {
-    location_id: number;
     gear_code: number;
     specie_code: number;
     fish_weight: number;
@@ -52,6 +59,7 @@ const FISH_SPECIES = [
 const FishingDetails: React.FC<FishingDetailsProps> = ({
   required = false,
   todaysGears,
+  selectedLocation,
   onChange,
 }) => {
   const {
@@ -64,7 +72,6 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
   } = useForm<FormValues>({
     defaultValues: {
       current: {
-        location_id: undefined,
         gear_code: undefined,
         specie_code: undefined,
         fish_weight: undefined,
@@ -89,10 +96,10 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
   const addFishEntry = () => {
     const values = getValues("current");
 
-    if (!isEntryValid(values)) return;
+    if (!isEntryValid(values) || !selectedLocation) return;
 
     append({
-      location_id: Number(values.location_id),
+      location_id: selectedLocation.id,
       gear_code: Number(values.gear_code),
       specie_code: Number(values.specie_code),
       fish_weight: Number(values.fish_weight),
@@ -100,7 +107,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       fish_quantity: Number(values.fish_quantity),
     });
 
-    // Reset only the fish details, keep location and gear
+    // Reset only the fish details, keep gear
     reset({
       current: {
         ...values,
@@ -115,7 +122,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
 
   const isEntryValid = (values: FormValues["current"]) => {
     return (
-      values.location_id &&
+      selectedLocation &&
       values.gear_code &&
       values.specie_code &&
       values.fish_weight &&
@@ -133,12 +140,26 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     FISH_SPECIES.find((species) => species.specie_code === code)?.specie_name ||
     "";
 
+  if (!selectedLocation) {
+    return (
+      <div className="space-y-3">
+        <h2 className="text-xl font-bold">Fishing Details Today</h2>
+        <p className="text-gray-500 italic">Please select a location on the map first.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <h2 className="text-xl font-bold">Fishing Details Today</h2>
+      
+      <div className="bg-blue-50 p-3 rounded-md mb-4">
+        <p className="text-sm text-blue-800">
+          Selected Location: {selectedLocation.name} (Lat: {selectedLocation.lat.toFixed(4)}, Lng: {selectedLocation.lng.toFixed(4)})
+        </p>
+      </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-
         {/* Gear Selection */}
         <div className="form-group">
           <label className="block text-gray-700 text-sm font-semibold mb-1">
@@ -148,7 +169,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
             {...register("current.gear_code")}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value={0}>Select Gear</option>
+            <option value="">Select Gear</option>
             {todaysGears.map((gear) => (
               <option key={gear.gear_code} value={gear.gear_code}>
                 {getGearName(gear.gear_code)}
@@ -166,7 +187,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
             {...register("current.specie_code")}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value={0}>Select Species</option>
+            <option value="">Select Species</option>
             {FISH_SPECIES.map((species) => (
               <option key={species.specie_code} value={species.specie_code}>
                 {species.specie_name}
@@ -212,8 +233,9 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
           <AddButton
             onClick={addFishEntry}
             disabled={!isEntryValid(currentValues)}
-            children="+ Add"
-          />
+          >
+            + Add
+          </AddButton>
         </div>
       </div>
 

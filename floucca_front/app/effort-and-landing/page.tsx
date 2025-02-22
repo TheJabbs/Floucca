@@ -186,9 +186,14 @@ function Page() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Landing Form</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Landing Form</h1>
+        <div className="w-72"> {/* Set a fixed width for the dropdown container */}
+          <PortDropdown selectedPort={selectedPort} onPortChange={handlePortChange} />
+        </div>
+      </div>
+      
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <PortDropdown selectedPort={selectedPort} onPortChange={handlePortChange} />
         <BoatInfo
           required={true}
           onChange={handleBoatInfoChange}

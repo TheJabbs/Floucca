@@ -94,14 +94,22 @@ function Page() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Fleet Senses Form</h1>
-      </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex items-center mb-4">
-        <PortDropdown selectedPort={getValues("port")} onPortChange={handlePortChange} className="mr-auto" />
+        <div className="w-72"> {/* Fixed width container for dropdown */}
+          <PortDropdown 
+            selectedPort={getValues("port")} 
+            onPortChange={handlePortChange} 
+          />
         </div>
+      </div>
+      
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <BoatInfo required={true} onChange={handleBoatChange} />
         <GearSelector onChange={handleGearChange} />
-        <SubmitButton isSubmitting={isSubmitting} disabled={!isValid} label="Submit" />
+        <SubmitButton 
+          isSubmitting={isSubmitting} 
+          disabled={!isValid} 
+          label="Submit" 
+        />
       </form>
     </div>
   );

@@ -100,7 +100,7 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Fleet Gear Usage</h2>
       
-      <div className="flex items-start gap-3">
+      <div className="w-72 flex items-start gap-3">
         <Dropdown
           label="Select Gear"
           options={availableGears.map(gear => ({

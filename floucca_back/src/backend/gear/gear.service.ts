@@ -11,14 +11,7 @@ export class GearService {
     }
 
     async getAllGear(): Promise<GetAllGearInterface[]> {
-        const gear = await this.prisma.gear.findMany({
-            select: {
-                gear_code: true,
-                gear_name: true,
-                equipment_id: true,
-                equipment_name: true,
-            }
-        });
+        const gear = await this.prisma.gear.findMany();
 
         if (!gear || gear.length === 0) {
             throw new NotFoundException('No gear found');

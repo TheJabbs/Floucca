@@ -6,6 +6,4 @@ export interface GetAllBoatDetailsInterface {
   fleet_max_weight?: number;
   fleet_length?: number;
   fleet_registration?: number;
-  fleet_senses: { fleet_senses_id: number }[];
-  landing: { landing_id: number }[];
 }

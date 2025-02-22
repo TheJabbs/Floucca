@@ -90,7 +90,7 @@ model form {
 model gear {
   gear_code      Int            @id @default(autoincrement())
   gear_name      String         @db.VarChar(30)
-  equipment_id   Int
+  equipment_id   String         @db.VarChar(20)
   equipment_name String         @db.VarChar(50)
   fish           fish[]
   gear_details   gear_details[]

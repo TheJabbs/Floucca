@@ -18,16 +18,6 @@ export class BoatDetailsServices {
         fleet_max_weight: true,
         fleet_length: true,
         fleet_registration: true,
-        fleet_senses: {
-          select: {
-            fleet_senses_id: true,
-          },
-        },
-        landing: {
-          select: {
-            landing_id: true,
-          },
-        },
       },
     });
 
@@ -54,16 +44,6 @@ async getBoatDetailsByBDID(
       fleet_max_weight: true,
       fleet_length: true,
       fleet_registration: true,
-      fleet_senses: {
-        select: {
-          fleet_senses_id: true,
-        },
-      },
-      landing: {
-        select: {
-          landing_id: true,
-        },
-      },
     },
   });
 
@@ -87,16 +67,6 @@ async getBoatDetailsByBDID(
         fleet_max_weight: true,
         fleet_length: true,
         fleet_registration: true,
-        fleet_senses: {
-          select: {
-            fleet_senses_id: true,
-          },
-        },
-        landing: {
-          select: {
-            landing_id: true,
-          },
-        },
       },
     });
 

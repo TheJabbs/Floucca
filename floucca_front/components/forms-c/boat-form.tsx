@@ -50,7 +50,7 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
   return (
     <div className="boat-info">
       <h2 className="text-xl font-bold mb-4">Boat Information</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-100 p-4 rounded-lg">
         <FormInput
           label="Boat Owner Name"
           name="fleet_owner"

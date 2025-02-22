@@ -12,6 +12,6 @@ export class CreateSenseLastwDto {
     @IsInt()
     @IsPositive()
     @IsOptional()
-    landing_id?: number;
+    form_id?: number;
 
 }

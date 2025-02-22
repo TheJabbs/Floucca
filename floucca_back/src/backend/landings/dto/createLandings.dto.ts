@@ -7,12 +7,6 @@ export class CreateLandingDto {
     @Optional()
     form_id?: number;
 
-    @IsInt()
-    @IsPositive()
-    @Optional()
-
-    boat_details_id?: number;
-
     @IsDecimal()
     @IsPositive()
     latitude: number;

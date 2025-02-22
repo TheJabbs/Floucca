@@ -5,16 +5,16 @@ export class UpdateSenseLastwDto {
     @Optional()
     @IsInt()
     @IsPositive()
-    days_fished: number;
+    days_fished?: number;
 
     @Optional()
     @IsInt()
     @IsPositive()
-    gear_code: number;
+    gear_code?: number;
 
     @Optional()
     @IsInt()
     @IsPositive()
-    landing_id: number;
+    form_id?: number;
 
 }

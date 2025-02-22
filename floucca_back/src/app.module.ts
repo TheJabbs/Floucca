@@ -8,7 +8,6 @@ import {FleetModule} from "./backend/fleet_senses/fleet.module";
 import {FormModule} from "./backend/form/form.module";
 import {GearModule} from "./backend/gear/gear.module";
 import {GearUsageModule} from "./backend/gear_usage/gear_usage.module";
-import {GearDetailService} from "./backend/gear_detail/gear_detail.service";
 import {GearDetailModule} from "./backend/gear_detail/gear_detail.module";
 import {ScheduleModule} from "./auto/schedule.module";
 import {SenseLastwModule} from "./backend/sense_lastw/sense_lastw.module";

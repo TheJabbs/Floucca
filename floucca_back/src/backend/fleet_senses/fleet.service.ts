@@ -1,11 +1,8 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import {GetAllFleetInterface} from "./Interface/GetAllFleetInterface";
-import {CreateFleetDto} from "./DTO/CreateFleet.dto";
-import {FleetIdDto} from "./DTO/FleetId.dto";
+import {CreateFleetDto} from "./DTO";
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
-import {idDTO} from "../../shared/dto/id.dto";
-import {CreateFormDto} from "../form/DTO";
 import {SenseFormContentInterface} from "./Interface/senseFormContent.interface";
 
 @Injectable()
@@ -17,7 +14,6 @@ export class FleetService {
         const fleet = await this.prisma.fleet_senses.findMany({
                 select: {
                     fleet_senses_id: true,
-                    boat_details_id: true,
                     form_id: true,
                     gear_usage: {
                         select: {
@@ -41,7 +37,6 @@ export class FleetService {
             where: {fleet_senses_id: id},
             select: {
                 fleet_senses_id: true,
-                boat_details_id: true,
                 form_id: true,
                 gear_usage: {
                     select: {
@@ -60,7 +55,7 @@ export class FleetService {
     }
 
     async createFleet(fleet: CreateFleetDto): Promise<ResponseMessage<any>> {
-        if (!await this.validate(fleet.form_id, fleet.boat_details_id)) {
+        if (!await this.validate(fleet.form_id)) {
             return {
                 message: "Form or boat details not found"
             }
@@ -68,7 +63,6 @@ export class FleetService {
 
         const newFleet = await this.prisma.fleet_senses.create({
             data: {
-                boat_details_id: fleet.boat_details_id,
                 form_id: fleet.form_id
             }
         });
@@ -80,7 +74,7 @@ export class FleetService {
     }
 
     async updateFleet(id: number, fleet: CreateFleetDto): Promise<ResponseMessage<any>> {
-        if (!await this.validate(fleet.form_id, fleet.boat_details_id)) {
+        if (!await this.validate(fleet.form_id)) {
             return {
                 message: "Form or boat details not found"
             }
@@ -89,7 +83,6 @@ export class FleetService {
         const updatedFleet = await this.prisma.fleet_senses.update({
             where: {fleet_senses_id: id},
             data: {
-                boat_details_id: fleet.boat_details_id,
                 form_id: fleet.form_id
             }
         });
@@ -141,31 +134,25 @@ export class FleetService {
 
 
 //Validate
-    async validate(form_id: number, boat_details_id: number): Promise<boolean> {
+    async validate(form_id: number): Promise<boolean> {
         const form = await this.prisma.form.findFirst({
             where: {
                 form_id: form_id
             }
         })
 
-        const boat = await this.prisma.boat_details.findFirst({
-            where: {
-                boat_id: boat_details_id
-            }
-        })
-
-        return !(!form || !boat);
+        return !(!form);
 
     }
 
-    async createFleetSensesForm(content : SenseFormContentInterface): Promise<ResponseMessage<any>> {
+    async createFleetSensesForm(content: SenseFormContentInterface): Promise<ResponseMessage<any>> {
         const newestPeriod = await this.prisma.period.findFirst({
             orderBy: {
                 period_date: 'desc'
             }
         });
 
-        if(!newestPeriod){
+        if (!newestPeriod) {
             await this.prisma.period.create({
                 data: {
                     period_date: new Date()
@@ -174,25 +161,25 @@ export class FleetService {
         }
 
         content.form.period_date = newestPeriod.period_date;
-
-        const form = await this.prisma.form.create({
-            data: content.form
+        const boatDetails = await this.prisma.boat_details.create({
+            data: content.boatDetails
         });
 
-        if(form){
-            const boatDetails = await this.prisma.boat_details.create({
-                data: content.boatDetails
+
+        if (boatDetails) {
+            content.form.boat_detail = boatDetails.boat_id
+            const form = await this.prisma.form.create({
+                data: content.form
             });
 
-            if(boatDetails){
+            if (form) {
                 const sense = await this.prisma.fleet_senses.create({
                     data: {
-                        boat_details_id: boatDetails.boat_id,
                         form_id: form.form_id
                     }
                 });
 
-                if(sense){
+                if (sense) {
                     for (const gear of content.gearUsage) {
                         await this.prisma.gear_usage.create({
                             data: {
@@ -203,21 +190,19 @@ export class FleetService {
                         });
                     }
                 }
-            }else{
-                await this.prisma.form.delete({
+            } else {
+                await this.prisma.boat_details.delete({
                     where: {
-                        form_id: form.form_id
+                        boat_id: boatDetails.boat_id
                     }
-                })
-                throw new NotFoundException('Boat details not created');
+                });
             }
-        }else{
-            await this.prisma.form.delete({
+        } else {
+            await this.prisma.boat_details.delete({
                 where: {
-                    form_id: form.form_id
+                    boat_id: boatDetails.boat_id
                 }
-            })
-            throw new NotFoundException('Form not created');
+            });
         }
 
         return {

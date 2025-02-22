@@ -40,12 +40,7 @@ export class FormService {
         }
 
         const newForm = await this.prisma.form.create({
-            data: {
-                user_id: form.user_id,
-                port_id: form.port_id,
-                period_date: form.period_date,
-                fisher_name: form.fisher_name,
-            }
+            data: form
         });
 
         return {

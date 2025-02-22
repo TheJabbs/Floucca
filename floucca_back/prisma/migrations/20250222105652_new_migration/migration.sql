@@ -24,11 +24,9 @@ CREATE TABLE `coop` (
 -- CreateTable
 CREATE TABLE `effort_today` (
     `effort_today_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `detail_id` INTEGER NOT NULL,
     `landing_id` INTEGER NOT NULL,
     `hours_fished` FLOAT NOT NULL,
 
-    INDEX `effort_today_ibfk_1_idx`(`detail_id`),
     INDEX `effort_today_ibfk_2`(`landing_id`),
     PRIMARY KEY (`effort_today_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -52,10 +50,8 @@ CREATE TABLE `fish` (
 -- CreateTable
 CREATE TABLE `fleet_senses` (
     `fleet_senses_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `boat_details_id` INTEGER NOT NULL,
     `form_id` INTEGER NOT NULL,
 
-    INDEX `fleet_senses_ibfk_1`(`boat_details_id`),
     INDEX `fleet_senses_ibfk_2`(`form_id`),
     PRIMARY KEY (`fleet_senses_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -64,8 +60,9 @@ CREATE TABLE `fleet_senses` (
 CREATE TABLE `form` (
     `form_id` INTEGER NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NULL,
+    `boat_detail` INTEGER NULL,
+    `period_date` DATE NULL,
     `port_id` INTEGER NOT NULL,
-    `period_date` DATE NOT NULL,
     `form_type` VARCHAR(10) NOT NULL,
     `fisher_name` VARCHAR(100) NOT NULL DEFAULT 'unknown',
     `creation_time` DATETIME(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
@@ -73,6 +70,7 @@ CREATE TABLE `form` (
     INDEX `form_ibfk_1`(`user_id`),
     INDEX `form_ibfk_2`(`port_id`),
     INDEX `form_ibfk_3`(`period_date`),
+    INDEX `form_ibfk_3_idx`(`boat_detail`),
     PRIMARY KEY (`form_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -90,17 +88,19 @@ CREATE TABLE `gear` (
 CREATE TABLE `gear_details` (
     `detail_id` INTEGER NOT NULL AUTO_INCREMENT,
     `gear_code` INTEGER NOT NULL,
+    `effort_today_id` INTEGER NULL,
     `detail_name` VARCHAR(50) NOT NULL,
     `detail_value` VARCHAR(200) NOT NULL,
 
     INDEX `gear_details_ibfk_1`(`gear_code`),
+    INDEX `effort_today_ibfk_1_idx`(`effort_today_id`),
     PRIMARY KEY (`detail_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `gear_usage` (
     `gear_usage_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `fleet_senses_id` INTEGER NOT NULL,
+    `fleet_senses_id` INTEGER NULL,
     `gear_code` INTEGER NOT NULL,
     `months` INTEGER NOT NULL DEFAULT 0,
 
@@ -113,12 +113,10 @@ CREATE TABLE `gear_usage` (
 CREATE TABLE `landing` (
     `landing_id` INTEGER NOT NULL AUTO_INCREMENT,
     `form_id` INTEGER NOT NULL,
-    `boat_details_id` INTEGER NOT NULL,
     `longitude` DECIMAL(9, 6) NOT NULL,
     `latitude` DECIMAL(9, 6) NOT NULL,
 
     INDEX `landing_ibfk_1`(`form_id`),
-    INDEX `landing_ibfk_2`(`boat_details_id`),
     PRIMARY KEY (`landing_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -161,12 +159,12 @@ CREATE TABLE `roles` (
 -- CreateTable
 CREATE TABLE `sense_lastw` (
     `sense_lastW_id` INTEGER NOT NULL AUTO_INCREMENT,
-    `days_fished` FLOAT NOT NULL,
     `gear_code` INTEGER NOT NULL,
-    `landing_id` INTEGER NOT NULL,
+    `form_id` INTEGER NULL,
+    `days_fished` FLOAT NOT NULL,
 
     INDEX `sense_lastw_ibfk_1`(`gear_code`),
-    INDEX `sense_lastw_ibfk_2`(`landing_id`),
+    INDEX `sense_lastw_ibfk_2_idx`(`form_id`),
     PRIMARY KEY (`sense_lastW_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -223,9 +221,6 @@ CREATE TABLE `users` (
 ALTER TABLE `coop` ADD CONSTRAINT `coop_ibfk_1` FOREIGN KEY (`region_code`) REFERENCES `region`(`region_code`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `effort_today` ADD CONSTRAINT `effort_today_ibfk_1` FOREIGN KEY (`detail_id`) REFERENCES `gear_details`(`detail_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `effort_today` ADD CONSTRAINT `effort_today_ibfk_2` FOREIGN KEY (`landing_id`) REFERENCES `landing`(`landing_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -236,9 +231,6 @@ ALTER TABLE `fish` ADD CONSTRAINT `fish_ibfk_2` FOREIGN KEY (`landing_id`) REFER
 
 -- AddForeignKey
 ALTER TABLE `fish` ADD CONSTRAINT `fish_ibfk_3` FOREIGN KEY (`gear_code`) REFERENCES `gear`(`gear_code`) ON DELETE SET NULL ON UPDATE SET NULL;
-
--- AddForeignKey
-ALTER TABLE `fleet_senses` ADD CONSTRAINT `fleet_senses_ibfk_1` FOREIGN KEY (`boat_details_id`) REFERENCES `boat_details`(`boat_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `fleet_senses` ADD CONSTRAINT `fleet_senses_ibfk_2` FOREIGN KEY (`form_id`) REFERENCES `form`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -253,6 +245,12 @@ ALTER TABLE `form` ADD CONSTRAINT `form_ibfk_2` FOREIGN KEY (`port_id`) REFERENC
 ALTER TABLE `form` ADD CONSTRAINT `form_ibfk_3` FOREIGN KEY (`period_date`) REFERENCES `period`(`period_date`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `form` ADD CONSTRAINT `form_ibfk_4` FOREIGN KEY (`boat_detail`) REFERENCES `boat_details`(`boat_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `gear_details` ADD CONSTRAINT `effort_today_ibfk_1` FOREIGN KEY (`effort_today_id`) REFERENCES `effort_today`(`effort_today_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE `gear_details` ADD CONSTRAINT `gear_details_ibfk_1` FOREIGN KEY (`gear_code`) REFERENCES `gear`(`gear_code`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -265,16 +263,13 @@ ALTER TABLE `gear_usage` ADD CONSTRAINT `gear_usage_ibfk_2` FOREIGN KEY (`fleet_
 ALTER TABLE `landing` ADD CONSTRAINT `landing_ibfk_1` FOREIGN KEY (`form_id`) REFERENCES `form`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `landing` ADD CONSTRAINT `landing_ibfk_2` FOREIGN KEY (`boat_details_id`) REFERENCES `boat_details`(`boat_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `ports` ADD CONSTRAINT `ports_ibfk_1` FOREIGN KEY (`coop_code`) REFERENCES `coop`(`coop_code`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `sense_lastw` ADD CONSTRAINT `sense_lastw_ibfk_1` FOREIGN KEY (`gear_code`) REFERENCES `gear`(`gear_code`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `sense_lastw` ADD CONSTRAINT `sense_lastw_ibfk_2` FOREIGN KEY (`landing_id`) REFERENCES `landing`(`landing_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `sense_lastw` ADD CONSTRAINT `sense_lastw_ibfk_2` FOREIGN KEY (`form_id`) REFERENCES `form`(`form_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `user_coop` ADD CONSTRAINT `user_coop_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;

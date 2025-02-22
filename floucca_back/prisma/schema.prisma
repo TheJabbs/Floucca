@@ -8,15 +8,14 @@ datasource db {
 }
 
 model boat_details {
-  boat_id            Int            @id @default(autoincrement())
-  fleet_owner        String         @default("Unknown") @db.VarChar(30)
+  boat_id            Int    @id @default(autoincrement())
+  fleet_owner        String @default("Unknown") @db.VarChar(30)
   fleet_size         Int?
   fleet_crew         Int?
-  fleet_max_weight   Float?         @db.Float
-  fleet_length       Float?         @db.Float
+  fleet_max_weight   Float? @db.Float
+  fleet_length       Float? @db.Float
   fleet_registration Int?
-  fleet_senses       fleet_senses[]
-  landing            landing[]
+  form               form[]
 }
 
 model coop {
@@ -41,16 +40,16 @@ model effort_today {
 }
 
 model fish {
-  fish_id       Int      @id @default(autoincrement())
+  fish_id       Int     @id @default(autoincrement())
   specie_code   Int
-  landing_id    Int?
+  landing_id    Int
   gear_code     Int?
-  fish_weight   Float?   @db.Float
-  fish_length   Float?   @db.Float
+  fish_weight   Float?  @db.Float
+  fish_length   Float?  @db.Float
   fish_quantity Int?
-  specie        specie   @relation(fields: [specie_code], references: [specie_code], onDelete: Cascade, map: "fish_ibfk_1")
-  landing       landing? @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "fish_ibfk_2")
-  gear          gear?    @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "fish_ibfk_3")
+  specie        specie  @relation(fields: [specie_code], references: [specie_code], onDelete: Cascade, map: "fish_ibfk_1")
+  landing       landing @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "fish_ibfk_2")
+  gear          gear?   @relation(fields: [gear_code], references: [gear_code], onUpdate: SetNull, map: "fish_ibfk_3")
 
   @@index([specie_code], map: "fish_ibfk_1")
   @@index([landing_id], map: "fish_ibfk_2")
@@ -59,38 +58,39 @@ model fish {
 
 model fleet_senses {
   fleet_senses_id Int          @id @default(autoincrement())
-  boat_details_id Int
   form_id         Int
-  boat_details    boat_details @relation(fields: [boat_details_id], references: [boat_id], onDelete: Cascade, map: "fleet_senses_ibfk_1")
   form            form         @relation(fields: [form_id], references: [form_id], onDelete: Cascade, map: "fleet_senses_ibfk_2")
   gear_usage      gear_usage[]
 
-  @@index([boat_details_id], map: "fleet_senses_ibfk_1")
   @@index([form_id], map: "fleet_senses_ibfk_2")
 }
 
 model form {
   form_id       Int            @id @default(autoincrement())
   user_id       Int?
+  boat_detail   Int?
+  period_date   DateTime?      @db.Date
   port_id       Int
-  period_date   DateTime       @db.Date
   fisher_name   String         @default("unknown") @db.VarChar(100)
   creation_time DateTime?      @default(now()) @db.DateTime(0)
   fleet_senses  fleet_senses[]
   users         users?         @relation(fields: [user_id], references: [user_id], map: "form_ibfk_1")
   ports         ports          @relation(fields: [port_id], references: [port_id], onDelete: Cascade, map: "form_ibfk_2")
-  period        period         @relation(fields: [period_date], references: [period_date], onDelete: Cascade, map: "form_ibfk_3")
+  period        period?        @relation(fields: [period_date], references: [period_date], onDelete: Cascade, map: "form_ibfk_3")
+  boat_details  boat_details?  @relation(fields: [boat_detail], references: [boat_id], onDelete: Cascade, map: "form_ibfk_4")
   landing       landing[]
+  sense_lastw   sense_lastw[]
 
   @@index([user_id], map: "form_ibfk_1")
   @@index([port_id], map: "form_ibfk_2")
   @@index([period_date], map: "form_ibfk_3")
+  @@index([boat_detail], map: "form_ibfk_3_idx")
 }
 
 model gear {
   gear_code      Int            @id @default(autoincrement())
   gear_name      String         @db.VarChar(30)
-  equipment_id   String         @db.VarChar(10)
+  equipment_id   Int
   equipment_name String         @db.VarChar(50)
   fish           fish[]
   gear_details   gear_details[]
@@ -101,9 +101,9 @@ model gear {
 model gear_details {
   detail_id       Int           @id @default(autoincrement())
   gear_code       Int
+  effort_today_id Int?
   detail_name     String        @db.VarChar(50)
   detail_value    String        @db.VarChar(200)
-  effort_today_id Int?
   effort_today    effort_today? @relation(fields: [effort_today_id], references: [effort_today_id], onDelete: NoAction, onUpdate: NoAction, map: "effort_today_ibfk_1")
   gear            gear          @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "gear_details_ibfk_1")
 
@@ -112,31 +112,27 @@ model gear_details {
 }
 
 model gear_usage {
-  gear_usage_id   Int          @id @default(autoincrement())
-  fleet_senses_id Int
+  gear_usage_id   Int           @id @default(autoincrement())
+  fleet_senses_id Int?
   gear_code       Int
-  months          Int          @default(0)
-  gear            gear         @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "gear_usage_ibfk_1")
-  fleet_senses    fleet_senses @relation(fields: [fleet_senses_id], references: [fleet_senses_id], onDelete: Cascade, map: "gear_usage_ibfk_2")
+  months          Int           @default(0)
+  gear            gear          @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "gear_usage_ibfk_1")
+  fleet_senses    fleet_senses? @relation(fields: [fleet_senses_id], references: [fleet_senses_id], onDelete: Cascade, map: "gear_usage_ibfk_2")
 
   @@index([gear_code], map: "gear_usage_ibfk_1")
   @@index([fleet_senses_id], map: "gear_usage_ibfk_2")
 }
 
 model landing {
-  landing_id      Int            @id @default(autoincrement())
-  form_id         Int?
-  boat_details_id Int?
-  longitude       Decimal        @db.Decimal(9, 6)
-  latitude        Decimal        @db.Decimal(9, 6)
-  effort_today    effort_today[]
-  fish            fish[]
-  form            form?          @relation(fields: [form_id], references: [form_id], onDelete: Cascade, map: "landing_ibfk_1")
-  boat_details    boat_details?  @relation(fields: [boat_details_id], references: [boat_id], onDelete: NoAction, map: "landing_ibfk_2")
-  sense_lastw     sense_lastw[]
+  landing_id   Int            @id @default(autoincrement())
+  form_id      Int?
+  longitude    Decimal        @db.Decimal(9, 6)
+  latitude     Decimal        @db.Decimal(9, 6)
+  effort_today effort_today[]
+  fish         fish[]
+  form         form?          @relation(fields: [form_id], references: [form_id], onDelete: Cascade, map: "landing_ibfk_1")
 
   @@index([form_id], map: "landing_ibfk_1")
-  @@index([boat_details_id], map: "landing_ibfk_2")
 }
 
 model period {
@@ -169,15 +165,15 @@ model roles {
 }
 
 model sense_lastw {
-  sense_lastW_id Int      @id @default(autoincrement())
-  days_fished    Float    @db.Float
-  gear_code      Int?
-  landing_id     Int?
-  gear           gear?    @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "sense_lastw_ibfk_1")
-  landing        landing? @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "sense_lastw_ibfk_2")
+  sense_lastW_id Int   @id @default(autoincrement())
+  gear_code      Int
+  form_id        Int?
+  days_fished    Float @db.Float
+  gear           gear  @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "sense_lastw_ibfk_1")
+  form           form? @relation(fields: [form_id], references: [form_id], onDelete: Cascade, map: "sense_lastw_ibfk_2")
 
   @@index([gear_code], map: "sense_lastw_ibfk_1")
-  @@index([landing_id], map: "sense_lastw_ibfk_2")
+  @@index([form_id], map: "sense_lastw_ibfk_2_idx")
 }
 
 model specie {

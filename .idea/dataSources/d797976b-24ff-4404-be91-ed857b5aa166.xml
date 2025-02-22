@@ -1149,7 +1149,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </schema>
     <schema id="295" parent="1" name="floucca">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2025-02-19.18:48:13</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2025-02-22.12:40:48</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="296" parent="1" name="root">
@@ -1307,7 +1307,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="332" parent="303" name="boat_id">
-      <AutoIncrement>4</AutoIncrement>
+      <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1434,6 +1434,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </column>
     <column id="357" parent="306" name="landing_id">
       <DasType>int|0s</DasType>
+      <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
     <column id="358" parent="306" name="gear_code">
@@ -1468,8 +1469,8 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </foreign-key>
     <foreign-key id="364" parent="306" name="fish_ibfk_3">
       <ColNames>gear_code</ColNames>
-      <OnDelete>cascade</OnDelete>
-      <OnUpdate>cascade</OnUpdate>
+      <OnDelete>set-null</OnDelete>
+      <OnUpdate>set-null</OnUpdate>
       <RefColNames>gear_code</RefColNames>
       <RefTableName>gear</RefTableName>
     </foreign-key>
@@ -1496,90 +1497,91 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="370" parent="307" name="fleet_senses_id">
-      <AutoIncrement>4</AutoIncrement>
+      <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="371" parent="307" name="boat_details_id">
+    <column id="371" parent="307" name="form_id">
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="372" parent="307" name="form_id">
-      <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
-      <Position>3</Position>
-    </column>
-    <foreign-key id="373" parent="307" name="fleet_senses_ibfk_1">
-      <ColNames>boat_details_id</ColNames>
-      <OnDelete>cascade</OnDelete>
-      <OnUpdate>cascade</OnUpdate>
-      <RefColNames>boat_id</RefColNames>
-      <RefTableName>boat_details</RefTableName>
-    </foreign-key>
-    <foreign-key id="374" parent="307" name="fleet_senses_ibfk_2">
+    <foreign-key id="372" parent="307" name="fleet_senses_ibfk_2">
       <ColNames>form_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <OnUpdate>cascade</OnUpdate>
       <RefColNames>form_id</RefColNames>
       <RefTableName>form</RefTableName>
     </foreign-key>
-    <index id="375" parent="307" name="PRIMARY">
+    <index id="373" parent="307" name="PRIMARY">
       <ColNames>fleet_senses_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="376" parent="307" name="fleet_senses_ibfk_1">
-      <ColNames>boat_details_id</ColNames>
-      <Type>btree</Type>
-    </index>
-    <index id="377" parent="307" name="fleet_senses_ibfk_2">
+    <index id="374" parent="307" name="fleet_senses_ibfk_2">
       <ColNames>form_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="378" parent="307" name="PRIMARY">
+    <key id="375" parent="307" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="379" parent="308" name="form_id">
-      <AutoIncrement>9</AutoIncrement>
+    <column id="376" parent="308" name="form_id">
+      <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="380" parent="308" name="user_id">
+    <column id="377" parent="308" name="user_id">
       <DasType>int|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="381" parent="308" name="port_id">
+    <column id="378" parent="308" name="boat_detail">
       <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="382" parent="308" name="period_date">
+    <column id="379" parent="308" name="period_date">
       <DasType>date|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="383" parent="308" name="fisher_name">
-      <DasType>varchar(100)|0s</DasType>
-      <DefaultExpression>&apos;unknown&apos;</DefaultExpression>
+    <column id="380" parent="308" name="port_id">
+      <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <column id="384" parent="308" name="creation_time">
-      <DasType>datetime|0s</DasType>
-      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+    <column id="381" parent="308" name="fisher_name">
+      <DasType>varchar(100)|0s</DasType>
+      <DefaultExpression>&apos;unknown&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
       <Position>6</Position>
     </column>
-    <foreign-key id="385" parent="308" name="form_ibfk_1">
+    <column id="382" parent="308" name="creation_time">
+      <DasType>datetime|0s</DasType>
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>7</Position>
+    </column>
+    <foreign-key id="383" parent="308" name="form_ibfk_1">
       <ColNames>user_id</ColNames>
       <OnDelete>set-null</OnDelete>
       <OnUpdate>cascade</OnUpdate>
       <RefColNames>user_id</RefColNames>
       <RefTableName>users</RefTableName>
+    </foreign-key>
+    <foreign-key id="384" parent="308" name="form_ibfk_4">
+      <ColNames>boat_detail</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <OnUpdate>cascade</OnUpdate>
+      <RefColNames>boat_id</RefColNames>
+      <RefTableName>boat_details</RefTableName>
+    </foreign-key>
+    <foreign-key id="385" parent="308" name="form_ibfk_3">
+      <ColNames>period_date</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <OnUpdate>cascade</OnUpdate>
+      <RefColNames>period_date</RefColNames>
+      <RefTableName>period</RefTableName>
     </foreign-key>
     <foreign-key id="386" parent="308" name="form_ibfk_2">
       <ColNames>port_id</ColNames>
@@ -1588,28 +1590,25 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <RefColNames>port_id</RefColNames>
       <RefTableName>ports</RefTableName>
     </foreign-key>
-    <foreign-key id="387" parent="308" name="form_ibfk_3">
-      <ColNames>period_date</ColNames>
-      <OnDelete>cascade</OnDelete>
-      <OnUpdate>cascade</OnUpdate>
-      <RefColNames>period_date</RefColNames>
-      <RefTableName>period</RefTableName>
-    </foreign-key>
-    <index id="388" parent="308" name="PRIMARY">
+    <index id="387" parent="308" name="PRIMARY">
       <ColNames>form_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="389" parent="308" name="form_ibfk_1">
+    <index id="388" parent="308" name="form_ibfk_1">
       <ColNames>user_id</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="390" parent="308" name="form_ibfk_2">
-      <ColNames>port_id</ColNames>
+    <index id="389" parent="308" name="form_ibfk_3_idx">
+      <ColNames>boat_detail</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="391" parent="308" name="form_ibfk_3">
+    <index id="390" parent="308" name="form_ibfk_3">
       <ColNames>period_date</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="391" parent="308" name="form_ibfk_2">
+      <ColNames>port_id</ColNames>
       <Type>btree</Type>
     </index>
     <key id="392" parent="308" name="PRIMARY">
@@ -1618,7 +1617,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="393" parent="309" name="gear_code">
-      <AutoIncrement>2</AutoIncrement>
+      <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1629,7 +1628,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Position>2</Position>
     </column>
     <column id="395" parent="309" name="equipment_id">
-      <DasType>varchar(10)|0s</DasType>
+      <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
@@ -1659,18 +1658,18 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="401" parent="310" name="detail_name">
-      <DasType>varchar(50)|0s</DasType>
-      <NotNull>1</NotNull>
+    <column id="401" parent="310" name="effort_today_id">
+      <DasType>int|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="402" parent="310" name="detail_value">
-      <DasType>varchar(200)|0s</DasType>
+    <column id="402" parent="310" name="detail_name">
+      <DasType>varchar(50)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="403" parent="310" name="effort_today_id">
-      <DasType>int|0s</DasType>
+    <column id="403" parent="310" name="detail_value">
+      <DasType>varchar(200)|0s</DasType>
+      <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
     <foreign-key id="404" parent="310" name="gear_details_ibfk_1">
@@ -1704,14 +1703,13 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="410" parent="311" name="gear_usage_id">
-      <AutoIncrement>12</AutoIncrement>
+      <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
     <column id="411" parent="311" name="fleet_senses_id">
       <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
     <column id="412" parent="311" name="gear_code">
@@ -1767,405 +1765,392 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <DasType>int|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="422" parent="312" name="boat_details_id">
-      <DasType>int|0s</DasType>
+    <column id="422" parent="312" name="longitude">
+      <DasType>decimal(9,6 digit)|0s</DasType>
+      <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="423" parent="312" name="longitude">
+    <column id="423" parent="312" name="latitude">
       <DasType>decimal(9,6 digit)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="424" parent="312" name="latitude">
-      <DasType>decimal(9,6 digit)|0s</DasType>
-      <NotNull>1</NotNull>
-      <Position>5</Position>
-    </column>
-    <foreign-key id="425" parent="312" name="landing_ibfk_1">
+    <foreign-key id="424" parent="312" name="landing_ibfk_1">
       <ColNames>form_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <OnUpdate>cascade</OnUpdate>
       <RefColNames>form_id</RefColNames>
       <RefTableName>form</RefTableName>
     </foreign-key>
-    <foreign-key id="426" parent="312" name="landing_ibfk_2">
-      <ColNames>boat_details_id</ColNames>
-      <OnUpdate>cascade</OnUpdate>
-      <RefColNames>boat_id</RefColNames>
-      <RefTableName>boat_details</RefTableName>
-    </foreign-key>
-    <index id="427" parent="312" name="PRIMARY">
+    <index id="425" parent="312" name="PRIMARY">
       <ColNames>landing_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="428" parent="312" name="landing_ibfk_1">
+    <index id="426" parent="312" name="landing_ibfk_1">
       <ColNames>form_id</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="429" parent="312" name="landing_ibfk_2">
-      <ColNames>boat_details_id</ColNames>
-      <Type>btree</Type>
-    </index>
-    <key id="430" parent="312" name="PRIMARY">
+    <key id="427" parent="312" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="431" parent="313" name="period_date">
+    <column id="428" parent="313" name="period_date">
       <DasType>date|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="432" parent="313" name="period_status">
+    <column id="429" parent="313" name="period_status">
       <DasType>char(1)|0s</DasType>
       <DefaultExpression>&apos;B&apos;</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <index id="433" parent="313" name="PRIMARY">
+    <index id="430" parent="313" name="PRIMARY">
       <ColNames>period_date</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="434" parent="313" name="PRIMARY">
+    <key id="431" parent="313" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="435" parent="314" name="port_id">
+    <column id="432" parent="314" name="port_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="436" parent="314" name="port_name">
+    <column id="433" parent="314" name="port_name">
       <DasType>varchar(50)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="437" parent="314" name="coop_code">
+    <column id="434" parent="314" name="coop_code">
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <foreign-key id="438" parent="314" name="ports_ibfk_1">
+    <foreign-key id="435" parent="314" name="ports_ibfk_1">
       <ColNames>coop_code</ColNames>
       <RefColNames>coop_code</RefColNames>
       <RefTableName>coop</RefTableName>
     </foreign-key>
-    <index id="439" parent="314" name="PRIMARY">
+    <index id="436" parent="314" name="PRIMARY">
       <ColNames>port_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="440" parent="314" name="coop_code">
+    <index id="437" parent="314" name="coop_code">
       <ColNames>coop_code</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="441" parent="314" name="PRIMARY">
+    <key id="438" parent="314" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="442" parent="315" name="region_code">
+    <column id="439" parent="315" name="region_code">
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="443" parent="315" name="region_name">
+    <column id="440" parent="315" name="region_name">
       <DasType>varchar(50)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <index id="444" parent="315" name="PRIMARY">
+    <index id="441" parent="315" name="PRIMARY">
       <ColNames>region_code</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="445" parent="315" name="PRIMARY">
+    <key id="442" parent="315" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="446" parent="316" name="role_id">
+    <column id="443" parent="316" name="role_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="447" parent="316" name="role_code">
+    <column id="444" parent="316" name="role_code">
       <DasType>varchar(4)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="448" parent="316" name="role_name">
+    <column id="445" parent="316" name="role_name">
       <DasType>varchar(20)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <index id="449" parent="316" name="PRIMARY">
+    <index id="446" parent="316" name="PRIMARY">
       <ColNames>role_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="450" parent="316" name="role_code">
+    <index id="447" parent="316" name="role_code">
       <ColNames>role_code</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="451" parent="316" name="PRIMARY">
+    <key id="448" parent="316" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="452" parent="316" name="role_code">
+    <key id="449" parent="316" name="role_code">
       <UnderlyingIndexName>role_code</UnderlyingIndexName>
     </key>
-    <column id="453" parent="317" name="sense_lastW_id">
+    <column id="450" parent="317" name="sense_lastW_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="454" parent="317" name="days_fished">
-      <DasType>float|0s</DasType>
+    <column id="451" parent="317" name="gear_code">
+      <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="455" parent="317" name="gear_code">
+    <column id="452" parent="317" name="form_id">
       <DasType>int|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="456" parent="317" name="landing_id">
-      <DasType>int|0s</DasType>
+    <column id="453" parent="317" name="days_fished">
+      <DasType>float|0s</DasType>
+      <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <foreign-key id="457" parent="317" name="sense_lastw_ibfk_1">
+    <foreign-key id="454" parent="317" name="sense_lastw_ibfk_1">
       <ColNames>gear_code</ColNames>
       <OnDelete>cascade</OnDelete>
       <OnUpdate>cascade</OnUpdate>
       <RefColNames>gear_code</RefColNames>
       <RefTableName>gear</RefTableName>
     </foreign-key>
-    <foreign-key id="458" parent="317" name="sense_lastw_ibfk_2">
-      <ColNames>landing_id</ColNames>
+    <foreign-key id="455" parent="317" name="sense_lastw_ibfk_2">
+      <ColNames>form_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <OnUpdate>cascade</OnUpdate>
-      <RefColNames>landing_id</RefColNames>
-      <RefTableName>landing</RefTableName>
+      <RefColNames>form_id</RefColNames>
+      <RefTableName>form</RefTableName>
     </foreign-key>
-    <index id="459" parent="317" name="PRIMARY">
+    <index id="456" parent="317" name="PRIMARY">
       <ColNames>sense_lastW_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="460" parent="317" name="sense_lastw_ibfk_1">
+    <index id="457" parent="317" name="sense_lastw_ibfk_1">
       <ColNames>gear_code</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="461" parent="317" name="sense_lastw_ibfk_2">
-      <ColNames>landing_id</ColNames>
+    <index id="458" parent="317" name="sense_lastw_ibfk_2_idx">
+      <ColNames>form_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="462" parent="317" name="PRIMARY">
+    <key id="459" parent="317" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="463" parent="318" name="specie_code">
+    <column id="460" parent="318" name="specie_code">
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="464" parent="318" name="specie_name">
+    <column id="461" parent="318" name="specie_name">
       <DasType>varchar(50)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="465" parent="318" name="specie_description">
+    <column id="462" parent="318" name="specie_description">
       <DasType>varchar(500)|0s</DasType>
       <DefaultExpression>&apos;No description&apos;</DefaultExpression>
       <Position>3</Position>
     </column>
-    <column id="466" parent="318" name="specie_avg_weight">
+    <column id="463" parent="318" name="specie_avg_weight">
       <DasType>float|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <column id="467" parent="318" name="specie_avg_length">
+    <column id="464" parent="318" name="specie_avg_length">
       <DasType>float|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
     </column>
-    <index id="468" parent="318" name="PRIMARY">
+    <index id="465" parent="318" name="PRIMARY">
       <ColNames>specie_code</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="469" parent="318" name="PRIMARY">
+    <key id="466" parent="318" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="470" parent="319" name="user_coop_id">
+    <column id="467" parent="319" name="user_coop_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="471" parent="319" name="user_id">
+    <column id="468" parent="319" name="user_id">
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="472" parent="319" name="coop_code">
+    <column id="469" parent="319" name="coop_code">
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <foreign-key id="473" parent="319" name="user_coop_ibfk_1">
+    <foreign-key id="470" parent="319" name="user_coop_ibfk_1">
       <ColNames>user_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <OnUpdate>cascade</OnUpdate>
       <RefColNames>user_id</RefColNames>
       <RefTableName>users</RefTableName>
     </foreign-key>
-    <foreign-key id="474" parent="319" name="user_coop_ibfk_2">
+    <foreign-key id="471" parent="319" name="user_coop_ibfk_2">
       <ColNames>coop_code</ColNames>
       <OnDelete>cascade</OnDelete>
       <OnUpdate>cascade</OnUpdate>
       <RefColNames>coop_code</RefColNames>
       <RefTableName>coop</RefTableName>
     </foreign-key>
-    <index id="475" parent="319" name="PRIMARY">
+    <index id="472" parent="319" name="PRIMARY">
       <ColNames>user_coop_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="476" parent="319" name="user_coop_ibfk_1">
+    <index id="473" parent="319" name="user_coop_ibfk_1">
       <ColNames>user_id</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="477" parent="319" name="user_coop_ibfk_2">
+    <index id="474" parent="319" name="user_coop_ibfk_2">
       <ColNames>coop_code</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="478" parent="319" name="PRIMARY">
+    <key id="475" parent="319" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="479" parent="320" name="user_role_id">
+    <column id="476" parent="320" name="user_role_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="480" parent="320" name="user_id">
+    <column id="477" parent="320" name="user_id">
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="481" parent="320" name="role_id">
+    <column id="478" parent="320" name="role_id">
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <foreign-key id="482" parent="320" name="user_role_ibfk_1">
+    <foreign-key id="479" parent="320" name="user_role_ibfk_1">
       <ColNames>user_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <OnUpdate>cascade</OnUpdate>
       <RefColNames>user_id</RefColNames>
       <RefTableName>users</RefTableName>
     </foreign-key>
-    <foreign-key id="483" parent="320" name="user_role_ibfk_2">
+    <foreign-key id="480" parent="320" name="user_role_ibfk_2">
       <ColNames>role_id</ColNames>
       <OnDelete>cascade</OnDelete>
       <OnUpdate>cascade</OnUpdate>
       <RefColNames>role_id</RefColNames>
       <RefTableName>roles</RefTableName>
     </foreign-key>
-    <index id="484" parent="320" name="PRIMARY">
+    <index id="481" parent="320" name="PRIMARY">
       <ColNames>user_role_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="485" parent="320" name="user_role_ibfk_1">
+    <index id="482" parent="320" name="user_role_ibfk_1">
       <ColNames>user_id</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="486" parent="320" name="user_role_ibfk_2">
+    <index id="483" parent="320" name="user_role_ibfk_2">
       <ColNames>role_id</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="487" parent="320" name="PRIMARY">
+    <key id="484" parent="320" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="488" parent="321" name="user_id">
+    <column id="485" parent="321" name="user_id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="489" parent="321" name="user_fname">
+    <column id="486" parent="321" name="user_fname">
       <DasType>varchar(20)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="490" parent="321" name="user_lname">
+    <column id="487" parent="321" name="user_lname">
       <DasType>varchar(20)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="491" parent="321" name="user_email">
+    <column id="488" parent="321" name="user_email">
       <DasType>varchar(50)|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="492" parent="321" name="user_phone">
+    <column id="489" parent="321" name="user_phone">
       <DasType>varchar(20)|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="493" parent="321" name="user_pass">
+    <column id="490" parent="321" name="user_pass">
       <DasType>varchar(250)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>6</Position>
     </column>
-    <column id="494" parent="321" name="last_login">
+    <column id="491" parent="321" name="last_login">
       <DasType>datetime|0s</DasType>
       <Position>7</Position>
     </column>
-    <column id="495" parent="321" name="creation_time">
+    <column id="492" parent="321" name="creation_time">
       <DasType>datetime|0s</DasType>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <Position>8</Position>
     </column>
-    <index id="496" parent="321" name="PRIMARY">
+    <index id="493" parent="321" name="PRIMARY">
       <ColNames>user_id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="497" parent="321" name="user_email">
+    <index id="494" parent="321" name="user_email">
       <ColNames>user_email</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="498" parent="321" name="user_phone">
+    <index id="495" parent="321" name="user_phone">
       <ColNames>user_phone</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="499" parent="321" name="PRIMARY">
+    <key id="496" parent="321" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="500" parent="321" name="user_email">
+    <key id="497" parent="321" name="user_email">
       <UnderlyingIndexName>user_email</UnderlyingIndexName>
     </key>
-    <key id="501" parent="321" name="user_phone">
+    <key id="498" parent="321" name="user_phone">
       <UnderlyingIndexName>user_phone</UnderlyingIndexName>
     </key>
   </database-model>

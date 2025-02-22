@@ -1,4 +1,4 @@
-import {IsDate, IsNumber, IsPositive, IsString} from "class-validator";
+import {IsDate, IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString} from "class-validator";
 import {Optional} from "@nestjs/common";
 
 export class UpdateFormDto {
@@ -16,4 +16,8 @@ export class UpdateFormDto {
     @IsString()
     @Optional()
     fisher_name : string
+    @IsInt()
+    @IsPositive()
+    @IsOptional()
+    boat_detail?: number
 }

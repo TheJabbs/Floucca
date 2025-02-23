@@ -4,6 +4,7 @@ import { ResponseMessage } from '../../shared/interface/response.interface';
 import { GetAllSenseLastw } from './interface/getAllSense_lastw.interface';
 import { CreateSenseLastwDto } from './dto/create-sense_lastw.dto';
 import { UpdateSenseLastwDto } from './dto/update-sense_lastw.dto';
+import {EffortFilterDto} from "./dto/EffortFilter.dto";
 
 @Injectable()
 export class SenseLastwService {
@@ -92,6 +93,23 @@ export class SenseLastwService {
                 data: updatedSenseLastw,
             };
         }
+    }
+
+    async getDaysExamined(filter: EffortFilterDto): Promise<number> {
+        const{period, gear_code, port_id} = filter;
+
+        const landings = await this.prisma.sense_lastw.groupBy({
+            by: ['form_id'],
+            where: {
+                gear_code: gear_code ? {in: gear_code} : undefined,
+                form: {
+                    period_date: period,
+                    port_id: {in: port_id}
+                },
+            },
+        });
+
+        return landings.length;
     }
     //================================================================================================
     async validate(d: any): Promise<boolean> {

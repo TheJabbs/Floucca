@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { History, Calendar, Plus, AlertCircle, Trash2 } from "lucide-react";
+import {Plus, AlertCircle, Trash2 } from "lucide-react";
 
 interface EffortLastWeekProps {
   required?: boolean;
@@ -93,13 +93,13 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
     currentGear.days_used > 7;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+    <div className="bg-white rounded-lg border p-6 space-y-6">
       <div className="flex items-center gap-3 text-gray-600">
         <h2 className="text-xl font-semibold">Effort Last Week</h2>
       </div>
 
       <div className="space-y-6">
-        <div className=" p-4 rounded-lg border">
+        <div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -163,7 +163,7 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
               {fields.map((entry, index) => (
                 <div
                   key={entry.id}
-                  className="p-4 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="p-4 bg-gray-50 rounded-lg transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">

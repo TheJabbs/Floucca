@@ -8,7 +8,7 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { MapPin, AlertCircle, Trash2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 const icon = L.icon({
   iconUrl: "marker-icon.png",
@@ -73,7 +73,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+    <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
       <div className="flex items-center gap-3 text-gray-600">
         <h2 className="text-xl font-semibold">
           Select Fishing Location

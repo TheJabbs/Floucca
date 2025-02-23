@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
-import { Plus,Trash2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, AlertCircle } from "lucide-react";
 
 interface EffortTodayProps {
   required?: boolean;
@@ -72,8 +72,8 @@ const EffortToday: React.FC<EffortTodayProps> = ({
 
   const updateParentForm = () => {
     const currentData = {
-      hours_fished: getValues('hours_fished'),
-      gear_entries: fields
+      hours_fished: getValues("hours_fished"),
+      gear_entries: fields,
     };
     onChange(currentData);
   };
@@ -129,12 +129,12 @@ const EffortToday: React.FC<EffortTodayProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+    <div className="bg-white rounded-lg border p-6 space-y-6">
       <div className="flex items-center gap-3 text-gray-600">
         <h2 className="text-xl font-semibold">Effort Today</h2>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-3">
         <div>
           <div className="flex items-center gap-2">
             <FormInput
@@ -149,12 +149,13 @@ const EffortToday: React.FC<EffortTodayProps> = ({
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-gray-700">
-            <h3 className="font-medium">Fishing Gear Details</h3>
-          </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Fishing Gear Details
+            {required && <span className="text-red-500">*</span>}
+          </label>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             <select
               value={currentGearCode}
               onChange={(e) => handleGearChange(Number(e.target.value))}
@@ -162,16 +163,18 @@ const EffortToday: React.FC<EffortTodayProps> = ({
               disabled={fields.length === GEARS.length}
             >
               <option value={0}>Select Gear</option>
-              {GEARS.filter(gear => !fields.some(field => field.gear_code === gear.gear_code))
-                .map((gear) => (
-                  <option key={gear.gear_code} value={gear.gear_code}>
-                    {gear.gear_name}
-                  </option>
+              {GEARS.filter(
+                (gear) =>
+                  !fields.some((field) => field.gear_code === gear.gear_code)
+              ).map((gear) => (
+                <option key={gear.gear_code} value={gear.gear_code}>
+                  {gear.gear_name}
+                </option>
               ))}
             </select>
 
             {currentGearCode !== 0 && (
-              <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                 <div className="grid md:grid-cols-2 gap-4">
                   {getCurrentGearSpecs().map((spec) => (
                     <div key={spec.name} className="space-y-2">
@@ -182,12 +185,16 @@ const EffortToday: React.FC<EffortTodayProps> = ({
                         <input
                           type={spec.type}
                           value={currentSpecs[spec.name] || ""}
-                          onChange={(e) => handleSpecChange(spec.name, e.target.value)}
+                          onChange={(e) =>
+                            handleSpecChange(spec.name, e.target.value)
+                          }
                           className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder={`Enter ${spec.name.toLowerCase()}`}
                         />
                         {spec.unit && (
-                          <span className="text-sm text-gray-500 w-12">{spec.unit}</span>
+                          <span className="text-sm text-gray-500 w-12">
+                            {spec.unit}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -209,7 +216,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
         </div>
 
         {fields.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="font-medium text-gray-700 flex items-center gap-2">
               Added Gear
             </h3>
@@ -217,7 +224,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
               {fields.map((entry, index) => (
                 <div
                   key={entry.id}
-                  className="p-4 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="p-4 bg-gray-50 rounded-lg transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
@@ -232,7 +239,9 @@ const EffortToday: React.FC<EffortTodayProps> = ({
                             </span>
                           ))
                           .reduce((prev, curr) => (
-                            <>{prev} • {curr}</>
+                            <>
+                              {prev} • {curr}
+                            </>
                           ))}
                       </div>
                     </div>

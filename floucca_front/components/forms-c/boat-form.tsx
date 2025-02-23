@@ -44,14 +44,14 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
   }, [watch, onChange]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-      <div className="flex items-center gap-3 text-gray-600">
+    <div className="rounded-lg border border-blue-200 p-6 space-y-6 ">
+      <div className="flex items-center gap-3 text-blue-700">
         <h2 className="text-xl font-semibold">Boat Information</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Boat Identity Section */}
-        <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+        <div className="space-y-4 p-4 rounded-lg border border-blue-200 bg-blue-50">
           <div className="flex items-center gap-2 text-gray-800">
             <FileText className="w-4 h-4" />
             <h3 className="font-medium">Boat Identity</h3>
@@ -82,7 +82,7 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
         </div>
 
         {/* Fleet Details Section */}
-        <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+        <div className="space-y-4 p-4 rounded-lg border border-blue-200 bg-blue-50">
           <div className="flex items-center gap-2 text-gray-800">
             <Anchor className="w-4 h-4" />
             <h3 className="font-medium">Fleet Details</h3>
@@ -114,7 +114,7 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
         </div>
 
         {/* Boat Specifications Section */}
-        <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-100 md:col-span-2">
+        <div className="space-y-4 p-4 rounded-lg border border-blue-200 bg-blue-50 md:col-span-2">
           <div className="flex items-center gap-2 text-gray-800">
             <Scale className="w-4 h-4" />
             <h3 className="font-medium">Boat Specifications</h3>

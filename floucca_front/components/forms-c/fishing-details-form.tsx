@@ -136,7 +136,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
 
   if (!selectedLocation) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="flex items-center gap-3 text-gray-600">
           <h2 className="text-xl font-semibold">Fishing Details Today</h2>
         </div>
@@ -148,7 +148,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+    <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
       <div className="flex items-center gap-3 text-gray-600">
         <h2 className="text-xl font-semibold">Fishing Details Today</h2>
       </div>
@@ -252,7 +252,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
             {fields.map((entry, index) => (
               <div
                 key={entry.id}
-                className="p-4 hover:bg-gray-50 rounded-lg transition-colors"
+                className="p-4 bg-gray-50 rounded-lg transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 flex-1">

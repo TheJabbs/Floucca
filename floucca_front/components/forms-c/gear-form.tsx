@@ -74,7 +74,7 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
     if (selectedGear) {
       const newGear = {
         gear_code: selectedGear.gear_code,
-        gear_name: `${selectedGear.gear_name} - ${selectedGear.equipment_name}`,
+        gear_name: `${selectedGear.gear_name}`,
         months: currentSelection.months
       };
       
@@ -98,14 +98,14 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
 
   return (
     <div className="space-y-4 rounded-lg border p-6 ">
-      <h2 className="text-xl font-semibold text-gray-600">Fleet Gear Usage</h2>
+      <h2 className="text-xl font-bold text-gray-600">Fleet Gear Usage</h2>
       
       <div className="w-84 flex items-start gap-3">
         <Dropdown
           label="Select Gear"
           options={availableGears.map(gear => ({
             value: gear.gear_code,
-            label: `${gear.gear_name} - ${gear.equipment_name}`
+            label: `${gear.gear_name}`
           }))}
           selectedValue={currentSelection.gear_code}
           onChange={handleGearChange}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import {Plus, AlertCircle, Trash2 } from "lucide-react";
+import Dropdown from "../dropdown/dropdown";
 
 interface EffortLastWeekProps {
   required?: boolean;

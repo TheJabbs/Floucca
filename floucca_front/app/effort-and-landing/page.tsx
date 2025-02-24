@@ -75,10 +75,10 @@ interface LandingsForm {
 interface FormValidation {
   port: boolean;
   boatInfo: boolean;
-  effortToday: boolean | null; // null means not filled
-  effortLastWeek: boolean | null; // null means not filled
-  location: boolean | null; // null means not required
-  fishingDetails: boolean | null; // null means not required
+  effortToday: boolean | null; 
+  effortLastWeek: boolean | null; 
+  location: boolean | null; 
+  fishingDetails: boolean | null;
 }
 
 function Page() {
@@ -142,12 +142,10 @@ function Page() {
   };
 
   const isFormValid = () => {
-    // Basic requirements: port and boat info
     if (!formValidation.port || !formValidation.boatInfo) {
       return false;
     }
     
-    // At least one effort section must be filled if attempting to fill
     const effortTodayValid = formValidation.effortToday === true;
     const effortLastWeekValid = formValidation.effortLastWeek === true;
     const eitherEffortFilled = effortTodayValid || effortLastWeekValid;

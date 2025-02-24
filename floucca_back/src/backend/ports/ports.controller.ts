@@ -11,26 +11,26 @@ export class PortsController {
   @Post()
   async create(@Body() createPortDto: CreatePortDto): Promise<Port> {
     console.log('Received request:', createPortDto); // Log request data
-    return this.portsService.create(createPortDto);
+    return this.portsService.createPort(createPortDto);
   }
 
   @Get()
   async findAll(): Promise<Port[]> {
-    return this.portsService.findAll();
+    return this.portsService.getAllPorts();
   }
 
   @Get(':id')
   async findOne(@Param() params: idDTO): Promise<Port> {
-    return this.portsService.findOne(params.id);
+    return this.portsService.getPortById(params.id);
   }
 
   @Put(':id')
   async update(@Param() params: idDTO, @Body() updatePortDto: CreatePortDto): Promise<Port> {
-    return this.portsService.update(params.id, updatePortDto);
+    return this.portsService.updatePort(params.id, updatePortDto);
   }
 
   @Delete(':id')
   async remove(@Param() params: idDTO): Promise<Port> {
-    return this.portsService.remove(params.id);
+    return this.portsService.deletePort(params.id);
   }
 }

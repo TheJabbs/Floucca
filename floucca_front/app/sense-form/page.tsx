@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { usePort } from "@/contexts/PortContext";
+import PortDropdown from "@/components/forms-c/port-dropdown";
 import BoatInfo from "@/components/forms-c/boat-form";
 import GearSelector from "@/components/forms-c/gear-form";
 import SubmitButton from "@/components/utils/submit-button";
-import PortDropdown from "@/components/forms-c/port-dropdown";
 
 interface BoatData {
   fleet_owner: string;
@@ -28,6 +29,7 @@ interface FleetSensesForm {
 }
 
 function Page() {
+  const {selectedPort} = usePort();
   const {
     handleSubmit,
     setValue,
@@ -44,9 +46,14 @@ function Page() {
         fleet_length: 0,
       },
       gearData: [],
-      port: "",
+      port: selectedPort,
     },
   });
+
+  useEffect(() => {
+    setValue('port', selectedPort);
+    checkFormValidity(getValues('boatData'), getValues('gearData'), selectedPort);
+  }, [selectedPort, setValue]);
 
   const [isValid, setIsValid] = useState(false);
 
@@ -95,10 +102,7 @@ function Page() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Fleet Senses Form</h1>
         <div className="w-72"> {/* Fixed width container for dropdown */}
-          <PortDropdown 
-            selectedPort={getValues("port")} 
-            onPortChange={handlePortChange} 
-          />
+          <PortDropdown/>
         </div>
       </div>
       

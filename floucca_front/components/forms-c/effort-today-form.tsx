@@ -258,7 +258,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
             </div>
           </div>
         ) : (
-          <div className="text-gray-500 italic text-center py-6 flex items-center justify-center gap-2">
+          <div className="text-gray-500 italic text-center py-3 flex items-center justify-center gap-2">
             <AlertCircle className="w-4 h-4" />
             No gear added yet.
           </div>

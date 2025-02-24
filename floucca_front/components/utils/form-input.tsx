@@ -20,6 +20,13 @@ const FormInput: React.FC<FormInputProps> = ({
   register,
   error,
 }) => {
+  // Handle keydown to prevent typing negative sign for number inputs
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (type === "number" && e.key === "-") {
+      e.preventDefault();
+    }
+  };
+
   return (
     <div className="form-group mb-2">
       <label
@@ -31,12 +38,18 @@ const FormInput: React.FC<FormInputProps> = ({
       <input
         type={type}
         id={name}
-        {...register(name, { required })}
+        {...register(name, { 
+          required,
+          validate: type === "number" ? value => 
+            value >= 0 || "Value must be a positive number" : undefined,
+          valueAsNumber: type === "number"
+        })}
         placeholder={placeholder}
         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
           error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
         }`}
         min={type === "number" ? 0 : undefined}
+        onKeyDown={handleKeyDown}
         required={required}
       />
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}

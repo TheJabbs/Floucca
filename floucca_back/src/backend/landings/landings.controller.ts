@@ -42,7 +42,7 @@ export class LandingsController {
     }
 
     @Post('/cpue')
-    async getCpue(filter: GeneralFilterDto) {
+    async getCpue(@Body() filter: GeneralFilterDto) {
         const landings = await this.service.getLandingsByFilter(filter);
         let fishWeight = 0
 

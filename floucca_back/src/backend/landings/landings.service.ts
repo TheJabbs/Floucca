@@ -118,7 +118,7 @@ export class LandingsService {
                     data: l.landing
                 })
 
-                if (l.effort) {
+                if (l.effort && landing) {
                     l.effort.landing_id = landing.landing_id
                     const effort = await this.prisma.effort_today.create({
                         data: l.effort

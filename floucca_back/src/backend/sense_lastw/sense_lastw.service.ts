@@ -1,13 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ResponseMessage } from '../../shared/interface/response.interface';
-import { GetAllSenseLastw } from './interface/getAllSense_lastw.interface';
-import { CreateSenseLastwDto } from './dto/create-sense_lastw.dto';
-import { UpdateSenseLastwDto } from './dto/update-sense_lastw.dto';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {PrismaService} from '../../prisma/prisma.service';
+import {ResponseMessage} from '../../shared/interface/response.interface';
+import {GetAllSenseLastw} from './interface/getAllSense_lastw.interface';
+import {CreateSenseLastwDto} from './dto/create-sense_lastw.dto';
+import {UpdateSenseLastwDto} from './dto/update-sense_lastw.dto';
+import {EffortFilterDto} from "./dto/EffortFilter.dto";
+import {GetFilteredInterface} from "./interface/getFiltered.interface";
 
 @Injectable()
 export class SenseLastwService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(private readonly prisma: PrismaService) {
+    }
 
     async getAllSenseLastw(): Promise<GetAllSenseLastw[]> {
         const sense_lastw = await this.prisma.sense_lastw.findMany();
@@ -21,7 +24,7 @@ export class SenseLastwService {
 
     async getSenseLastwById(id: number): Promise<GetAllSenseLastw> {
         const sense_lastw = await this.prisma.sense_lastw.findUnique({
-            where: { sense_lastW_id: id },
+            where: {sense_lastW_id: id},
         });
 
         if (!sense_lastw) {
@@ -32,7 +35,7 @@ export class SenseLastwService {
     }
 
     async createSenseLastw(sense_lastw: CreateSenseLastwDto): Promise<ResponseMessage<any>> {
-        if(sense_lastw.form_id || sense_lastw.gear_code) {
+        if (sense_lastw.form_id || sense_lastw.gear_code) {
             if (!await this.validate(sense_lastw)) {
                 const newSenseLastw = await this.prisma.sense_lastw.create({
                     data: sense_lastw,
@@ -63,7 +66,7 @@ export class SenseLastwService {
         }
 
         await this.prisma.sense_lastw.delete({
-            where: { sense_lastW_id: id },
+            where: {sense_lastW_id: id},
         });
 
         return {
@@ -81,7 +84,7 @@ export class SenseLastwService {
                 data: null,
             };
         }
-        if(!await this.validate(sense_lastw)) {
+        if (!await this.validate(sense_lastw)) {
             const updatedSenseLastw = await this.prisma.sense_lastw.update({
                 where: {sense_lastW_id: id},
                 data: sense_lastw,
@@ -93,19 +96,62 @@ export class SenseLastwService {
             };
         }
     }
+
+    async getEffortsByFilter(filter: EffortFilterDto): Promise<GetFilteredInterface[]> {
+        const {
+            period,
+            gear_code,
+            port_id,
+            region,
+            coop
+        } = filter;
+
+        // With this design I am giving the user the option to filter not only by port, but also by region and coop
+        if(!port_id && !region && !coop) {
+            throw new NotFoundException('No port, region or coop found');
+        }
+
+        const landings = await this.prisma.sense_lastw.findMany({
+            distinct: ['form_id'],
+            where: {
+                gear_code,
+                form: {
+                    period_date: period,
+                    port_id: port_id ? {in: port_id} : undefined,
+                    ports: {
+                        coop_code: coop ? {in: coop} : undefined,
+                        coop: {
+                            region_code: region ? {in: region} : undefined
+                        }
+                    }
+                }
+            },
+            select: {
+                form_id: true,
+                days_fished: true
+            }
+        });
+
+        if(!landings || landings.length === 0) {
+            throw new NotFoundException('No landings found');
+        }
+
+        return landings;
+    }
+
     //================================================================================================
     async validate(d: any): Promise<boolean> {
-        if(d.gear_code){
+        if (d.gear_code) {
             const gear = await this.prisma.gear.findUnique({
-                where: { gear_code: d.gear_code }
+                where: {gear_code: d.gear_code}
             });
             if (!gear) {
                 return false;
             }
         }
-        if(d.landing_id){
+        if (d.landing_id) {
             const landing = await this.prisma.landing.findUnique({
-                where: { landing_id: d.landing_id }
+                where: {landing_id: d.landing_id}
             });
             if (!landing) {
                 return false;

@@ -77,7 +77,6 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       <div className="flex items-center gap-3 text-gray-600">
         <h2 className="text-xl font-semibold">
           Select Fishing Location
-          {required && <span className="text-red-500 ml-1">*</span>}
         </h2>
       </div>
 

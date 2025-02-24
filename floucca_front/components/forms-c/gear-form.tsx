@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { AlertCircle,Trash2 } from 'lucide-react';
 import AddButton from '../utils/form-button';
 import { getAllGears } from '@/app/services/gearService';
 import Dropdown from '../dropdown/dropdown';
@@ -74,7 +74,7 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
     if (selectedGear) {
       const newGear = {
         gear_code: selectedGear.gear_code,
-        gear_name: `${selectedGear.gear_name} - ${selectedGear.equipment_name}`,
+        gear_name: `${selectedGear.gear_name}`,
         months: currentSelection.months
       };
       
@@ -97,15 +97,15 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Fleet Gear Usage</h2>
+    <div className="space-y-4 rounded-lg border p-6 ">
+      <h2 className="text-xl font-bold text-gray-600">Fleet Gear Usage</h2>
       
-      <div className="w-72 flex items-start gap-3">
+      <div className="w-84 flex items-start gap-3">
         <Dropdown
           label="Select Gear"
           options={availableGears.map(gear => ({
             value: gear.gear_code,
-            label: `${gear.gear_name} - ${gear.equipment_name}`
+            label: `${gear.gear_name}`
           }))}
           selectedValue={currentSelection.gear_code}
           onChange={handleGearChange}
@@ -117,7 +117,7 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
           <label className="block text-gray-700 text-sm font-semibold mb-1">
             Select Months {required && <span className="text-red-500">*</span>}
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-1">
             {MONTHS.map(month => (
               <button
                 key={month}
@@ -144,29 +144,43 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
       </div>
 
       {selectedGears.length > 0 ? (
-        <div className="space-y-3 mt-4">
-          {selectedGears.map((gear, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-4 p-3 bg-gray-50 rounded-md"
-            >
-              <span className="font-medium">{gear.gear_name}</span>
-              <span className="text-gray-600">
-                Months: {gear.months.join(', ')}
-              </span>
-              <button
-                onClick={() => handleRemoveGear(index)}
-                className="ml-auto text-red-500 hover:text-red-700"
-                type="button"
-              >
-                Remove
-              </button>
+          <div className="space-y-2">
+            <h3 className="font-medium text-gray-700 flex items-center gap-2">
+              Added Gear Usage
+            </h3>
+            <div className="divide-y divide-gray-100">
+              {selectedGears.map((gear, index) => (
+                <div
+                  key={index}
+                  className="p-4 bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h4 className="font-medium text-gray-900">
+                        {gear.gear_name}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Used in: {gear.months.join(', ')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveGear(index)}
+                      className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
+                      type="button"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500 italic mt-4">No gear added yet.</p>
-      )}
+          </div>
+        ) : (
+          <div className="text-gray-500 italic text-center py-6 flex items-center justify-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            No gear usage recorded yet.
+          </div>
+        )}
     </div>
   );
 };

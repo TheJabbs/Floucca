@@ -220,7 +220,7 @@ export class LandingsService {
             port_id,
             coop,
             region
-        }= filter
+        } = filter
 
         // With this design I am giving the user the option to filter not only by port, but also by region and coop
         if(!port_id && !region && !coop) {

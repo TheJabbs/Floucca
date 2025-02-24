@@ -4,10 +4,11 @@ export class GeneralFilterDto {
     @IsDate()
     period: Date;
 
-    @IsInt()
-    @IsPositive()
-    @IsNotEmpty()
-    gear_code: number;
+    @IsArray()
+    @IsOptional()
+    @IsInt({each: true})
+    @IsPositive(({each: true}))
+    gear_code?: number[];
 
     @IsArray()
     @IsOptional()

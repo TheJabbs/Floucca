@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { PortProvider } from "@/contexts/PortContext";
 import Navbar from "@/components/navigators/nav-bar-form";
 import FormHeader from "@/components/headers/form-header";
 import React from "react";
@@ -20,10 +21,13 @@ export default function RootLayout({
   return (
       <html lang="en">
       <body className={inter.className}>
+      <PortProvider>
       <FormHeader />
       <Navbar />
       <main>{children}</main>
+      </PortProvider>
       </body>
       </html>
   );
 }
+

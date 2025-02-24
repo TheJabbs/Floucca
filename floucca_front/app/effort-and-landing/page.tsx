@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import BoatInfo from "@/components/forms-c/boat-form";
@@ -11,6 +11,7 @@ const MapWithMarkers = dynamic(
 );
 import FishingDetails from "@/components/forms-c/fishing-details-form";
 import SubmitButton from "@/components/utils/submit-button";
+import { usePort } from "@/contexts/PortContext";
 import PortDropdown from "@/components/forms-c/port-dropdown"; 
 
 
@@ -81,6 +82,7 @@ interface FormValidation {
 }
 
 function Page() {
+  const {selectedPort} = usePort();
   const {
     handleSubmit,
     setValue,
@@ -88,7 +90,7 @@ function Page() {
   } = useForm<LandingsForm>({
     defaultValues: {
       LandingFormDTO: {
-        port: "",
+        port: selectedPort,
         boatData: {
           fleet_owner: "",
           fleet_registration: 0,
@@ -111,8 +113,6 @@ function Page() {
       },
     },
   });
-
-  const [selectedPort, setSelectedPort] = useState<string>("");
 
   // Track dependencies for FishingDetails
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
@@ -174,22 +174,21 @@ function Page() {
     updateValidation('fishingDetails', isValid);
   }, [setValue]);
 
-  const handlePortChange = (portId: string) => {
-    setSelectedPort(portId);
-    setValue("LandingFormDTO.port", portId); 
-    updateValidation('port', !!portId);
-  };
-
   const onSubmit = async (formData: LandingsForm) => {
     console.log("Submitting form data:", formData);
   };
+
+  useEffect(() => {
+    setValue('LandingFormDTO.port', selectedPort);
+    updateValidation('port', !!selectedPort);
+  }, [selectedPort, setValue]);
 
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Landing Form</h1>
-        <div className="w-72"> {/* Set a fixed width for the dropdown container */}
-          <PortDropdown selectedPort={selectedPort} onPortChange={handlePortChange} />
+        <div className="w-72">
+          <PortDropdown/>
         </div>
       </div>
       

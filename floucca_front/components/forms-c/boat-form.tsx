@@ -45,7 +45,7 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
 
   return (
     <div className="rounded-lg border border-blue-200 p-6 space-y-6 ">
-      <div className="flex items-center gap-3 text-blue-700">
+      <div className="flex items-center gap-3 text-gray-600">
         <h2 className="text-xl font-semibold">Boat Information</h2>
       </div>
 

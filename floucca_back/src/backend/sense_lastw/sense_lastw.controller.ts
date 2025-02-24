@@ -38,7 +38,7 @@ export class SenseLastwController {
     }
 
     @Post('formula/pba')
-    async getFilteredSenseLastw(@Body() filter: EffortFilterDto) {
+    async getPba(@Body() filter: EffortFilterDto) {
         const data = await this.service.getEffortsByFilter(filter);
 
         let daysExamined = data.length * 7;

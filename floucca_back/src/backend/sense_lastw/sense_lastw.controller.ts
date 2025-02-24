@@ -1,13 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { SenseLastwService } from './sense_lastw.service';
-import { CreateSenseLastwDto } from './dto/create-sense_lastw.dto';
-import { UpdateSenseLastwDto } from './dto/update-sense_lastw.dto';
-import { idDTO } from '../../shared/dto/id.dto';
+import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {SenseLastwService} from './sense_lastw.service';
+import {CreateSenseLastwDto} from './dto/create-sense_lastw.dto';
+import {UpdateSenseLastwDto} from './dto/update-sense_lastw.dto';
+import {idDTO} from '../../shared/dto/id.dto';
 import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
+import {getDaysInMonthByDate} from "../../utils/date/getDaysInAMonth";
 
 @Controller('api/dev/sense_lastw')
 export class SenseLastwController {
-    constructor(private readonly service: SenseLastwService) {}
+    constructor(private readonly service: SenseLastwService) {
+    }
 
     @Get('/all/sense_lastw')
     getAllSenseLastw() {
@@ -37,7 +39,7 @@ export class SenseLastwController {
         return this.service.updateSenseLastw(sense_lastw_id.id, updatedSenseLastw);
     }
 
-    @Post('formula/pba')
+    @Post('/pba')
     async getPba(@Body() filter: GeneralFilterDto) {
         const data = await this.service.getEffortsByFilter(filter);
 
@@ -48,6 +50,22 @@ export class SenseLastwController {
             daysFished += effort.days_fished;
         });
 
-        return (daysFished / daysExamined) ;
+        return (daysFished / daysExamined)
+
     }
+
+    @Post('/totalEffort')
+    async getTotalEffort(@Body() filter: GeneralFilterDto) {
+        delete filter.gear_code;
+
+        const data = await this.service.getEffortsByFilter(filter);
+
+        const pba = await this.getPba(filter);
+        const periodDate = new Date(filter.period);
+        const days = getDaysInMonthByDate(periodDate.toDateString());
+        const numberGear = data.length;
+
+        return (days * numberGear * pba)
+    }
+
 }

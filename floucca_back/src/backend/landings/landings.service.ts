@@ -88,18 +88,22 @@ export class LandingsService {
         let gearError: number = 0;
         let senseError: number = 0;
 
-        const newPeriod = await this.prisma.period.findFirst({
+        let newPeriod = await this.prisma.period.findFirst({
             orderBy: {
                 period_date: 'desc'
             }
         })
 
         if (!newPeriod) {
-            await this.prisma.period.create({
+            newPeriod = await this.prisma.period.create({
                 data: {
                     period_date: new Date()
+                },
+                select: {
+                    period_date: true,
+                    period_status: true
                 }
-            })
+            });
         }
 
         l.form.period_date = newPeriod.period_date;
@@ -239,7 +243,7 @@ export class LandingsService {
 
                 fish: {
                     some: {
-                        gear_code: gear_code
+                        gear_code: gear_code ? {in: gear_code} : undefined
                     }
                 }
             },

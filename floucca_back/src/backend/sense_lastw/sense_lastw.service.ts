@@ -112,9 +112,8 @@ export class SenseLastwService {
         }
 
         const landings = await this.prisma.sense_lastw.findMany({
-            distinct: ['form_id'],
             where: {
-                gear_code,
+                gear_code: gear_code ? {in: gear_code} : undefined,
                 form: {
                     period_date: period,
                     port_id: port_id ? {in: port_id} : undefined,
@@ -126,10 +125,6 @@ export class SenseLastwService {
                     }
                 }
             },
-            select: {
-                form_id: true,
-                days_fished: true
-            }
         });
 
         if(!landings || landings.length === 0) {

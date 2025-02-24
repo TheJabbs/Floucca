@@ -29,8 +29,13 @@ export class RoleController {
   }
 
   @Delete("delete/:role_id")
-  async deleteRole(@Param() params: idDTO): Promise<Role> {
+  async deleteRole(@Param("role_id") role_id: string): Promise<Role> {
+    const params = new idDTO(); 
+    params.id = parseInt(role_id, 10); 
+  
+  
     console.log("Received request to delete role with ID:", params.id);
     return this.roleService.deleteRole(params.id);
   }
+  
 }

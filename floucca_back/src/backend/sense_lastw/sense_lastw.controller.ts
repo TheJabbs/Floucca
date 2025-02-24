@@ -3,7 +3,7 @@ import { SenseLastwService } from './sense_lastw.service';
 import { CreateSenseLastwDto } from './dto/create-sense_lastw.dto';
 import { UpdateSenseLastwDto } from './dto/update-sense_lastw.dto';
 import { idDTO } from '../../shared/dto/id.dto';
-import {EffortFilterDto} from "./dto/EffortFilter.dto";
+import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
 
 @Controller('api/dev/sense_lastw')
 export class SenseLastwController {
@@ -38,7 +38,7 @@ export class SenseLastwController {
     }
 
     @Post('formula/pba')
-    async getPba(@Body() filter: EffortFilterDto) {
+    async getPba(@Body() filter: GeneralFilterDto) {
         const data = await this.service.getEffortsByFilter(filter);
 
         let daysExamined = data.length * 7;

@@ -4,6 +4,7 @@ import {idDTO} from "../../shared/dto/id.dto";
 import {CreateLandingDto} from "./dto/createLandings.dto";
 import {UpdateLandingsDto} from "./dto/updateLandings.dto";
 import {CreateFormLandingDto} from "./dto/CreateFormLanding.dto";
+import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
 
 @Controller("api/dev/landings")
 export class LandingsController {
@@ -38,6 +39,20 @@ export class LandingsController {
     @Post("/create/form")
     createFormLanding(@Body() formLanding: CreateFormLandingDto) {
         return this.service.createLandingForm(formLanding);
+    }
+
+    @Post('/cpue')
+    async getCpue(filter: GeneralFilterDto) {
+        const landings = await this.service.getLandingsByFilter(filter);
+        let fishWeight = 0
+
+        landings.forEach(landing => {
+            landing.fish.forEach(fish => {
+                fishWeight += fish.fish_weight
+            })
+        })
+
+        return (fishWeight/landings.length)
     }
 
 }

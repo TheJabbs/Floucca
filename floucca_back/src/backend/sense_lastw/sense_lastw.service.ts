@@ -4,7 +4,7 @@ import {ResponseMessage} from '../../shared/interface/response.interface';
 import {GetAllSenseLastw} from './interface/getAllSense_lastw.interface';
 import {CreateSenseLastwDto} from './dto/create-sense_lastw.dto';
 import {UpdateSenseLastwDto} from './dto/update-sense_lastw.dto';
-import {EffortFilterDto} from "./dto/EffortFilter.dto";
+import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
 import {GetFilteredInterface} from "./interface/getFiltered.interface";
 
 @Injectable()
@@ -97,7 +97,7 @@ export class SenseLastwService {
         }
     }
 
-    async getEffortsByFilter(filter: EffortFilterDto): Promise<GetFilteredInterface[]> {
+    async getEffortsByFilter(filter: GeneralFilterDto): Promise<GetFilteredInterface[]> {
         const {
             period,
             gear_code,

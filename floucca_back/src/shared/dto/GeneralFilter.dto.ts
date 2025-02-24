@@ -1,6 +1,6 @@
 import {IsArray, IsDate, IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString} from "class-validator";
 
-export class EffortFilterDto {
+export class GeneralFilterDto {
     @IsDate()
     period: Date;
 

@@ -5,6 +5,8 @@ import {CreateLandingDto} from "./dto/createLandings.dto";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 import {UpdateLandingsDto} from "./dto/updateLandings.dto";
 import {CreateFormLandingDto} from "./dto/CreateFormLanding.dto";
+import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
+import {GetFilteredInterface} from "./interface/getFiltered.interface";
 
 @Injectable()
 export class LandingsService {
@@ -205,6 +207,60 @@ export class LandingsService {
             data: null
         }
 
+    }
+
+    async getLandingsByFilter(filter: GeneralFilterDto): Promise<GetFilteredInterface[]>{
+        const {
+            period,
+            gear_code,
+            port_id,
+            coop,
+            region
+        }= filter
+
+        // With this design I am giving the user the option to filter not only by port, but also by region and coop
+        if(!port_id && !region && !coop) {
+            throw new NotFoundException('No port, region or coop found');
+        }
+
+        const landings = await this.prisma.landing.findMany({
+            distinct: ['form_id'],
+            where: {
+                form: {
+                    period_date: period,
+                    port_id: port_id ? {in: port_id} : undefined,
+                    ports: {
+                        coop_code: coop ? {in: coop} : undefined,
+                        coop: {
+                            region_code: region ? {in: region} : undefined
+                        }
+                    }
+                },
+
+                fish: {
+                    some: {
+                        gear_code: gear_code
+                    }
+                }
+            },
+
+            select: {
+                form_id: true,
+                fish: {
+                    select: {
+                        specie_code: true,
+                        fish_weight: true,
+                        fish_quantity: true
+                    }
+                }
+            }
+        })
+
+        if(!landings || landings.length === 0){
+            throw new NotFoundException('No landings found')
+        }
+
+        return landings
     }
 
 

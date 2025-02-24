@@ -4,16 +4,28 @@ export class EffortFilterDto {
     @IsDate()
     period: Date;
 
-    @IsArray()
-    @IsInt({each: true})
-    @IsPositive(({each: true}))
-    @IsOptional()
-    gear_code?: number[];
+    @IsInt()
+    @IsPositive()
+    @IsNotEmpty()
+    gear_code: number;
 
     @IsArray()
+    @IsOptional()
     @IsInt({each: true})
     @IsPositive(({each: true}))
-    port_id:  number[];
+    port_id?:  number[];
+
+    @IsArray()
+    @IsOptional()
+    @IsInt({each: true})
+    @IsPositive(({each: true}))
+    coop?:  number[];
+
+    @IsArray()
+    @IsOptional()
+    @IsInt({each: true})
+    @IsPositive(({each: true}))
+    region?:  number[];
 
 
 }

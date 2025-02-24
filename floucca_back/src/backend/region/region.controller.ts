@@ -1,8 +1,6 @@
-// src/models/region/region.controller.ts
 import { Controller, Get, Post, Param, Delete, Body, Put } from "@nestjs/common";
 import { RegionService } from "./region.service";
 import { CreateRegionDto } from "./dto/create-region.dto";
-import { idDTO } from "../../shared/dto/id.dto";
 import { Region } from "./interfaces/region.interface";
 
 @Controller("region")
@@ -19,18 +17,24 @@ export class RegionController {
     return this.regionService.findAllRegions();
   }
 
-  @Get(":id")
-  async findRegionById(@Param() params: idDTO): Promise<Region | null> {
-    return this.regionService.findRegionById(params.id);
+  @Get(":region_code") 
+  async findRegionById(@Param("region_code") region_code: number): Promise<Region | null> {
+    console.log("Fetching region with code:", region_code);
+    return this.regionService.findRegionById(region_code);
   }
 
-  @Put("update/:id")
-  async updateRegion(@Param() params: idDTO, @Body() updateRegionDto: CreateRegionDto): Promise<Region> {
-    return this.regionService.updateRegion(params.id, updateRegionDto);
+  @Put("update/:region_code") 
+  async updateRegion(
+    @Param("region_code") region_code: number,
+    @Body() updateRegionDto: CreateRegionDto
+  ): Promise<Region> {
+    console.log(`Updating region ${region_code} with data:`, updateRegionDto);
+    return this.regionService.updateRegion(region_code, updateRegionDto);
   }
 
-  @Delete("delete/:id")
-  async deleteRegion(@Param() params: idDTO): Promise<Region> {
-    return this.regionService.deleteRegion(params.id);
+  @Delete("delete/:region_code") 
+  async deleteRegion(@Param("region_code") region_code: number): Promise<Region> {
+    console.log("Received request to delete region with code:", region_code);
+    return this.regionService.deleteRegion(region_code);
   }
 }

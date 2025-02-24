@@ -14,13 +14,14 @@ import {SenseLastwModule} from "./backend/sense_lastw/sense_lastw.module";
 import {LandingsModule} from "./backend/landings/landings.module";
 import { PortsModule } from './backend/ports/ports.module';
 import { RegionModule } from './backend/region/region.module';
+import { RoleModule } from './backend/role/role.module';
 
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,
     EffortTodayModule, FishModule, FishModule, FleetModule,
     FormModule, GearModule, GearUsageModule, GearDetailModule,
   ScheduleModule, SenseLastwModule, LandingsModule, PortsModule,
-  RegionModule],
+  RegionModule, RoleModule],
   providers: [],
 })
 export class AppModule {}

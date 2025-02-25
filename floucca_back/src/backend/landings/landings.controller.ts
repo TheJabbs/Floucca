@@ -5,10 +5,12 @@ import {CreateLandingDto} from "./dto/createLandings.dto";
 import {UpdateLandingsDto} from "./dto/updateLandings.dto";
 import {CreateFormLandingDto} from "./dto/CreateFormLanding.dto";
 import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
+import {FishService} from "../fish/fish.service";
 
 @Controller("api/dev/landings")
 export class LandingsController {
-    constructor(private readonly service: LandingsService) {
+    constructor(private readonly service: LandingsService,
+                private readonly fishService: FishService) {
     }
 
     @Get("/all/landings")
@@ -54,5 +56,19 @@ export class LandingsController {
 
         return (fishWeight/landings.length)
     }
+
+    @Post('/effortbyspecie/:code')
+    async getEffortBySpecie(@Param('code') code: idDTO, @Body() filter: GeneralFilterDto) {
+        const cpue = await this.getCpue(filter);
+        const fishes = await this.fishService.getAllFishByFilter(filter, code);
+
+        let fishWeight = 0
+        fishes.forEach(fish => {
+            fishWeight += fish.fish_weight
+        })
+
+        return fishWeight/cpue
+    }
+
 
 }

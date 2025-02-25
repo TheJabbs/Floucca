@@ -4,6 +4,8 @@ import {CreateFishDto} from "./dto/create_fish.Dto";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 import {UpdateFishDto} from "./dto/update_fish.dto";
 import {FishInterface} from "./interface/fish.interface";
+import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
+import {idDTO} from "../../shared/dto/id.dto";
 
 @Injectable()
 export class FishService {
@@ -65,6 +67,38 @@ export class FishService {
         return this.prismaService.fish.delete({
             where: {fish_id: fish_id}
         });
+    }
+
+    async getAllFishByFilter(filter: GeneralFilterDto, code: idDTO): Promise<FishInterface[]> {
+        const {
+            period,
+            port_id,
+            coop,
+            region,
+            gear_code
+        } = filter
+
+        const fish = await this.prismaService.fish.findMany({
+            where: {
+                specie_code: code.id,
+                landing: {
+                    form: {
+                        period_date: period,
+                        port_id: port_id ? {in: port_id} : undefined,
+                        ports:{
+                            coop_code: coop ? {in: coop} : undefined,
+                            coop:{
+                                region_code: region ? {in: region} : undefined
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        if(!fish || fish.length === 0) throw new NotFoundException("No fish records found");
+
+        return fish;
     }
 
     //===============================================

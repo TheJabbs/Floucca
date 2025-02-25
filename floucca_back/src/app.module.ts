@@ -16,12 +16,13 @@ import { PortsModule } from './backend/ports/ports.module';
 import { RegionModule } from './backend/region/region.module';
 import { RoleModule } from './backend/role/role.module';
 import { SpecieModule } from './backend/species/species.module';
+import { UserRoleModule } from './backend/user_role/user_role.module';
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,
     EffortTodayModule, FishModule, FishModule, FleetModule,
     FormModule, GearModule, GearUsageModule, GearDetailModule,
   ScheduleModule, SenseLastwModule, LandingsModule, PortsModule,
-  RegionModule, RoleModule, SpecieModule],
+  RegionModule, RoleModule, SpecieModule, UserRoleModule],
   providers: [],
 })
 export class AppModule {}

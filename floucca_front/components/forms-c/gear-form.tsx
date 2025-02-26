@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle,Trash2 } from 'lucide-react';
 import AddButton from '../utils/form-button';
-import { getAllGears } from '@/app/services/gearService';
+import { getAllGears } from '@/services/gearService';
 import Dropdown from '../dropdown/dropdown';
 
 interface Gear {
@@ -98,7 +98,7 @@ const GearSelector: React.FC<GearSelectorProps> = ({ onChange, required = false 
 
   return (
     <div className="space-y-4 rounded-lg border p-6 ">
-      <h2 className="text-xl font-bold text-gray-600">Fleet Gear Usage</h2>
+      <h2 className="text-xl font-semibold text-gray-600">Fleet Gear Usage</h2>
       
       <div className="w-84 flex items-start gap-3">
         <Dropdown

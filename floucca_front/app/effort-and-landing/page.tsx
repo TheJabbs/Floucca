@@ -13,7 +13,7 @@ import FishingDetails from "@/components/forms-c/fishing-details-form";
 import SubmitButton from "@/components/utils/submit-button";
 import { usePort } from "@/contexts/PortContext";
 import PortDropdown from "@/components/forms-c/port-dropdown"; 
-
+import { CheckCircle, XCircle } from "lucide-react";
 
 // Form interfaces
 interface BoatData {
@@ -81,37 +81,46 @@ interface FormValidation {
   fishingDetails: boolean | null;
 }
 
+interface FormNotification {
+  type: 'success' | 'error';
+  message: string;
+}
+
 function Page() {
   const {selectedPort} = usePort();
+  
+  const defaultValues = {
+    LandingFormDTO: {
+      port: selectedPort,
+      boatData: {
+        fleet_owner: "",
+        fleet_registration: 0,
+        fleet_size: 0,
+        fleet_crew: 0,
+        fleet_max_weight: 0,
+        fleet_length: 0,
+      },
+      effortTodayData: {
+        hours_fished: 0,
+        gear_entries: [],
+      },
+      effortLastWeekData: {
+        gear_entries: [],
+      },
+      location: null,
+      fishingDetails: {
+        fish_entries: [],
+      },
+    },
+  };
+  
   const {
     handleSubmit,
     setValue,
+    reset,
     formState: { isSubmitting },
   } = useForm<LandingsForm>({
-    defaultValues: {
-      LandingFormDTO: {
-        port: selectedPort,
-        boatData: {
-          fleet_owner: "",
-          fleet_registration: 0,
-          fleet_size: 0,
-          fleet_crew: 0,
-          fleet_max_weight: 0,
-          fleet_length: 0,
-        },
-        effortTodayData: {
-          hours_fished: 0,
-          gear_entries: [],
-        },
-        effortLastWeekData: {
-          gear_entries: [],
-        },
-        location: null,
-        fishingDetails: {
-          fish_entries: [],
-        },
-      },
-    },
+    defaultValues
   });
 
   // Track dependencies for FishingDetails
@@ -124,6 +133,12 @@ function Page() {
   // Track if effort sections are actively being completed
   const [hasEffortToday, setHasEffortToday] = useState<boolean>(false);
   const [hasEffortLastWeek, setHasEffortLastWeek] = useState<boolean>(false);
+  
+  // Form reset flag to trigger reset in child components
+  const [resetCounter, setResetCounter] = useState(0);
+  
+  // Notification state
+  const [notification, setNotification] = useState<FormNotification | null>(null);
 
   const [formValidation, setFormValidation] = useState<FormValidation>({
     port: false,
@@ -164,6 +179,30 @@ function Page() {
     return true;
   };
 
+  // Completely reset form state
+  const resetFormState = () => {
+    // Reset React Hook Form
+    reset(defaultValues);
+    
+    // Reset all internal state
+    setSelectedLocation(null);
+    setSelectedGears([]);
+    setHasEffortToday(false);
+    setHasEffortLastWeek(false);
+    
+    // Reset validation state
+    setFormValidation({
+      port: !!selectedPort, 
+      boatInfo: false,
+      effortToday: null,
+      effortLastWeek: null,
+      location: null,
+      fishingDetails: null,
+    });
+    
+    setResetCounter(prev => prev + 1);
+  };
+
   // Handlers
   const handleBoatInfoChange = useCallback((data: BoatData) => {
     setValue("LandingFormDTO.boatData", data);
@@ -198,12 +237,8 @@ function Page() {
 
   const handleEffortLastWeekChange = useCallback((data: EffortLastWeekData) => {
     setValue("LandingFormDTO.effortLastWeekData", data);
-    
-    // Check if any meaningful data has been entered
     const hasData = data.gear_entries.length > 0;
     setHasEffortLastWeek(hasData);
-    
-    // Set validation status
     const isValid = hasData ? true : null;
     updateValidation('effortLastWeek', isValid);
   }, [setValue]);
@@ -229,7 +264,39 @@ function Page() {
   }, [setValue, hasEffortToday]);
 
   const onSubmit = async (formData: LandingsForm) => {
-    console.log("Submitting form data:", formData);
+    try {
+      // Simulating API call
+      console.log("Submitting form data:", formData);
+      
+      // Wait for submission (simulate network delay)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Show success message
+      setNotification({
+        type: 'success',
+        message: 'Form submitted successfully! Your data has been recorded.'
+      });
+      
+      // Reset the form and state
+      resetFormState();
+      
+      // Clear notification after 5 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+      
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setNotification({
+        type: 'error',
+        message: 'There was an error submitting the form. Please try again.'
+      });
+      
+      // Clear error notification after 5 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+    }
   };
 
   useEffect(() => {
@@ -239,6 +306,20 @@ function Page() {
 
   return (
     <div className="container mx-auto p-6">
+      {notification && (
+        <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
+          notification.type === 'success' 
+            ? 'bg-green-100 text-green-800 border border-green-200' 
+            : 'bg-red-100 text-red-800 border border-red-200'
+        }`}>
+          {notification.type === 'success' 
+            ? <CheckCircle className="h-5 w-5" /> 
+            : <XCircle className="h-5 w-5" />
+          }
+          <p>{notification.message}</p>
+        </div>
+      )}
+      
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Landing Form</h1>
         <div className="w-72">
@@ -250,15 +331,19 @@ function Page() {
         <BoatInfo
           required={true}
           onChange={handleBoatInfoChange}
+          key={`boat-info-${resetCounter}`}
         />
-
-        <EffortLastWeek
-          required={false} // Make it optional
-          onChange={handleEffortLastWeekChange}
-        />
+        
         <EffortToday
-          required={false} // Make it optional
+          required={false}
           onChange={handleEffortTodayChange}
+          key={`effort-today-${resetCounter}`}
+        />
+        
+        <EffortLastWeek
+          required={false}
+          onChange={handleEffortLastWeekChange}
+          key={`effort-last-week-${resetCounter}`}
         />
         
         {/* Conditionally show these sections only if Effort Today has data */}
@@ -267,6 +352,7 @@ function Page() {
             <MapWithMarkers
               required={true}
               onChange={handleLocationsChange}
+              key={`map-markers-${resetCounter}`}
             />
             
             <FishingDetails
@@ -274,6 +360,7 @@ function Page() {
               selectedLocation={selectedLocation}
               todaysGears={selectedGears}
               onChange={handleFishingDetailsChange}
+              key={`fishing-details-${resetCounter}`}
             />
           </>
         )}

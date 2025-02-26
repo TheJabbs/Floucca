@@ -4,15 +4,11 @@ import {idDTO} from "../../shared/dto/id.dto";
 import {CreateLandingDto} from "./dto/createLandings.dto";
 import {UpdateLandingsDto} from "./dto/updateLandings.dto";
 import {CreateFormLandingDto} from "./dto/CreateFormLanding.dto";
-import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
-import {FishService} from "../fish/fish.service";
-import {SenseLastwService} from "../sense_lastw/sense_lastw.service";
+
 
 @Controller("api/dev/landings")
 export class LandingsController {
-    constructor(private readonly service: LandingsService,
-                private readonly fishService: FishService,
-                private readonly senseController: SenseLastwService) {
+    constructor(private readonly service: LandingsService) {
     }
 
     @Get("/all/landings")
@@ -44,40 +40,4 @@ export class LandingsController {
     createFormLanding(@Body() formLanding: CreateFormLandingDto) {
         return this.service.createLandingForm(formLanding);
     }
-
-    @Post('/cpue')
-    async getCpue(@Body() filter: GeneralFilterDto) {
-        const landings = await this.service.getLandingsByFilter(filter);
-        let fishWeight = 0
-
-        landings.forEach(landing => {
-            landing.fish.forEach(fish => {
-                fishWeight += fish.fish_weight
-            })
-        })
-
-        return (fishWeight/landings.length)
-    }
-
-    @Post('/effortbyspecie/:code')
-    async getEffortBySpecie(@Param('code') code: idDTO, @Body() filter: GeneralFilterDto) {
-        const cpue = await this.getCpue(filter);
-        const fishes = await this.fishService.getAllFishByFilter(filter, code);
-
-        let fishWeight = 0
-        fishes.forEach(fish => {
-            fishWeight += fish.fish_weight
-        })
-
-        return fishWeight/cpue
-    }
-
-    // @Post('/estimateCatch')
-    // async getEstimateCatch(@Body() filter: GeneralFilterDto){
-    //     delete filter.gear_code
-    //
-    //     return await this.senseController.getEstimateEffort(filter) * await this.getCpue(filter);
-    // }
-
-
 }

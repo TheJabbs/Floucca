@@ -9,8 +9,7 @@ import {GearService} from "../gear/gear.service";
 
 @Controller('api/dev/sense_lastw')
 export class SenseLastwController {
-    constructor(private readonly service: SenseLastwService,
-                private readonly gearService: GearService) {
+    constructor(private readonly service: SenseLastwService){
     }
 
     @Get('/all/sense_lastw')
@@ -41,57 +40,5 @@ export class SenseLastwController {
         return this.service.updateSenseLastw(sense_lastw_id.id, updatedSenseLastw);
     }
 
-    @Post('/pba')
-    async getPba(@Body() filter: GeneralFilterDto) {
-        const data = await this.service.getEffortsByFilter(filter);
-
-        let daysExamined = data.length * 7;
-        let daysFished = 0;
-
-        data.forEach((effort) => {
-            daysFished += effort.days_fished;
-        });
-
-        return (daysFished / daysExamined)
-
-    }
-
-    @Post('/totalEffort')
-    async getTotalEffort(@Body() filter: GeneralFilterDto) {
-        delete filter.gear_code;
-
-        const data = await this.service.getEffortsByFilter(filter);
-
-        const pba = await this.getPba(filter);
-        const periodDate = new Date(filter.period);
-        const days = getDaysInMonthByDate(periodDate.toDateString());
-        const numberGear = data.length;
-
-        return (days * numberGear * pba)
-    }
-
-    @Post('/activeDays')
-    async getActiveDays(@Body() filter: GeneralFilterDto) {
-
-        const data = await this.service.getEffortsByFilter(filter);
-        const allGears = await this.gearService.getAllGear();
-
-        let activeDays = 0;
-        data.forEach((effort) => {
-            activeDays += effort.days_fished;
-        });
-
-        return activeDays * data.length/allGears.length;
-    }
-
-    @Post('/estimateEffort')
-    async getEstimateEffort(@Body() filter: GeneralFilterDto) {
-
-        const activeDays = await this.getActiveDays(filter);
-        const allGears = await this.gearService.getAllGear();
-        const pba = await this.getPba(filter);
-
-        return activeDays * allGears.length * pba;
-    }
 
 }

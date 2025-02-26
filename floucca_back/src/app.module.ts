@@ -18,13 +18,14 @@ import { RoleModule } from './backend/role/role.module';
 import { SpecieModule } from './backend/species/species.module';
 import { UserRoleModule } from './backend/user_role/user_role.module';
 import { UserCoopModule } from './backend/user_coop/user_coop.module';
+import {FormulasModule} from "./formulas/formulas.module";
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,
     EffortTodayModule, FishModule, FishModule, FleetModule,
     FormModule, GearModule, GearUsageModule, GearDetailModule,
   ScheduleModule, SenseLastwModule, LandingsModule, PortsModule,
   RegionModule, RoleModule, SpecieModule, UserRoleModule, 
-  UserCoopModule],
+  UserCoopModule, FormulasModule],
   providers: [],
 })
 export class AppModule {}

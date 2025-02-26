@@ -4,8 +4,9 @@ import { SenseLastwService } from './sense_lastw.service';
 import {GearModule} from "../gear/gear.module";
 
 @Module({
-    imports: [],
+    imports: [GearModule],
     controllers: [SenseLastwController],
-    providers: [SenseLastwService, GearModule],
+    providers: [SenseLastwService],
+    exports: [SenseLastwService]
 })
 export class SenseLastwModule {}

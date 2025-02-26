@@ -6,5 +6,6 @@ import {FishService} from "./fish.service";
     imports: [],
     controllers: [FishController],
     providers: [FishService],
+    exports: [FishService],
 })
 export class FishModule{}

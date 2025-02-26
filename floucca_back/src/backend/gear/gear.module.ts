@@ -6,5 +6,6 @@ import {GearService} from "./gear.service";
     imports: [],
     controllers: [GearController],
     providers: [GearService],
+    exports: [GearService]
 })
 export class GearModule {}

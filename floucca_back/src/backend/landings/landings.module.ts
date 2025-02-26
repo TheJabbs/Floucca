@@ -5,8 +5,8 @@ import {FishModule} from "../fish/fish.module";
 import {SenseLastwModule} from "../sense_lastw/sense_lastw.module";
 
 @Module({
-    imports: [],
+    imports: [FishModule, SenseLastwModule],
     controllers: [LandingsController],
-    providers: [LandingsService, FishModule, SenseLastwModule],
+    providers: [LandingsService],
 })
 export class LandingsModule {}

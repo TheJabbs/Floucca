@@ -18,10 +18,12 @@ export class UserCoopController {
     return this.userCoopService.findAllUserCoops();
   }
 
-  @Get(":id")
-  async findUserCoopById(@Param() params: idDTO): Promise<UserCoop | null> {
-    return this.userCoopService.findUserCoopById(params.id);
+  @Get(":user_coop_id")
+  async findUserCoopById(@Param("user_coop_id") user_coop_id: string): Promise<UserCoop | null> {
+    const id = parseInt(user_coop_id, 10);
+    return this.userCoopService.findUserCoopById(id);
   }
+  
 
   @Put("update/:id")
   async updateUserCoop(@Param() params: idDTO, @Body() updateUserCoopDto: CreateUserCoopDto): Promise<UserCoop> {
@@ -30,7 +32,7 @@ export class UserCoopController {
 
   @Delete("delete/:user_coop_id")
   async deleteUserCoop(@Param("user_coop_id") user_coop_id: string): Promise<UserCoop> {
-    const id = parseInt(user_coop_id, 10); // Convert string to number
+    const id = parseInt(user_coop_id, 10); 
     console.log("Deleting user coop with ID:", id);
     return this.userCoopService.deleteUserCoop(id);
   }

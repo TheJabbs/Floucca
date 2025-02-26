@@ -43,8 +43,8 @@ export class FormService {
             period_date: true,
             fisher_name: true,
             creation_time: true,
-            ports: { select: { port_name: true } }, // Fetch port name
-            boat_details: { // Fetch full boat details object
+            ports: { select: { port_name: true } }, 
+            boat_details: { 
               select: {
                 boat_id: true,
                 fleet_owner: true,

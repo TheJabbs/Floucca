@@ -6,11 +6,13 @@ import {UpdateLandingsDto} from "./dto/updateLandings.dto";
 import {CreateFormLandingDto} from "./dto/CreateFormLanding.dto";
 import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
 import {FishService} from "../fish/fish.service";
+import {SenseLastwController} from "../sense_lastw/sense_lastw.controller";
 
 @Controller("api/dev/landings")
 export class LandingsController {
     constructor(private readonly service: LandingsService,
-                private readonly fishService: FishService) {
+                private readonly fishService: FishService,
+                private readonly senseController: SenseLastwController) {
     }
 
     @Get("/all/landings")
@@ -68,6 +70,13 @@ export class LandingsController {
         })
 
         return fishWeight/cpue
+    }
+
+    @Post('/estimateCatch')
+    async getEstimateCatch(@Body() filter: GeneralFilterDto){
+        delete filter.gear_code
+
+        return await this.senseController.getEstimateEffort(filter) * await this.getCpue(filter);
     }
 
 

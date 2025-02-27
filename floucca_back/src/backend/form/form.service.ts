@@ -4,7 +4,7 @@ import { GetAllFormInterface} from './interface/index'
 import {UpdateFormDto} from "./DTO/UpdateForm.dto";
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
-import { GetUserFormsInterface } from "./interface/GetUserForms.interface";
+import { GetTopFormsInterface } from "./interface/index";
 
 @Injectable()
 export class FormService {
@@ -21,54 +21,109 @@ export class FormService {
         return form;
     }
 
-    async getTopFormsByUser(user_id: number): Promise<GetUserFormsInterface[]> {
-        console.log("Fetching top 20 forms for user ID:", user_id);
-    
-        const userExists = await this.prisma.users.findUnique({
-          where: { user_id },
-        });
-    
-        if (!userExists) {
-          throw new NotFoundException(`User with ID ${user_id} not found.`);
-        }
-    
+    async getTopFormsByUser(user_id: number): Promise<GetTopFormsInterface[]> {
         const forms = await this.prisma.form.findMany({
           where: { user_id },
-          orderBy: { creation_time: "desc" }, 
-          take: 20, 
+          take: 20,
+          orderBy: { creation_time: "desc" },
           select: {
             form_id: true,
-            user_id: true,
             port_id: true,
-            period_date: true,
+            user_id: true,
             fisher_name: true,
-            creation_time: true,
-            ports: { select: { port_name: true } }, 
-            boat_details: { 
+            period_date: true,
+            boat_detail: true,
+      
+            ports: { select: { port_name: true } },
+            boat_details: {
               select: {
-                boat_id: true,
                 fleet_owner: true,
+                fleet_registration: true,
                 fleet_size: true,
                 fleet_crew: true,
                 fleet_max_weight: true,
                 fleet_length: true,
-                fleet_registration: true
-              }
-            }
+              },
+            },
+      
+            landing: {
+              select: {
+                longitude: true,
+                latitude: true,
+                fish: {
+                  select: {
+                    specie_code: true,
+                    gear_code: true,
+                    fish_weight: true,
+                    fish_length: true,
+                    fish_quantity: true,
+                  },
+                },
+                effort_today: {
+                  select: {
+                    hours_fished: true,
+                    gear_details: {
+                      select: {
+                        gear_code: true,
+                        detail_name: true,
+                        detail_value: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+      
+            sense_lastw: {
+              select: {
+                gear_code: true,
+                days_fished: true,
+              },
+            },
           },
         });
-    
-        return forms.map(form => ({
-          form_id: form.form_id,
-          user_id: form.user_id,
-          port_id: form.port_id,
-          period_date: form.period_date,
-          fisher_name: form.fisher_name,
-          creation_time: form.creation_time,
+      
+        return forms.map((form) => ({
+          form: {
+            form_id: form.form_id,
+            user_id: form.user_id,
+            port_id: form.port_id,
+            fisher_name: form.fisher_name,
+            period_date: form.period_date,
+            boat_detail: form.boat_detail,
+          },
+      
           ports: form.ports,
           boat_details: form.boat_details,
+      
+          landing: form.landing.length > 0
+            ? {
+                latitude: form.landing[0].latitude.toNumber(), 
+                longitude: form.landing[0].longitude.toNumber(),
+              }
+            : undefined,
+      
+          fish: form.landing.length > 0 && form.landing[0].fish
+            ? form.landing[0].fish
+            : [],
+      
+          effort: form.landing.length > 0 && form.landing[0].effort_today.length > 0
+            ? {
+                hours_fished: form.landing[0].effort_today[0].hours_fished,
+              }
+            : undefined,
+      
+          gearDetail: form.landing.length > 0 &&
+            form.landing[0].effort_today.length > 0 &&
+            form.landing[0].effort_today[0].gear_details
+            ? form.landing[0].effort_today[0].gear_details
+            : [],
+      
+          lastw: form.sense_lastw.length > 0 ? form.sense_lastw : [],
         }));
-    }
+      }
+      
+      
     
 
     async getFormById(id: number): Promise<GetAllFormInterface> {

@@ -2,7 +2,7 @@ import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {FormService} from "./form.service";
 import {CreateFormDto, FormIdDto, UpdateFormDto,} from "./DTO/index";
 import {idDTO} from "../../shared/dto/id.dto";
-import { GetUserFormsInterface } from "./interface/GetUserForms.interface";
+import { GetTopFormsInterface } from "./interface/index";
 
 @Controller('api/dev/form')
 export class FormController {
@@ -19,11 +19,13 @@ export class FormController {
         return this.formService.getFormById(form_id.id);
     }
 
-    @Get("/top/:user_id") 
-    async getTopFormsByUser(@Param('user_id') user_id: number): Promise<GetUserFormsInterface[]> {
-      console.log("Received request for top 20 forms of user ID:", user_id);
-      return this.formService.getTopFormsByUser(user_id);
+    @Get("/top/:user_id")
+    async getTopFormsByUser(@Param("user_id") id: number): Promise<GetTopFormsInterface[]> {
+        console.log("Received request for top 20 forms of user ID:", id);
+        return this.formService.getTopFormsByUser(id);
     }
+    
+
 
 
     @Post('/create/form')

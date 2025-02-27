@@ -3,14 +3,14 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface PortContextType {
-  selectedPort: string;
-  setSelectedPort: (port: string) => void;
+  selectedPort: number | null;
+  setSelectedPort: (port: number | null) => void;
 }
 
 const PortContext = createContext<PortContextType | undefined>(undefined);
 
 export function PortProvider({ children }: { children: ReactNode }) {
-  const [selectedPort, setSelectedPort] = useState<string>('');
+  const [selectedPort, setSelectedPort] = useState<number | null>(null);
 
   return (
     <PortContext.Provider value={{ selectedPort, setSelectedPort }}>

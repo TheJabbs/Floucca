@@ -36,14 +36,6 @@ const Navbar: React.FC = () => {
                 >
                     Submission History
                 </Link>
-                <Link
-                    href="/stats"
-                    className={`${
-                        pathname === '/stats' ? 'text-blue-600 font-semibold' : 'text-gray-800'
-                    } font-medium hover:text-blue-600`}
-                >
-                    Stats
-                </Link>
             </div>
         </nav>
     );

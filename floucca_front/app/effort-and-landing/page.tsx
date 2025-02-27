@@ -5,15 +5,17 @@ import { useForm } from "react-hook-form";
 import BoatInfo from "@/components/forms-c/boat-form";
 import EffortToday from "@/components/forms-c/effort-today-form";
 import EffortLastWeek from "@/components/forms-c/effort-last-week-form";
+import SubmitButton from "@/components/utils/submit-button";
+import { usePort } from "@/contexts/PortContext";
+import PortDropdown from "@/components/forms-c/port-dropdown";
+import Notification from "@/components/utils/notification";
+import { submitLandingForm, LandingFormDTO } from "@/services/landingService";
+
 const MapWithMarkers = dynamic(
   () => import("@/components/forms-c/map-with-markers"),
   { ssr: false }
 );
 import FishingDetails from "@/components/forms-c/fishing-details-form";
-import SubmitButton from "@/components/utils/submit-button";
-import { usePort } from "@/contexts/PortContext";
-import PortDropdown from "@/components/forms-c/port-dropdown"; 
-import { CheckCircle, XCircle } from "lucide-react";
 
 // Form interfaces
 interface BoatData {
@@ -63,7 +65,7 @@ interface FishingDetailsData {
 
 interface LandingsForm {
   LandingFormDTO: {
-    port: string; 
+    port: number | null;
     boatData: BoatData;
     effortTodayData: EffortTodayData;
     effortLastWeekData: EffortLastWeekData;
@@ -75,20 +77,20 @@ interface LandingsForm {
 interface FormValidation {
   port: boolean;
   boatInfo: boolean;
-  effortToday: boolean | null; 
-  effortLastWeek: boolean | null; 
-  location: boolean | null; 
+  effortToday: boolean | null;
+  effortLastWeek: boolean | null;
+  location: boolean | null;
   fishingDetails: boolean | null;
 }
 
 interface FormNotification {
-  type: 'success' | 'error';
+  type: "success" | "error";
   message: string;
 }
 
 function Page() {
-  const {selectedPort} = usePort();
-  
+  const { selectedPort } = usePort();
+
   const defaultValues = {
     LandingFormDTO: {
       port: selectedPort,
@@ -113,32 +115,37 @@ function Page() {
       },
     },
   };
-  
+
   const {
     handleSubmit,
     setValue,
     reset,
     formState: { isSubmitting },
   } = useForm<LandingsForm>({
-    defaultValues
+    defaultValues,
   });
 
   // Track dependencies for FishingDetails
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
-  const [selectedGears, setSelectedGears] = useState<{
-    gear_code: number;
-    gear_details: { detail_name: string; detail_value: string }[];
-  }[]>([]);
-  
+  const [selectedGears, setSelectedGears] = useState<
+    {
+      gear_code: number;
+      gear_details: { detail_name: string; detail_value: string }[];
+    }[]
+  >([]);
+
   // Track if effort sections are actively being completed
   const [hasEffortToday, setHasEffortToday] = useState<boolean>(false);
   const [hasEffortLastWeek, setHasEffortLastWeek] = useState<boolean>(false);
-  
+
   // Form reset flag to trigger reset in child components
   const [resetCounter, setResetCounter] = useState(0);
-  
+
   // Notification state
-  const [notification, setNotification] = useState<FormNotification | null>(null);
+  const [notification, setNotification] = useState<FormNotification | null>(
+    null
+  );
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
   const [formValidation, setFormValidation] = useState<FormValidation>({
     port: false,
@@ -149,10 +156,13 @@ function Page() {
     fishingDetails: null,
   });
 
-  const updateValidation = (section: keyof FormValidation, isValid: boolean | null) => {
-    setFormValidation(prev => ({
+  const updateValidation = (
+    section: keyof FormValidation,
+    isValid: boolean | null
+  ) => {
+    setFormValidation((prev) => ({
       ...prev,
-      [section]: isValid
+      [section]: isValid,
     }));
   };
 
@@ -160,192 +170,262 @@ function Page() {
     if (!formValidation.port || !formValidation.boatInfo) {
       return false;
     }
-    
+
     const effortTodayValid = formValidation.effortToday === true;
     const effortLastWeekValid = formValidation.effortLastWeek === true;
     const eitherEffortFilled = effortTodayValid || effortLastWeekValid;
     const eitherEffortAttempted = hasEffortToday || hasEffortLastWeek;
-    
+
     if (eitherEffortAttempted && !eitherEffortFilled) {
       return false;
     }
-    
-    // If effort today is filled, location and fishing details must be filled
+
     if (effortTodayValid) {
-      return formValidation.location === true && formValidation.fishingDetails === true;
+      return (
+        formValidation.location === true &&
+        formValidation.fishingDetails === true
+      );
     }
-    
-    // If only effort last week is filled, no need for location or fishing details
+
     return true;
   };
 
-  // Completely reset form state
   const resetFormState = () => {
-    // Reset React Hook Form
     reset(defaultValues);
-    
-    // Reset all internal state
+
     setSelectedLocation(null);
     setSelectedGears([]);
     setHasEffortToday(false);
     setHasEffortLastWeek(false);
-    
-    // Reset validation state
+
     setFormValidation({
-      port: !!selectedPort, 
+      port: !!selectedPort,
       boatInfo: false,
       effortToday: null,
       effortLastWeek: null,
       location: null,
       fishingDetails: null,
     });
-    
-    setResetCounter(prev => prev + 1);
+
+    setResetCounter((prev) => prev + 1);
   };
 
-  // Handlers
-  const handleBoatInfoChange = useCallback((data: BoatData) => {
-    setValue("LandingFormDTO.boatData", data);
-    const isValid = !!data.fleet_owner && Object.values(data).every(val => val != null && val !== 0);
-    updateValidation('boatInfo', isValid);
-  }, [setValue]);
+  const handleCloseNotification = useCallback(() => {
+    setIsNotificationVisible(false);
+  }, []);
 
-  const handleEffortTodayChange = useCallback((data: EffortTodayData) => {
-    setValue("LandingFormDTO.effortTodayData", data);
-    
-    // Check if any meaningful data has been entered
-    const hasData = data.hours_fished > 0 || data.gear_entries.length > 0;
-    setHasEffortToday(hasData);
-    
-    // Set validation status
-    const isValid = hasData ? (data.hours_fished > 0 && data.gear_entries.length > 0) : null;
-    updateValidation('effortToday', isValid);
-    
-    // Update gear selection for fishing details
-    if (hasData) {
-      setSelectedGears(data.gear_entries);
-    } else {
-      setSelectedGears([]);
-    }
-    
-    // Update location and fishing details validation requirements based on effort today
-    if (!hasData) {
-      updateValidation('location', null);
-      updateValidation('fishingDetails', null);
-    }
-  }, [setValue]);
+  const handleBoatInfoChange = useCallback(
+    (data: BoatData) => {
+      setValue("LandingFormDTO.boatData", data);
+      const isValid =
+        !!data.fleet_owner &&
+        Object.values(data).every((val) => val != null && val !== 0);
+      updateValidation("boatInfo", isValid);
+    },
+    [setValue]
+  );
 
-  const handleEffortLastWeekChange = useCallback((data: EffortLastWeekData) => {
-    setValue("LandingFormDTO.effortLastWeekData", data);
-    const hasData = data.gear_entries.length > 0;
-    setHasEffortLastWeek(hasData);
-    const isValid = hasData ? true : null;
-    updateValidation('effortLastWeek', isValid);
-  }, [setValue]);
+  const handleEffortTodayChange = useCallback(
+    (data: EffortTodayData) => {
+      setValue("LandingFormDTO.effortTodayData", data);
 
-  const handleLocationsChange = useCallback((data: MapLocation|null) => {
-    setValue("LandingFormDTO.location", data);
-    setSelectedLocation(data);
-    
-    // Only validate if effort today is being filled
-    if (hasEffortToday) {
-      updateValidation('location', !!data);
-    }
-  }, [setValue, hasEffortToday]);
+      const hasData = data.hours_fished > 0 || data.gear_entries.length > 0;
+      setHasEffortToday(hasData);
 
-  const handleFishingDetailsChange = useCallback((data: FishingDetailsData) => {
-    setValue("LandingFormDTO.fishingDetails", data);
-    
-    // Only validate if effort today is being filled
-    if (hasEffortToday) {
-      const isValid = data.fish_entries.length > 0;
-      updateValidation('fishingDetails', isValid);
-    }
-  }, [setValue, hasEffortToday]);
+      const isValid = hasData
+        ? data.hours_fished > 0 && data.gear_entries.length > 0
+        : null;
+      updateValidation("effortToday", isValid);
+
+      if (hasData) {
+        setSelectedGears(data.gear_entries);
+      } else {
+        setSelectedGears([]);
+      }
+
+      if (!hasData) {
+        updateValidation("location", null);
+        updateValidation("fishingDetails", null);
+      }
+    },
+    [setValue]
+  );
+
+  const handleEffortLastWeekChange = useCallback(
+    (data: EffortLastWeekData) => {
+      setValue("LandingFormDTO.effortLastWeekData", data);
+      const hasData = data.gear_entries.length > 0;
+      setHasEffortLastWeek(hasData);
+      const isValid = hasData ? true : null;
+      updateValidation("effortLastWeek", isValid);
+    },
+    [setValue]
+  );
+
+  const handleLocationsChange = useCallback(
+    (data: MapLocation | null) => {
+      setValue("LandingFormDTO.location", data);
+      setSelectedLocation(data);
+
+      // Only validate if effort today is being filled
+      if (hasEffortToday) {
+        updateValidation("location", !!data);
+      }
+    },
+    [setValue, hasEffortToday]
+  );
+
+  const handleFishingDetailsChange = useCallback(
+    (data: FishingDetailsData) => {
+      setValue("LandingFormDTO.fishingDetails", data);
+
+      // Only validate if effort today is being filled
+      if (hasEffortToday) {
+        const isValid = data.fish_entries.length > 0;
+        updateValidation("fishingDetails", isValid);
+      }
+    },
+    [setValue, hasEffortToday]
+  );
 
   const onSubmit = async (formData: LandingsForm) => {
     try {
-      // Simulating API call
-      console.log("Submitting form data:", formData);
-      
-      // Wait for submission (simulate network delay)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      setNotification(null);
+      setIsNotificationVisible(false);
+
+      // Extract data from the form
+      const {
+        port,
+        boatData,
+        effortTodayData,
+        effortLastWeekData,
+        location,
+        fishingDetails,
+      } = formData.LandingFormDTO;
+
+      if (!port) {
+        throw new Error("Port must be selected");
+      }
+
+      // Structure data according to the CreateFormLandingDto expected by the backend
+      const apiPayload: LandingFormDTO = {
+        form: {
+          port_id: port,
+          user_id: 1,
+          fisher_name: boatData.fleet_owner,
+        },
+        boat_details: {
+          fleet_owner: boatData.fleet_owner,
+          fleet_registration: boatData.fleet_registration,
+          fleet_size: boatData.fleet_size,
+          fleet_crew: boatData.fleet_crew,
+          fleet_max_weight: boatData.fleet_max_weight,
+          fleet_length: boatData.fleet_length,
+        },
+        landing: {
+          latitude: location?.lat || 0,
+          longitude: location?.lng || 0,
+        },
+      };
+
+      // Only include landing data if effort today is filled
+      if (hasEffortToday) {
+        apiPayload.fish = fishingDetails.fish_entries.map((entry) => ({
+          specie_code: entry.specie_code,
+          gear_code: entry.gear_code,
+          fish_weight: entry.fish_weight,
+          fish_length: entry.fish_length,
+          fish_quantity: entry.fish_quantity,
+        }));
+
+        apiPayload.effort = {
+          hours_fished: effortTodayData.hours_fished,
+        };
+
+        apiPayload.gearDetail = effortTodayData.gear_entries.flatMap((gear) =>
+          gear.gear_details.map((detail) => ({
+            gear_code: gear.gear_code,
+            detail_name: detail.detail_name,
+            detail_value: detail.detail_value,
+          }))
+        );
+      }
+
+      if (hasEffortLastWeek) {
+        apiPayload.lastw = effortLastWeekData.gear_entries.map((gear) => ({
+          gear_code: gear.gear_code,
+          days_fished: gear.days_used,
+        }));
+      }
+
+      console.log("Submitting API payload:", apiPayload);
+
+      // Send data to the API endpoint
+      const response = await submitLandingForm(apiPayload);
+
+      // Handle successful response
+      console.log("API Response:", response);
+
       // Show success message
       setNotification({
-        type: 'success',
-        message: 'Form submitted successfully! Your data has been recorded.'
+        type: "success",
+        message:
+          "Form submitted successfully! Your data has been recorded.",
       });
-      
-      // Reset the form and state
+      setIsNotificationVisible(true);
+
+      // Reset the form after successful submission
       resetFormState();
-      
-      // Clear notification after 5 seconds
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
-      
     } catch (error) {
       console.error("Error submitting form:", error);
+
+      // Show more detailed error message if available
+      let errorMessage = "There was an error submitting the form. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       setNotification({
-        type: 'error',
-        message: 'There was an error submitting the form. Please try again.'
+        type: "error",
+        message: errorMessage,
       });
-      
-      // Clear error notification after 5 seconds
-      setTimeout(() => {
-        setNotification(null);
-      }, 5000);
+      setIsNotificationVisible(true);
     }
   };
 
   useEffect(() => {
-    setValue('LandingFormDTO.port', selectedPort);
-    updateValidation('port', !!selectedPort);
+    setValue("LandingFormDTO.port", selectedPort);
+    updateValidation("port", !!selectedPort);
   }, [selectedPort, setValue]);
 
   return (
     <div className="container mx-auto p-6">
-      {notification && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
-          notification.type === 'success' 
-            ? 'bg-green-100 text-green-800 border border-green-200' 
-            : 'bg-red-100 text-red-800 border border-red-200'
-        }`}>
-          {notification.type === 'success' 
-            ? <CheckCircle className="h-5 w-5" /> 
-            : <XCircle className="h-5 w-5" />
-          }
-          <p>{notification.message}</p>
-        </div>
-      )}
-      
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Landing Form</h1>
         <div className="w-72">
-          <PortDropdown/>
+          <PortDropdown />
         </div>
       </div>
-      
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <BoatInfo
           required={true}
           onChange={handleBoatInfoChange}
           key={`boat-info-${resetCounter}`}
         />
-        
-        <EffortToday
-          required={false}
-          onChange={handleEffortTodayChange}
-          key={`effort-today-${resetCounter}`}
-        />
-        
+
         <EffortLastWeek
           required={false}
           onChange={handleEffortLastWeekChange}
           key={`effort-last-week-${resetCounter}`}
         />
-        
+
+        <EffortToday
+          required={false}
+          onChange={handleEffortTodayChange}
+          key={`effort-today-${resetCounter}`}
+        />
+
         {/* Conditionally show these sections only if Effort Today has data */}
         {hasEffortToday && (
           <>
@@ -354,7 +434,7 @@ function Page() {
               onChange={handleLocationsChange}
               key={`map-markers-${resetCounter}`}
             />
-            
+
             <FishingDetails
               required={true}
               selectedLocation={selectedLocation}
@@ -371,6 +451,15 @@ function Page() {
           label="Submit"
         />
       </form>
+
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          isVisible={isNotificationVisible}
+          onClose={handleCloseNotification}
+        />
+      )}
     </div>
   );
 }

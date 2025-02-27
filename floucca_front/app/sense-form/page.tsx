@@ -25,11 +25,11 @@ interface GearFormValues {
 interface FleetSensesForm {
   boatData: BoatData;
   gearData: GearFormValues[];
-  port: string;
+  port: number | null;
 }
 
 function Page() {
-  const {selectedPort} = usePort();
+  const { selectedPort } = usePort();
   const {
     handleSubmit,
     setValue,
@@ -53,7 +53,7 @@ function Page() {
   useEffect(() => {
     setValue('port', selectedPort);
     checkFormValidity(getValues('boatData'), getValues('gearData'), selectedPort);
-  }, [selectedPort, setValue]);
+  }, [selectedPort, setValue, getValues]);
 
   const [isValid, setIsValid] = useState(false);
 
@@ -67,41 +67,66 @@ function Page() {
     checkFormValidity(null, data, getValues("port"));
   };
 
-  const handlePortChange = (port: string) => {
-    setValue("port", port);
-    checkFormValidity(getValues("boatData"), getValues("gearData"), port);
-  };
-
   const checkFormValidity = (
     boatData: BoatData | null,
     gearData: GearFormValues[] | null,
-    port: string
+    port: number | null
   ) => {
     const currentBoatData = boatData || (getValues()?.boatData as BoatData);
     const currentGearData =
       gearData || (getValues()?.gearData as GearFormValues[]);
-    const currentPort = port || getValues("port");
+    const currentPort = port !== undefined ? port : getValues("port");
 
-    const isBoatValid = Object.values(currentBoatData).every(
-      (val) => val !== null && val !== undefined && val !== ""
-    );
+    const isBoatValid = currentBoatData && 
+      !!currentBoatData.fleet_owner && 
+      Object.values(currentBoatData).every(
+        (val) => val !== null && val !== undefined && val !== ""
+      );
+      
     const isGearValid =
       currentGearData?.length > 0 &&
       currentGearData.every((gear) => gear.gear_code && gear.months.length > 0);
-    const isPortValid = currentPort !== "";
+      
+    const isPortValid = !!currentPort;
 
     setIsValid(isBoatValid && isGearValid && isPortValid);
   };
 
   const onSubmit = async (formData: FleetSensesForm) => {
-    console.log("Submitting form data:", formData);
+    try {
+      console.log("Submitting form data:", formData);
+      
+      const apiPayload = {
+        formDto: {
+          port_id: formData.port,
+          user_id: 1, 
+          fisher_name: formData.boatData.fleet_owner,
+        },
+        boatDetailDto: formData.boatData,
+        gearUsageDto: formData.gearData.map(gear => ({
+          gear_code: gear.gear_code,
+          months: gear.months
+        }))
+      };
+      
+      console.log("API payload:", apiPayload);
+      
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      alert("Fleet senses data submitted successfully!");
+      
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("Error submitting form. Please try again.");
+    }
   };
 
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Fleet Senses Form</h1>
-        <div className="w-72"> {/* Fixed width container for dropdown */}
+        <div className="w-72">
           <PortDropdown/>
         </div>
       </div>

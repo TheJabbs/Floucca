@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
-import { Trash2, Plus} from "lucide-react";
+import { Trash2, Plus, Search, X } from "lucide-react";
+import { getSpecies } from "@/services/landingService";
 
 interface MapLocation {
   id: number;
@@ -46,12 +47,10 @@ interface FormValues {
   fish_entries: FishEntry[];
 }
 
-const FISH_SPECIES = [
-  { specie_code: 1, specie_name: "Tuna" },
-  { specie_code: 2, specie_name: "Sardine" },
-  { specie_code: 3, specie_name: "Sea Bass" },
-  { specie_code: 4, specie_name: "Mackerel" },
-];
+interface Species {
+  specie_code: number;
+  specie_name: string;
+}
 
 const FishingDetails: React.FC<FishingDetailsProps> = ({
   required = false,
@@ -59,12 +58,18 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
   selectedLocation,
   onChange,
 }) => {
+  const [speciesList, setSpeciesList] = useState<Species[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
+
   const {
     register,
     control,
     watch,
     reset,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -86,9 +91,31 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
 
   const currentValues = watch("current");
 
+  // Fetch species from API when component mounts
+  useEffect(() => {
+    const fetchSpeciesData = async () => {
+      try {
+        try {
+          const data = await getSpecies();
+          setSpeciesList(data);
+        } catch (error) {
+          console.error("Error fetching species:", error);
+        }
+      } catch (error) {
+        console.error("Error in fetchSpeciesData:", error);
+      }
+    };
+
+    fetchSpeciesData();
+  }, []);
+
   useEffect(() => {
     onChange({ fish_entries: fields });
   }, [fields, onChange]);
+
+  const filteredSpecies = speciesList.filter((s) =>
+    s.specie_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const addFishEntry = () => {
     const values = getValues("current");
@@ -103,6 +130,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       fish_quantity: Number(values.fish_quantity),
     });
 
+    // Reset form fields after adding
     reset({
       current: {
         ...values,
@@ -113,6 +141,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       },
       fish_entries: getValues("fish_entries"),
     });
+    setSelectedSpecies(null);
   };
 
   const isEntryValid = (values: FormValues["current"]) => {
@@ -126,13 +155,22 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     );
   };
 
+  const handleSpeciesSelect = (species: Species) => {
+    setValue("current.specie_code", Number(species.specie_code));
+    setSelectedSpecies(species);
+    setIsDropdownOpen(false);
+    setSearchTerm("");
+  };
+
   const getGearName = (code: number) => {
     const gear = todaysGears.find((g) => g.gear_code === code);
     return gear ? `Gear ${gear.gear_code}` : "";
   };
 
-  const getSpecieName = (code: number) =>
-    FISH_SPECIES.find((species) => species.specie_code === code)?.specie_name || "";
+  const getSpecieName = (code: number) => {
+    const species = speciesList.find((s) => s.specie_code === code);
+    return species ? species.specie_name : `Species ${code}`;
+  };
 
   if (!selectedLocation) {
     return (
@@ -185,17 +223,68 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
             <label className="block text-gray-700 text-sm font-medium mb-2">
               Fish Species {required && <span className="text-red-500">*</span>}
             </label>
-            <select
-              {...register("current.specie_code")}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="">Select Species</option>
-              {FISH_SPECIES.map((species) => (
-                <option key={species.specie_code} value={species.specie_code}>
-                  {species.specie_name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <div 
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white flex items-center justify-between cursor-pointer"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                {selectedSpecies ? (
+                  <div className="flex items-center justify-between w-full">
+                    <span>{selectedSpecies.specie_name}</span>
+                    <button 
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSpecies(null);
+                        setValue("current.specie_code", 0); // Use 0 instead of undefined
+                      }}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-gray-500">Search for species...</span>
+                )}
+              </div>
+              
+              {isDropdownOpen && (
+                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div className="sticky top-0 bg-white p-2 border-b">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search species..."
+                        className="w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <Search className="absolute left-2 top-2.5 text-gray-400" size={16} />
+                    </div>
+                  </div>
+                  
+                  {filteredSpecies.length === 0 ? (
+                    <div className="p-3 text-center text-gray-500">No species found</div>
+                  ) : (
+                    filteredSpecies.map((species) => (
+                      <div
+                        key={species.specie_code}
+                        className="px-3 py-2 hover:bg-blue-50 cursor-pointer"
+                        onClick={() => handleSpeciesSelect(species)}
+                      >
+                        {species.specie_name}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+              
+              <input
+                type="hidden"
+                {...register("current.specie_code")}
+              />
+            </div>
           </div>
         </div>
 
@@ -257,11 +346,13 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-900">{getSpecieName(entry.specie_code)}</span>
-                    </div>
-                      <span className="text-gray-600">
-                        {entry.fish_weight}kg, {entry.fish_quantity} fish
+                      <span className="text-gray-900">
+                        {getSpecieName(entry.specie_code)}
                       </span>
+                    </div>
+                    <span className="text-gray-600">
+                      {entry.fish_weight}kg, {entry.fish_quantity} fish
+                    </span>
                     <div className="flex items-center gap-2">
                       <span className="text-gray-600">{entry.fish_length}cm</span>
                     </div>

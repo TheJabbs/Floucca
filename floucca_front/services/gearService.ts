@@ -7,7 +7,7 @@ export interface Gear {
     equipment_name: string;
 }
 
-const API_BASE_URL = "http://localhost:3000/api/dev/gear";  
+const API_BASE_URL = "http://localhost:4000/api/dev/gear";  
 
 // Function to fetch all gears from the backend
 export const getAllGears = async (): Promise<Gear[]> => {

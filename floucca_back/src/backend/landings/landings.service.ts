@@ -250,6 +250,11 @@ export class LandingsService {
 
             select: {
                 form_id: true,
+                form: {
+                    select:{
+                        port_id: true
+                    }
+                },
                 fish: {
                     select: {
                         specie_code: true,
@@ -260,11 +265,20 @@ export class LandingsService {
             }
         })
 
+        // transform landings into GetFilteredInterface
+        const landingsFiltered = landings.map(landing => {
+            return {
+                form_id: landing.form_id,
+                port_id: landing.form.port_id,
+                fish: landing.fish
+            }
+        })
+
         if(!landings || landings.length === 0){
             throw new NotFoundException('No landings found')
         }
 
-        return landings
+        return landingsFiltered
     }
 
 

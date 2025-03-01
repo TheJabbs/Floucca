@@ -23,7 +23,7 @@ export default function FormHeader() {
               University of Balamand
             </p>
             <p className="text-sm text-gray-600">Koura Campus</p>
-            <p className="text-sm text-gray-600">example@gmail.com</p>
+            <p className="text-sm text-gray-600">example@balamand.edu.lb</p>
             <p className="text-sm text-gray-600">+961 000 000</p>
           </div>
         </div>

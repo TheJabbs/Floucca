@@ -49,7 +49,7 @@ const SubmissionHistory = () => {
       try {
         const userId = 1;
         
-        const response = await fetch(`http://localhost:3000/api/dev/form/top/${userId}`);
+        const response = await fetch(`http://localhost:4000/api/dev/form/top/${userId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch submissions');
         }

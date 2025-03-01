@@ -2,9 +2,9 @@ import {IsDecimal, IsInt, IsPositive} from "class-validator";
 import {Optional} from "@nestjs/common";
 
 export class CreateLandingDto {
+    @Optional()
     @IsInt()
     @IsPositive()
-    @Optional()
     form_id?: number;
 
     @IsDecimal()

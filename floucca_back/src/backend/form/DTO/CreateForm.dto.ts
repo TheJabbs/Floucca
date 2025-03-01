@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import {IsDate, IsInt, IsNotEmpty, IsNumber, IsPositive, IsString} from "class-validator";
+import {IsDate, IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString} from "class-validator";
 
 export class CreateFormDto {
     @IsNumber()
@@ -10,11 +10,13 @@ export class CreateFormDto {
     @IsPositive()
     port_id   :    number;
     @IsDate()
-    period_date : Date;
+    @IsOptional()
+    period_date ?: Date;
 
     @IsInt()
     @IsPositive()
     @IsNotEmpty()
+    @IsOptional()
     boat_detail?: number
 
     @IsString()

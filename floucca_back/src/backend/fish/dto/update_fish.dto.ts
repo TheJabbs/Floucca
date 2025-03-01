@@ -1,26 +1,30 @@
 import {IsDecimal, IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive} from "class-validator";
 
 export class UpdateFishDto {
+    @IsOptional()
     @IsNotEmpty()
     @IsNumber()
-    @IsOptional()
     specie_code?: number;
+    @IsOptional()
     @IsNotEmpty()
     @IsNumber()
-    @IsOptional()
     landing_id?: number;
+    @IsOptional()
     @IsNotEmpty()
     @IsNumber()
-    @IsOptional()
     gear_code?: number;
-    @IsDecimal()
     @IsOptional()
+    @IsDecimal()
     fish_weight?: number;
-    @IsDecimal()
     @IsOptional()
+    @IsDecimal()
     fish_length?: number;
+    @IsOptional()
     @IsPositive()
     @IsInt()
-    @IsOptional()
     fish_quantity?: number
+    @IsOptional()
+    @IsPositive()
+    @IsDecimal()
+    price: number
 }

@@ -47,6 +47,7 @@ model fish {
   fish_weight   Float?  @db.Float
   fish_length   Float?  @db.Float
   fish_quantity Int?
+  price         Float?  @db.Float
   specie        specie  @relation(fields: [specie_code], references: [specie_code], onDelete: Cascade, map: "fish_ibfk_1")
   landing       landing @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "fish_ibfk_2")
   gear          gear?   @relation(fields: [gear_code], references: [gear_code], onUpdate: SetNull, map: "fish_ibfk_3")
@@ -136,7 +137,7 @@ model landing {
 }
 
 model period {
-  period_date   DateTime @id @db.Date
+  period_date   DateTime @id @default(dbgenerated("(now())")) @db.Date
   period_status String   @default("B") @db.Char(1)
   form          form[]
 }
@@ -179,6 +180,7 @@ model sense_lastw {
 model specie {
   specie_code        Int     @id
   specie_name        String  @db.VarChar(50)
+  specie_name_ar     String? @db.VarChar(45)
   specie_description String? @default("No description") @db.VarChar(500)
   specie_avg_weight  Float   @db.Float
   specie_avg_length  Float   @db.Float

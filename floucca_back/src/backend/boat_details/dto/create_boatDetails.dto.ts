@@ -8,28 +8,27 @@ import {
 
 export class CreateBoatDetailsDto {
 
-
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   fleet_owner?: string = 'Unknown';
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   fleet_size?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   fleet_crew?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   fleet_max_weight?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   fleet_length?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   fleet_registration?: number;
 

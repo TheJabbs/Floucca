@@ -146,69 +146,53 @@ export class FleetService {
     }
 
     async createFleetSensesForm(content: SenseFormContentInterface): Promise<ResponseMessage<any>> {
-        const newestPeriod = await this.prisma.period.findFirst({
-            orderBy: {
-                period_date: 'desc'
-            }
-        });
-
-        if (!newestPeriod) {
-            await this.prisma.period.create({
-                data: {
-                    period_date: new Date()
-                }
-            })
-        }
-
-        content.form.period_date = newestPeriod.period_date;
-        const boatDetails = await this.prisma.boat_details.create({
-            data: content.boatDetails
-        });
-
-
-        if (boatDetails) {
-            content.form.boat_detail = boatDetails.boat_id
-            const form = await this.prisma.form.create({
-                data: content.form
+        return await this.prisma.$transaction(async (prisma) => {
+            // Get the latest period or create one if it doesn't exist
+            let newestPeriod = await prisma.period.findFirst({
+                orderBy: { period_date: 'desc' }
             });
 
-            if (form) {
-                const sense = await this.prisma.fleet_senses.create({
-                    data: {
-                        form_id: form.form_id
-                    }
+            if (!newestPeriod) {
+                newestPeriod = await prisma.period.create({
+                    data: { period_date: new Date() }
                 });
+            }
 
-                if (sense) {
-                    for (const gear of content.gearUsage) {
-                        await this.prisma.gear_usage.create({
+            content.form.period_date = newestPeriod.period_date;
+
+            // Create boat details
+            const boatDetails = await prisma.boat_details.create({ data: content.boatDetails });
+            content.form.boat_detail = boatDetails.boat_id;
+
+            // Create form
+            const form = await prisma.form.create({ data: content.form });
+            if (!form) throw new Error("Failed to create form");
+
+            // Create fleet senses entry
+            const sense = await prisma.fleet_senses.create({ data: { form_id: form.form_id } });
+
+            // Create gear usage entries in parallel
+            if (sense && content.gearUsage.length > 0) {
+                await Promise.all(
+                    content.gearUsage.map(gear =>
+                        prisma.gear_usage.create({
                             data: {
                                 fleet_senses_id: sense.fleet_senses_id,
                                 gear_code: gear.gear_code,
                                 months: gear.months
                             }
-                        });
-                    }
-                }
-            } else {
-                await this.prisma.boat_details.delete({
-                    where: {
-                        boat_id: boatDetails.boat_id
-                    }
-                });
+                        })
+                    )
+                );
             }
-        } else {
-            await this.prisma.boat_details.delete({
-                where: {
-                    boat_id: boatDetails.boat_id
-                }
-            });
-        }
 
-        return {
-            message: 'Fleet senses form created'
-        }
+            return { message: 'Fleet senses form created successfully' };
+        }).catch(async (error) => {
+            console.error("Transaction failed:", error);
+            return { message: `Failed to create fleet senses form: ${error.message}` };
+        });
     }
+
 
 
 }

@@ -83,135 +83,88 @@ export class LandingsService {
     }
 
     async createLandingForm(l: CreateFormLandingDto): Promise<ResponseMessage<any>> {
-
-        let fishError: number = 0;
-        let gearError: number = 0;
-        let senseError: number = 0;
+        let fishError = 0, gearError = 0, senseError = 0;
 
         let newPeriod = await this.prisma.period.findFirst({
-            orderBy: {
-                period_date: 'desc'
-            }
-        })
-
-        if (!newPeriod) {
-            newPeriod = await this.prisma.period.create({
-                data: {
-                    period_date: new Date()
-                },
-                select: {
-                    period_date: true,
-                    period_status: true
-                }
-            });
-        }
+            orderBy: { period_date: 'desc' }
+        }) || await this.prisma.period.create({
+            data: { period_date: new Date() },
+            select: { period_date: true, period_status: true }
+        });
 
         l.form.period_date = newPeriod.period_date;
 
-        const boatDetails = await this.prisma.boat_details.create({
-            data: l.boat_details
-        })
+        return await this.prisma.$transaction(async (prisma) => {
+            const boatDetails = await prisma.boat_details.create({ data: l.boat_details });
+            l.form.boat_detail = boatDetails.boat_id;
 
-        if (boatDetails) {
-            l.form.boat_detail = boatDetails.boat_id
-            const form = await this.prisma.form.create({
-                data: l.form
-            })
+            const form = await prisma.form.create({ data: l.form });
+            if (!form) throw new Error("Failed to create form data missing");
 
-            if (form && l.landing) {
-                l.landing.form_id = form.form_id
-                const landing = await this.prisma.landing.create({
-                    data: l.landing
-                })
+            l.landing.form_id = form.form_id;
+            const landing = await prisma.landing.create({ data: l.landing });
 
-                if (l.effort && landing) {
-                    l.effort.landing_id = landing.landing_id
-                    const effort = await this.prisma.effort_today.create({
-                        data: l.effort
-                    })
+            const [gears, species] = await Promise.all([
+                prisma.gear.findMany({ select: { gear_code: true } }),
+                prisma.specie.findMany({ select: { specie_code: true } })
+            ]);
 
-                    for (const g of l.gearDetail) {
-                        const gear = await this.prisma.gear.findUnique({
-                            where: {
-                                gear_code: g.gear_code
-                            }
-                        })
-
-                        if (gear) {
-                            g.effort_today_id = effort.effort_today_id
-                            await this.prisma.gear_details.create({
-                                data: g
-                            })
-                        }else{
-                            gearError++;
-                        }
-                    }
-
-                    for (const f of l.fish) {
-                        const specie = await this.prisma.specie.findUnique({
-                            where: {
-                                specie_code: f.specie_code
-                            }
-                        })
-
-                        const gear = await this.prisma.gear.findUnique({
-                            where: {
-                                gear_code: f.gear_code
-                            }
-                        })
-
-
-                        if (specie && gear) {
-                            f.landing_id = landing.landing_id
-                            await this.prisma.fish.create({
-                                data: f
-                            })
-                        }else{
-                            fishError++;
-                        }
-                    }
-                }
-
-                if (l.lastw) {
-                    for (const s of l.lastw) {
-                        const gear = await this.prisma.gear.findUnique({
-                            where: {
-                                gear_code: s.gear_code
-                            }
-                        })
-
-                        if (gear) {
-                            s.form_id = form.form_id
-                            await this.prisma.sense_lastw.create({
-                                data: s
-                            })
-                        }else{
-                            senseError++;
-                        }
-                    }
-                }
-
-            } else {
-                await this.prisma.boat_details.delete({
-                    where: {
-                        boat_id: boatDetails.boat_id
-                    }
-                })
+            let effort: any = null;
+            if (l.effort) {
+                l.effort.landing_id = landing.landing_id;
+                effort = await prisma.effort_today.create({ data: l.effort });
             }
-        } else {
-            await this.prisma.boat_details.delete({
-                where: {
-                    boat_id: boatDetails.boat_id
-                }
-            })
-        }
 
-        return {
-            message: 'Landing form created successfully. Errors: Fish: ' + fishError + ' Gear: ' + gearError + ' Sense: ' + senseError,
-            data: null
-        }
+            if (l.gearDetail && effort) {
+                const gearDetailsPromises = l.gearDetail.map(async (g) => {
+                    if (gears.some(gear => gear.gear_code === g.gear_code)) {
+                        g.effort_today_id = effort.effort_today_id;
+                        return prisma.gear_details.create({ data: g });
+                    } else {
+                        gearError++;
+                    }
+                });
+                await Promise.all(gearDetailsPromises);
+            }
 
+            if (l.fish) {
+                const fishPromises = l.fish.map(async (f) => {
+                    if (
+                        species.some(specie => specie.specie_code === f.specie_code) &&
+                        gears.some(gear => gear.gear_code === f.gear_code)
+                    ) {
+                        f.landing_id = landing.landing_id;
+                        return prisma.fish.create({ data: f });
+                    } else {
+                        fishError++;
+                    }
+                });
+                await Promise.all(fishPromises);
+            }
+
+            if (l.lastw) {
+                const lastwPromises = l.lastw.map(async (s) => {
+                    if (gears.some(gear => gear.gear_code === s.gear_code)) {
+                        s.form_id = form.form_id;
+                        return prisma.sense_lastw.create({ data: s });
+                    } else {
+                        senseError++;
+                    }
+                });
+                await Promise.all(lastwPromises);
+            }
+
+            return {
+                message: `Landing form created successfully. Errors - Fish: ${fishError}, Gear: ${gearError}, Sense: ${senseError}`,
+                data: null
+            };
+        }).catch(async (error) => {
+            // Cleanup if transaction fails
+            await this.prisma.boat_details.delete({ where: { boat_id: l.form.boat_detail } });
+            return { message: `Failed to create landing form: ${error.message}`, data: null };
+        });
     }
+
 
     async getLandingsByFilter(filter: GeneralFilterDto): Promise<GetFilteredInterface[]>{
         const {

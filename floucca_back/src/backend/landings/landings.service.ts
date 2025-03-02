@@ -118,7 +118,7 @@ export class LandingsService {
                 data: l.form
             })
 
-            if (form) {
+            if (form && l.landing) {
                 l.landing.form_id = form.form_id
                 const landing = await this.prisma.landing.create({
                     data: l.landing

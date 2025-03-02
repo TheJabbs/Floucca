@@ -9,16 +9,18 @@ export class CreateFishDto {
     @IsNumber()
     landing_id: number;
     @IsNotEmpty()
+    @IsPositive()
     @IsNumber()
     gear_code: number;
-    @IsDecimal()
+    @IsNumber()
     fish_weight?: number;
-    @IsDecimal()
+    @IsPositive()
+    @IsNumber()
     fish_length?: number;
     @IsPositive()
     @IsInt()
     fish_quantity?: number
     @IsPositive()
-    @IsDecimal()
+    @IsNumber()
     price:number
 }

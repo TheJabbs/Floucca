@@ -1,17 +1,14 @@
-import {IsDecimal, IsInt, IsPositive} from "class-validator";
-import {Optional} from "@nestjs/common";
+import {IsDecimal, IsInt, IsOptional, IsPositive} from "class-validator";
 
 export class CreateLandingDto {
-    @Optional()
+    @IsOptional()
     @IsInt()
     @IsPositive()
     form_id?: number;
 
-    @IsDecimal()
     @IsPositive()
     latitude: number;
 
-    @IsDecimal()
     @IsPositive()
     longitude: number;
 }

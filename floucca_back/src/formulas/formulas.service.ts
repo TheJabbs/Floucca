@@ -8,6 +8,7 @@ import { idDTO } from "../shared/dto/id.dto";
 import { getDaysInMonthByDate } from "../utils/date/getDaysInAMonth";
 import { GearService } from "../backend/gear/gear.service";
 import {GetFilteredInterface} from "../backend/landings/interface/getFiltered.interface";
+import {mapLandingsMapper} from "./utils/mapLandings.mapper";
 
 @Injectable()
 export class FormulasService {
@@ -26,16 +27,7 @@ export class FormulasService {
     async getCpue(filter: GeneralFilterDto) {
         const landings = await this.landingsService.getLandingsByFilter(filter);
 
-        let mapper : Map<number, GetFilteredInterface[]> = new Map();
-
-        // mapping the landings to the port_id
-        landings.forEach(landing => {
-            if (mapper.has(landing.port_id)) {
-                mapper.get(landing.port_id).push(landing);
-            } else {
-                mapper.set(landing.port_id, [landing]);
-            }
-        });
+        let mapper : Map<number, GetFilteredInterface[]> = mapLandingsMapper(landings);
 
         /**
          *  for each port we calculate the total fish weight abd divide by the

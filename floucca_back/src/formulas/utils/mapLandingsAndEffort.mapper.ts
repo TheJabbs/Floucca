@@ -1,6 +1,6 @@
 import {GetFilteredInterface} from "../../backend/landings/interface/getFiltered.interface";
 
-export function mapLandingsMapper(landings: GetFilteredInterface[]): Map<number, GetFilteredInterface[]> {
+export function mapLandingsAndEffortMapper(landings: any[]): Map<number, any[]> {
     let mapper : Map<number, GetFilteredInterface[]> = new Map();
 
     // mapping the landings to the port_id

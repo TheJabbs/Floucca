@@ -8,8 +8,10 @@ import { idDTO } from "../shared/dto/id.dto";
 import { getDaysInMonthByDate } from "../utils/date/getDaysInAMonth";
 import { GearService } from "../backend/gear/gear.service";
 import {GetFilteredInterface} from "../backend/landings/interface/getFiltered.interface";
-import {mapLandingsMapper} from "./utils/mapLandings.mapper";
+import {mapLandingsAndEffortMapper} from "./utils/mapLandingsAndEffort.mapper";
 import {mapLandingsMapMapper} from "./utils/mapLandingsMap.mapper";
+import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/getFilteredLastW.interface";
+import {mapEffortMapMapper} from "./utils/mapEffortMap.mapper";
 
 @Injectable()
 export class FormulasService {
@@ -50,7 +52,7 @@ export class FormulasService {
         const landings = await this.landingsService.getLandingsByFilter(filter);
 
         // mapping landings by port ID (stratum) and then by species
-        let mapLandings = mapLandingsMapper(landings);
+        let mapLandings: Map<number, GetFilteredInterface[]> = mapLandingsAndEffortMapper(landings);
         let speciesMap = mapLandingsMapMapper(mapLandings);
 
         let filterList = [];
@@ -78,17 +80,28 @@ export class FormulasService {
      * Calculates the Proportion of Boats Active (PBA), which is the ratio of
      * days fished to the total number of examined days.
      */
+    //TODO: Check if this is the correct implementation
     async getPba(filter: GeneralFilterDto) {
         const data = await this.senseLastWService.getEffortsByFilter(filter);
-        let daysExamined = data.length * 7; // Assuming each data entry represents a weekly report
-        let daysFished = 0;
 
-        data.forEach(effort => {
-            daysFished += effort.days_fished;
-        });
+        let map: Map<number, GetFilteredLastWInterface[]> = mapLandingsAndEffortMapper(data);
+        let speciesMap = mapEffortMapMapper(map);
 
-        return daysFished / daysExamined;
+        let sumPba = 0;
+        let count = 0;
+
+        for (const efforts of speciesMap.values()) {
+            efforts.forEach(({ sumDaysFished, numberOfForms }) => {
+                if (numberOfForms > 0) {
+                    count++;
+                    sumPba += sumDaysFished / numberOfForms;
+                }
+            });
+        }
+
+        return count > 0 ? sumPba / count : 0;
     }
+
 
     /**
      * Computes the total fishing effort based on the number of active gears,

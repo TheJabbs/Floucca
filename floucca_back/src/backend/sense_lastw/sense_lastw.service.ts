@@ -5,7 +5,7 @@ import {GetAllSenseLastw} from './interface/getAllSense_lastw.interface';
 import {CreateSenseLastwDto} from './dto/create-sense_lastw.dto';
 import {UpdateSenseLastwDto} from './dto/update-sense_lastw.dto';
 import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
-import {GetFilteredInterface} from "./interface/getFiltered.interface";
+import {GetFilteredLastWInterface} from "./interface/getFilteredLastW.interface";
 
 @Injectable()
 export class SenseLastwService {
@@ -97,7 +97,7 @@ export class SenseLastwService {
         }
     }
 
-    async getEffortsByFilter(filter: GeneralFilterDto): Promise<GetFilteredInterface[]> {
+    async getEffortsByFilter(filter: GeneralFilterDto): Promise<GetFilteredLastWInterface[]> {
         const {
             period,
             gear_code,
@@ -125,6 +125,16 @@ export class SenseLastwService {
                     }
                 }
             },
+            select:{
+                gear_code: true,
+                days_fished: true,
+                form:{
+                    select:{
+                        form_id: true,
+                        port_id: true,
+                    }
+                }
+            }
         });
 
         if(!landings || landings.length === 0) {

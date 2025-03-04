@@ -69,37 +69,7 @@ export class FishService {
         });
     }
 
-    async getAllFishByFilter(filter: GeneralFilterDto, code: idDTO): Promise<FishInterface[]> {
-        const {
-            period,
-            port_id,
-            coop,
-            region,
-            gear_code
-        } = filter
 
-        const fish = await this.prismaService.fish.findMany({
-            where: {
-                specie_code: code.id,
-                landing: {
-                    form: {
-                        period_date: period,
-                        port_id: port_id ? {in: port_id} : undefined,
-                        ports:{
-                            coop_code: coop ? {in: coop} : undefined,
-                            coop:{
-                                region_code: region ? {in: region} : undefined
-                            }
-                        }
-                    }
-                }
-            }
-        })
-
-        if(!fish || fish.length === 0) throw new NotFoundException("No fish records found");
-
-        return fish;
-    }
 
     //===============================================
     async validate(d: any): Promise<boolean> {

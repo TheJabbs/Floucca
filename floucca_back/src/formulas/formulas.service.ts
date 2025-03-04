@@ -9,6 +9,7 @@ import { getDaysInMonthByDate } from "../utils/date/getDaysInAMonth";
 import { GearService } from "../backend/gear/gear.service";
 import {GetFilteredInterface} from "../backend/landings/interface/getFiltered.interface";
 import {mapLandingsMapper} from "./utils/mapLandings.mapper";
+import {mapLandingsMapMapper} from "./utils/mapLandingsMap.mapper";
 
 @Injectable()
 export class FormulasService {
@@ -25,6 +26,8 @@ export class FormulasService {
      * by the number of landings that match the given filter criteria.
      */
     async getCpue(filter: GeneralFilterDto) {
+        delete filter.gear_code;
+
         const landings = await this.landingsService.getLandingsByFilter(filter);
         let fishWeight = 0;
 
@@ -42,17 +45,34 @@ export class FormulasService {
      * Estimates fishing effort for a specific species by dividing the total fish weight
      * by the CPUE value obtained from the given filter criteria.
      */
-    async getEffortBySpecies(filter: GeneralFilterDto, code: idDTO) {
-        const cpue = await this.getCpue(filter);
-        const fishes = await this.fishService.getAllFishByFilter(filter, code);
+    //TODO: Check if this is the correct implementation
+    async getEffortBySpecies(filter: GeneralFilterDto) {
+        const landings = await this.landingsService.getLandingsByFilter(filter);
 
-        let fishWeight = 0;
-        fishes.forEach(fish => {
-            fishWeight += fish.fish_weight;
-        });
+        // mapping landings by port ID (stratum) and then by species
+        let mapLandings = mapLandingsMapper(landings);
+        let speciesMap = mapLandingsMapMapper(mapLandings);
 
-        return fishWeight / cpue;
+        let filterList = [];
+
+        // preparing the filters for mass fetching
+        for (const [port_id, species] of speciesMap) {
+            for (const [specie_code, weight] of species) {
+                filterList.push({ port_id, specie_code, period: filter.period, weight });
+            }
+        }
+
+        // parallel fetching
+        const cpueValues = await Promise.all(
+            filterList.map(f => this.getCpue({ port_id: f.port_id, specie_code: f.specie_code, period: f.period }))
+        );
+
+        // calculate total effort
+        let totalEffort = filterList.reduce((sum, f, index) => sum + (f.weight / cpueValues[index]), 0);
+
+        return totalEffort / filterList.length;
     }
+
 
     /**
      * Calculates the Proportion of Boats Active (PBA), which is the ratio of

@@ -175,7 +175,8 @@ export class LandingsService {
             gear_code,
             port_id,
             coop,
-            region
+            region,
+            specie_code
         } = filter
 
         // With this design I am giving the user the option to filter not only by port, but also by region and coop
@@ -199,42 +200,36 @@ export class LandingsService {
 
                 fish: {
                     some: {
-                        gear_code: gear_code ? {in: gear_code} : undefined
+                        gear_code: gear_code ? {in: gear_code} : undefined,
+                        specie_code: specie_code ? {in: specie_code} : undefined
                     }
                 }
             },
 
             select: {
-                form_id: true,
                 form: {
                     select: {
-                        port_id: true
+                        port_id: true,
+                        form_id: true,
                     }
                 },
                 fish: {
                     select: {
                         specie_code: true,
                         fish_weight: true,
-                        fish_quantity: true
+                        fish_quantity: true,
+                        fish_length: true,
+                        price: true
                     }
                 }
             }
         })
 
-        // transform landings into GetFilteredInterface
-        const landingsFiltered = landings.map(landing => {
-            return {
-                form_id: landing.form_id,
-                port_id: landing.form.port_id,
-                fish: landing.fish
-            }
-        })
-
         if (!landings || landings.length === 0) {
-            throw new NotFoundException('No landings found')
+            throw new NotFoundException('No landings found');
         }
 
-        return landingsFiltered
+        return landings;
     }
 
 

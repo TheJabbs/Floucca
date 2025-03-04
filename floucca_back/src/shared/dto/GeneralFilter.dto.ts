@@ -28,5 +28,11 @@ export class GeneralFilterDto {
     @IsPositive(({each: true}))
     region?:  number[];
 
+    @IsArray()
+    @IsOptional()
+    @IsInt({each: true})
+    @IsPositive(({each: true}))
+    specie_code?: number[];
+
 
 }

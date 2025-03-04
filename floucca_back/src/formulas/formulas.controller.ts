@@ -1,6 +1,5 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Post,} from '@nestjs/common';
 import {FormulasService} from "./formulas.service";
-import {idDTO} from "../shared/dto/id.dto";
 import {GeneralFilterDto} from "../shared/dto/GeneralFilter.dto";
 
 @Controller('api/dev/formulas')
@@ -13,9 +12,9 @@ export class FormulasController {
         return this.service.getCpue(filter);
     }
 
-    @Post('/effortBySpecies/:code')
-    async getEffortBySpecies(@Param('code') code: idDTO, @Body() filter: GeneralFilterDto) {
-        return this.service.getEffortBySpecies(filter, code);
+    @Post('/effortBySpecies/')
+    async getEffortBySpecies(@Body() filter: GeneralFilterDto) {
+        return this.service.getEffortBySpecies(filter);
     }
 
     @Post('/pba')

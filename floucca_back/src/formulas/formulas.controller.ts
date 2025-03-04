@@ -9,7 +9,7 @@ export class FormulasController {
     }
 
     @Post('/cpue')
-    async getCpue(@Body() filter) {
+    async getCpue(@Body() filter: GeneralFilterDto) {
         return this.service.getCpue(filter);
     }
 

@@ -26,28 +26,16 @@ export class FormulasService {
      */
     async getCpue(filter: GeneralFilterDto) {
         const landings = await this.landingsService.getLandingsByFilter(filter);
+        let fishWeight = 0;
 
-        let mapper : Map<number, GetFilteredInterface[]> = mapLandingsMapper(landings);
-
-        /**
-         *  for each port we calculate the total fish weight abd divide by the
-         *   number of landings then we add them all together and divide by the
-         *   number of different ports
-         */
-        let sum = 0;
-
-        mapper.forEach((value, key) => {
-            let totalFishWeight = 0;
-            value.forEach(landing => {
-                landing.fish.forEach(fish => {
-                    totalFishWeight += fish.fish_weight;
-                });
+        // Summing up the weight of all fish from all landings
+        landings.forEach(landing => {
+            landing.fish.forEach(fish => {
+                fishWeight += fish.fish_weight;
             });
-
-            sum += totalFishWeight / value.length;
         });
 
-        return  sum / mapper.size;
+        return fishWeight / landings.length;
     }
 
     /**

@@ -16,24 +16,29 @@ export class CreateFormLandingDto {
     @ValidateNested()
     @Type(() => CreateBoatDetailsDto)
     boat_details: CreateBoatDetailsDto;
+
     @IsOptional()
     @ValidateNested()
     @Type(() => CreateLandingDto)
     landing?: CreateLandingDto;
+
     @IsOptional()
     @IsArray()
     @ValidateNested({each: true})
     @Type(() => CreateFishDto)
     fish?: CreateFishDto[];
+
     @IsOptional()
     @ValidateNested()
     @Type(() => CreateEffortTodayDto)
     effort?: CreateEffortTodayDto;
+
     @IsOptional()
     @IsArray()
     @ValidateNested({each: true})
     @Type(() => CreateGearDetailDto)
     gearDetail?: CreateGearDetailDto[];
+
     @IsOptional()
     @IsArray()
     @ValidateNested({each: true})

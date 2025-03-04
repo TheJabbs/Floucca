@@ -15,7 +15,6 @@ export class CreateFormDto {
 
     @IsInt()
     @IsPositive()
-    @IsNotEmpty()
     @IsOptional()
     boat_detail?: number
 

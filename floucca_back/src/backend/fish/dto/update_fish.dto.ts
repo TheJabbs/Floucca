@@ -5,24 +5,30 @@ export class UpdateFishDto {
     @IsNotEmpty()
     @IsNumber()
     specie_code?: number;
+
     @IsOptional()
     @IsNotEmpty()
     @IsNumber()
     landing_id?: number;
+
     @IsOptional()
     @IsNotEmpty()
     @IsNumber()
     gear_code?: number;
+
     @IsOptional()
     @IsDecimal()
     fish_weight?: number;
+
     @IsOptional()
     @IsDecimal()
     fish_length?: number;
+
     @IsOptional()
     @IsPositive()
     @IsInt()
     fish_quantity?: number
+
     @IsOptional()
     @IsPositive()
     @IsDecimal()

@@ -24,7 +24,7 @@ export class FormulasController {
 
     @Post('/totalEffort')
     async getTotalEffort(@Body() filter: GeneralFilterDto) {
-        return this.service.getTotalEffort(filter);
+       // return this.service.getTotalEffort(filter);
     }
 
     @Post('/activeDays')

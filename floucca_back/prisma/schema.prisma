@@ -31,9 +31,9 @@ model coop {
 
 model effort_today {
   effort_today_id Int            @id @default(autoincrement())
-  landing_id      Int
+  landing_id      Int?
   hours_fished    Float          @db.Float
-  landing         landing        @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "effort_today_ibfk_2")
+  landing         landing?       @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "effort_today_ibfk_2")
   gear_details    gear_details[]
 
   @@index([landing_id], map: "effort_today_ibfk_2")

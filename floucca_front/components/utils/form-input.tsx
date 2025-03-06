@@ -9,6 +9,8 @@ interface FormInputProps {
   placeholder?: string;
   register: UseFormRegister<any>;
   error?: string;
+  min?: number;
+  max?: number;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -17,6 +19,8 @@ const FormInput: React.FC<FormInputProps> = ({
   type = "text",
   required = false,
   placeholder = "",
+  min,
+  max,
   register,
   error,
 }) => {
@@ -48,7 +52,8 @@ const FormInput: React.FC<FormInputProps> = ({
         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
           error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
         }`}
-        min={type === "number" ? 0 : undefined}
+        min={type === "number" ? min : undefined}
+        max={type === "number" ? max : undefined}
         onKeyDown={handleKeyDown}
         required={required}
       />

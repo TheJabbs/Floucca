@@ -131,9 +131,9 @@ export const getSpecies = async (): Promise<{specie_code: number, specie_name: s
 /**
  * Fetches all gears from the API
  */
-export const getGears = async (): Promise<{gear_code: number, gear_name: string}[]> => {
+export const getGears = async (): Promise<{gear_code: number, gear_name: string, equipment_id: string, equipment_name: string}[]> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/gear/all/gear`);
+    const response = await axios.get(`${API_BASE_URL}/api/dev/gear/all/gear`);
     return response.data;
   } catch (error) {
     console.error("Error fetching gears:", error);

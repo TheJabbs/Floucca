@@ -30,6 +30,7 @@ interface FishEntry {
   fish_weight: number;
   fish_length: number;
   fish_quantity: number;
+  price: number;
 }
 
 interface FishingDetailsData {
@@ -43,6 +44,7 @@ interface FormValues {
     fish_weight: number;
     fish_length: number;
     fish_quantity: number;
+    price: number; 
   };
   fish_entries: FishEntry[];
 }
@@ -79,6 +81,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
         fish_weight: undefined,
         fish_length: undefined,
         fish_quantity: undefined,
+        price: undefined,
       },
       fish_entries: [],
     },
@@ -128,6 +131,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       fish_weight: Number(values.fish_weight),
       fish_length: Number(values.fish_length),
       fish_quantity: Number(values.fish_quantity),
+      price: Number(values.price),
     });
 
     // Reset form fields after adding
@@ -138,6 +142,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
         fish_weight: undefined,
         fish_length: undefined,
         fish_quantity: undefined,
+        price: undefined,
       },
       fish_entries: getValues("fish_entries"),
     });
@@ -151,7 +156,8 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       values.specie_code &&
       values.fish_weight &&
       values.fish_length &&
-      values.fish_quantity
+      values.fish_quantity &&
+      values.price
     );
   };
 
@@ -288,7 +294,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-4 gap-4">
           <div className="space-y-1">
             <FormInput
               label="Weight (kg)"
@@ -321,6 +327,17 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
               error={errors.current?.fish_quantity?.message}
             />
           </div>
+
+          <div className="space-y-1">
+            <FormInput
+              label="Price (LBP)"
+              name="current.price"
+              type="number"
+              required={required}
+              register={register}
+              error={errors.current?.price?.message}
+            />
+          </div>
         </div>
 
         <button
@@ -344,7 +361,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
                 className="p-4 bg-gray-50 rounded-lg transition-colors"
               >
                 <div className="flex items-center justify-between">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 flex-1">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-gray-900">
                         {getSpecieName(entry.specie_code)}
@@ -355,6 +372,9 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-gray-600">{entry.fish_length}cm</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600">{entry.price} LBP</span>
                     </div>
                   </div>
                   <button

@@ -107,10 +107,10 @@ export class FormulasService {
      * Computes the total fishing effort based on the number of active gears,
      * the number of days in the period, and the Proportion of Boats Active (PBA).
      */
-    async getTotalEffort(filter: GeneralFilterDto) {
+    //ToDo: Check if this is the correct implementation I made it take pba as a parameter to prevent redundancy
+    async getTotalEffort(filter: GeneralFilterDto, pba: number) {
         delete filter.gear_code; // Remove specific gear filtering to get total effort
         const data = await this.senseLastWService.getEffortsByFilter(filter);
-        const pba = await this.getPba(filter);
         const periodDate = new Date(filter.period);
         const days = getDaysInMonthByDate(periodDate.toDateString());
         const numberGear = data.length;
@@ -154,4 +154,6 @@ export class FormulasService {
         delete filter.gear_code; // Remove specific gear filtering for total estimate
         return await this.getEstimateEffort(filter) * await this.getCpue(filter);
     }
+
+    
 }

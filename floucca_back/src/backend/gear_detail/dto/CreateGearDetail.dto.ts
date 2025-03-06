@@ -1,12 +1,13 @@
-import {IsInt, IsPositive, IsString} from "class-validator";
+import {IsInt, IsOptional, IsPositive, IsString} from "class-validator";
 
 export class CreateGearDetailDto {
     @IsPositive()
     @IsInt()
     gear_code: number;
+    @IsOptional()
     @IsPositive()
     @IsInt()
-    effort_today_id: number;
+    effort_today_id?: number;
     @IsString()
     detail_name: string;
     @IsString()

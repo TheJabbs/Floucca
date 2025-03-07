@@ -4,14 +4,14 @@ import { FishService } from "../backend/fish/fish.service";
 import { LandingsService } from "../backend/landings/landings.service";
 import { SenseLastwService } from "../backend/sense_lastw/sense_lastw.service";
 import { GeneralFilterDto } from "../shared/dto/GeneralFilter.dto";
-import { idDTO } from "../shared/dto/id.dto";
 import { getDaysInMonthByDate } from "../utils/date/getDaysInAMonth";
 import { GearService } from "../backend/gear/gear.service";
 import {GetFilteredInterface} from "../backend/landings/interface/getFiltered.interface";
 import {mapLandingsAndEffortMapper} from "./utils/mapLandingsAndEffort.mapper";
-import {mapLandingsMapMapper} from "./utils/mapLandingsMap.mapper";
+import {mapLandingsMapForSpecieCountMapper} from "./utils/mapLandingsMapForSpecieCount.mapper";
 import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/getFilteredLastW.interface";
 import {mapEffortMapMapper} from "./utils/mapEffortMap.mapper";
+import {mapLandingsMapForSpeciePriceMapper} from "./utils/mapLandingsMapForSpeciePrice.mapper";
 
 @Injectable()
 export class FormulasService {
@@ -53,7 +53,7 @@ export class FormulasService {
 
         // mapping landings by port ID (stratum) and then by species
         let mapLandings: Map<number, GetFilteredInterface[]> = mapLandingsAndEffortMapper(landings);
-        let speciesMap = mapLandingsMapMapper(mapLandings);
+        let speciesMap = mapLandingsMapForSpecieCountMapper(mapLandings);
 
         let filterList = [];
 
@@ -155,5 +155,150 @@ export class FormulasService {
         return await this.getEstimateEffort(filter) * await this.getCpue(filter);
     }
 
-    
+    /**
+     * Computes the average fish price by dividing the total price of all fish
+     * by the total number of fish caught in the given filter criteria.
+     */
+    async getAvgFishPrice(filter: GeneralFilterDto) {
+        const { gear_code, ...newFilter } = filter;
+
+        const data = await this.landingsService.getLandingsByFilter(newFilter);
+
+        const map: Map<number, GetFilteredInterface[]> = mapLandingsAndEffortMapper(data);
+        const fishMap = mapLandingsMapForSpeciePriceMapper(map);
+
+        let sumPrice = 0;
+        let count = 0;
+
+        for (const speciesMap of fishMap.values()) {
+            for (const { fishTotalPrice, count: speciesCount } of speciesMap.values()) {
+                sumPrice += fishTotalPrice;
+                count += speciesCount;
+            }
+        }
+
+        return count > 0 ? sumPrice / count : 0;
+    }
+
+    async getAvgFishWeight(filter: GeneralFilterDto){
+        const { gear_code, ...newFilter } = filter;
+
+        const data = await this.landingsService.getLandingsByFilter(newFilter);
+
+        let sumWeight = 0;
+        let count = 0;
+
+        data.forEach(landing => {
+            landing.fish.forEach(fish => {
+                sumWeight += fish.fish_weight;
+                count++;
+            });
+        });
+
+        return count > 0 ? sumWeight / count : 0;
+    }
+
+    async getAvgFishLength(filter: GeneralFilterDto){
+        const { gear_code, ...newFilter } = filter;
+
+        const data = await this.landingsService.getLandingsByFilter(newFilter);
+
+        let sumLength = 0;
+        let count = 0;
+
+        data.forEach(landing => {
+            landing.fish.forEach(fish => {
+                sumLength += fish.fish_length;
+                count++;
+            });
+        });
+
+        return count > 0 ? sumLength / count : 0;
+    }
+
+    async getAvgFishQuantity(filter: GeneralFilterDto){
+        const { gear_code, ...newFilter } = filter;
+
+        const data = await this.landingsService.getLandingsByFilter(newFilter);
+
+        let sumQuantity = 0;
+        let count = 0;
+
+        data.forEach(landing => {
+            landing.fish.forEach(fish => {
+                sumQuantity += fish.fish_quantity;
+                count++;
+            });
+        });
+
+        return count > 0 ? sumQuantity / count : 0;
+    }
+
+    async getAvgFishWeightByKilo(filter: GeneralFilterDto, kg: number){
+        const { gear_code, ...newFilter } = filter;
+
+        const data = await this.landingsService.getLandingsByFilter(newFilter);
+
+        let sumWeight = 0;
+        let count = 0;
+
+        data.forEach(landing => {
+            landing.fish.forEach(fish => {
+                sumWeight += fish.fish_weight;
+                count++;
+            });
+        });
+
+        return count > 0 ? sumWeight / count / kg : 0;
+    }
+
+    async getEstimateSpeciesCatch(filter: GeneralFilterDto, specie_code: number) {
+        // Get the estimated total catch
+        const estimatedTotalCatch = await this.getEstimateCatch(filter);
+
+        // Fetch landings data
+        const data = await this.landingsService.getLandingsByFilter(filter);
+
+        let sampleSpeciesCatch = 0;
+        let sampleTotalCatch = 0;
+
+        data.forEach(landing => {
+            landing.fish.forEach(fish => {
+                sampleTotalCatch += fish.fish_weight;
+                if (fish.specie_code === specie_code) {
+                    sampleSpeciesCatch += fish.fish_weight;
+                }
+            });
+        });
+
+        // Prevent division by zero
+        if (sampleTotalCatch === 0) return 0;
+
+        // Calculate estimated species catch
+        return estimatedTotalCatch * (sampleSpeciesCatch / sampleTotalCatch);
+    }
+
+    async getSpeciesCpue(filter: GeneralFilterDto, specie_code: number) {
+        const [estimatedSpeciesCatch, estimatedTotalEffort] = await Promise.all([
+            this.getEstimateSpeciesCatch(filter, specie_code),
+            this.getEstimateEffort(filter)
+        ]);
+
+        if (estimatedTotalEffort === 0) return 0;
+
+        return estimatedSpeciesCatch / estimatedTotalEffort;
+    }
+
+    async getEstimatedSpeciesValue(filter: GeneralFilterDto, specie_code: number) {
+        const [estimatedPrice, estimatedSpeciesCatch] = await Promise.all([
+            this.getAvgFishPrice(filter),
+            this.getEstimateSpeciesCatch(filter, specie_code)
+        ]);
+
+        return estimatedPrice * estimatedSpeciesCatch;
+    }
+
+
+
+
 }

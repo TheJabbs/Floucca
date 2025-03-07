@@ -240,9 +240,14 @@ const EffortToday: React.FC<EffortTodayProps> = ({
                               e.target.value
                             )
                           }
+                          onKeyDown={(e) => {
+                            if (e.key === "-" || e.key === "e") {
+                              e.preventDefault();
+                            }
+                          }}
+                          min={0}
                           className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder={`Enter ${spec.equipment_name.toLowerCase()}`}
-                          min={0}
                         />
                         <button
                           onClick={addGear}

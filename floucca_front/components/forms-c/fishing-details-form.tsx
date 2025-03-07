@@ -156,15 +156,6 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     };
     
     append(newEntry);
-  
-    setValue("current.gear_code", "" as any);
-    setValue("current.specie_code", "" as any);
-    setValue("current.fish_weight", "" as any);
-    setValue("current.fish_length", "" as any);
-    setValue("current.fish_quantity", "" as any);
-    setValue("current.price", "" as any);
-    
-    setSelectedSpecies(null);
   };
 
   const isEntryValid = (values: FormValues["current"]) => {

@@ -168,29 +168,29 @@ function Page() {
   };
 
   const isFormValid = () => {
-    if (!formValidation.port || !formValidation.boatInfo) {
+    // Boat info must be filled
+    if (!formValidation.boatInfo) {
       return false;
     }
-
-    const effortTodayValid = formValidation.effortToday === true;
-    const effortLastWeekValid = formValidation.effortLastWeek === true;
-    const eitherEffortFilled = effortTodayValid || effortLastWeekValid;
-    const eitherEffortAttempted = hasEffortToday || hasEffortLastWeek;
-
-    if (eitherEffortAttempted && !eitherEffortFilled) {
-      return false;
+  
+    // Allow submission if only Boat Details are filled
+    if (
+      !hasEffortToday &&
+      !hasEffortLastWeek
+    ) {
+      return true;
     }
-
-    if (effortTodayValid) {
-      return (
-        formValidation.location === true &&
-        formValidation.fishingDetails === true
-      );
+  
+    // If Effort Today is filled, location and fishing details are required
+    if (hasEffortToday) {
+      if (!formValidation.location || !formValidation.fishingDetails) {
+        return false;
+      }
     }
-
+  
     return true;
   };
-
+  
   const resetFormState = () => {
     reset(defaultValues);
 
@@ -220,7 +220,11 @@ function Page() {
       setValue("LandingFormDTO.boatData", data);
       const isValid =
         !!data.fleet_owner &&
-        Object.values(data).every((val) => val != null && val !== 0);
+        data.fleet_registration > 0 &&
+        data.fleet_size > 0 &&
+        data.fleet_crew > 0 &&
+        data.fleet_max_weight > 0 &&
+        data.fleet_length > 0;
       updateValidation("boatInfo", isValid);
     },
     [setValue]

@@ -9,6 +9,8 @@ interface FormInputProps {
   placeholder?: string;
   register: UseFormRegister<any>;
   error?: string;
+  min?: number;
+  max?: number;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -17,12 +19,14 @@ const FormInput: React.FC<FormInputProps> = ({
   type = "text",
   required = false,
   placeholder = "",
+  min=0,
+  max,
   register,
   error,
 }) => {
   // Handle keydown to prevent typing negative sign for number inputs
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (type === "number" && e.key === "-") {
+    if (type === "number" && e.key === "-" || e.key === "e") {
       e.preventDefault();
     }
   };
@@ -48,7 +52,8 @@ const FormInput: React.FC<FormInputProps> = ({
         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
           error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
         }`}
-        min={type === "number" ? 0 : undefined}
+        min={type === "number" ? min : 0}
+        max={type === "number" ? max : undefined}
         onKeyDown={handleKeyDown}
         required={required}
       />

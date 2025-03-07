@@ -60,6 +60,7 @@ interface FishingDetailsData {
     fish_weight: number;
     fish_length: number;
     fish_quantity: number;
+    price: number; 
   }[];
 }
 
@@ -315,50 +316,65 @@ function Page() {
           fisher_name: boatData.fleet_owner,
         },
         boat_details: {
-          fleet_owner: boatData.fleet_owner,
-          fleet_registration: boatData.fleet_registration,
-          fleet_size: boatData.fleet_size,
-          fleet_crew: boatData.fleet_crew,
-          fleet_max_weight: boatData.fleet_max_weight,
-          fleet_length: boatData.fleet_length,
-        },
-        landing: {
-          latitude: location?.lat || 0,
-          longitude: location?.lng || 0,
-        },
+          fleet_owner: boatData.fleet_owner || "Unknown",
+          fleet_registration: boatData.fleet_registration || 0,
+          fleet_size: boatData.fleet_size || 0,
+          fleet_crew: boatData.fleet_crew || 0,
+          fleet_max_weight: boatData.fleet_max_weight || 0,
+          fleet_length: boatData.fleet_length || 0,
+        }
       };
+
+      // Only add landing if location is provided
+      if (location && location.lat && location.lng) {
+        apiPayload.landing = {
+          latitude: location.lat,
+          longitude: location.lng,
+        };
+      }
 
       // Only include landing data if effort today is filled
       if (hasEffortToday) {
-        apiPayload.fish = fishingDetails.fish_entries.map((entry) => ({
-          specie_code: entry.specie_code,
-          gear_code: entry.gear_code,
-          fish_weight: entry.fish_weight,
-          fish_length: entry.fish_length,
-          fish_quantity: entry.fish_quantity,
-        }));
+        // Only add fish entries if there are any
+        if (fishingDetails.fish_entries && fishingDetails.fish_entries.length > 0) {
+          apiPayload.fish = fishingDetails.fish_entries.map((entry) => ({
+            specie_code: entry.specie_code,
+            gear_code: entry.gear_code,
+            fish_weight: entry.fish_weight,
+            fish_length: entry.fish_length,
+            fish_quantity: entry.fish_quantity,
+            price: entry.price || 0,
+          }));
+        }
 
-        apiPayload.effort = {
-          hours_fished: effortTodayData.hours_fished,
-        };
+        // Only add effort if hours_fished is provided
+        if (effortTodayData.hours_fished > 0) {
+          apiPayload.effort = {
+            hours_fished: effortTodayData.hours_fished,
+          };
+        }
 
-        apiPayload.gearDetail = effortTodayData.gear_entries.flatMap((gear) =>
-          gear.gear_details.map((detail) => ({
-            gear_code: gear.gear_code,
-            detail_name: detail.detail_name,
-            detail_value: detail.detail_value,
-          }))
-        );
+        // Only add gear details if there are any
+        if (effortTodayData.gear_entries && effortTodayData.gear_entries.length > 0) {
+          apiPayload.gearDetail = effortTodayData.gear_entries.flatMap((gear) =>
+            gear.gear_details.map((detail) => ({
+              gear_code: gear.gear_code,
+              detail_name: detail.detail_name,
+              detail_value: detail.detail_value,
+            }))
+          );
+        }
       }
 
-      if (hasEffortLastWeek) {
+      // Only add last week data if there are entries
+      if (hasEffortLastWeek && effortLastWeekData.gear_entries.length > 0) {
         apiPayload.lastw = effortLastWeekData.gear_entries.map((gear) => ({
           gear_code: gear.gear_code,
           days_fished: gear.days_used,
         }));
       }
 
-      console.log("Submitting API payload:", apiPayload);
+      console.log("Submitting API payload:", JSON.stringify(apiPayload, null, 2));
 
       // Send data to the API endpoint
       const response = await submitLandingForm(apiPayload);
@@ -383,6 +399,9 @@ function Page() {
       let errorMessage = "There was an error submitting the form. Please try again.";
       if (error instanceof Error) {
         errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        // Try to extract error message from response
+        errorMessage = JSON.stringify(error);
       }
 
       setNotification({

@@ -29,6 +29,7 @@ export interface LandingFormDTO {
     fish_weight: number;
     fish_length: number;
     fish_quantity: number;
+    price: number; 
   }>;
   effort?: {
     hours_fished: number;
@@ -54,20 +55,50 @@ export interface ApiResponse<T = any> {
  */
 export const submitLandingForm = async (formData: LandingFormDTO): Promise<ApiResponse> => {
   try {
+    // Set headers for proper content type
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    };
+    
+    // Convert any Date objects to ISO strings for consistent API serialization
+    const processedData = JSON.parse(JSON.stringify(formData));
+    
+    console.log("Sending data to API:", JSON.stringify(processedData, null, 2));
+    
     const response = await axios.post<ApiResponse>(
       `${API_BASE_URL}/api/dev/landings/create/form`, 
-      formData
+      processedData,
+      config
     );
+    
     return response.data;
   } catch (error) {
-    // return the structured error message
-    if ((error as any).response && (error as any).response.data) {
-      if (axios.isAxiosError(error) && error.response) {
-        throw error.response.data;
+    console.error("API Error details:", error);
+    
+    // Return structured error message if available
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+        
+        // Throw with specific error message if available
+        if (error.response.data && typeof error.response.data === 'object') {
+          throw {
+            message: error.response.data.message || "Server error",
+            statusCode: error.response.status,
+            details: error.response.data
+          };
+        }
+        
+        // Throw error with status code
+        throw new Error(`Server error (${error.response.status}): ${error.message}`);
       }
     }
-    // otherwise throw generic error
-    throw new Error("Failed to submit landing form. Please try again later.");
+    
+    // Otherwise throw generic error
+    throw new Error("Failed to submit landing form. Please check your connection and try again.");
   }
 };
 
@@ -100,9 +131,9 @@ export const getSpecies = async (): Promise<{specie_code: number, specie_name: s
 /**
  * Fetches all gears from the API
  */
-export const getGears = async (): Promise<{gear_code: number, gear_name: string}[]> => {
+export const getGears = async (): Promise<{gear_code: number, gear_name: string, equipment_id: string, equipment_name: string}[]> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/gear/all/gear`);
+    const response = await axios.get(`${API_BASE_URL}/api/dev/gear/all/gear`);
     return response.data;
   } catch (error) {
     console.error("Error fetching gears:", error);

@@ -1149,7 +1149,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </schema>
     <schema id="295" parent="1" name="floucca">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2025-03-01.13:03:56</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2025-03-06.21:01:00</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="296" parent="1" name="root">
@@ -1307,7 +1307,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="332" parent="303" name="boat_id">
-      <AutoIncrement>28</AutoIncrement>
+      <AutoIncrement>72</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1385,14 +1385,13 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="348" parent="305" name="effort_today_id">
-      <AutoIncrement>13</AutoIncrement>
+      <AutoIncrement>38</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
     <column id="349" parent="305" name="landing_id">
       <DasType>int|0s</DasType>
-      <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
     <column id="350" parent="305" name="hours_fished">
@@ -1422,7 +1421,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="355" parent="306" name="fish_id">
-      <AutoIncrement>16</AutoIncrement>
+      <AutoIncrement>61</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1533,7 +1532,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="377" parent="308" name="form_id">
-      <AutoIncrement>26</AutoIncrement>
+      <AutoIncrement>70</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1652,7 +1651,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="400" parent="310" name="detail_id">
-      <AutoIncrement>23</AutoIncrement>
+      <AutoIncrement>71</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1760,7 +1759,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="421" parent="312" name="landing_id">
-      <AutoIncrement>22</AutoIncrement>
+      <AutoIncrement>48</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1912,7 +1911,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>role_code</UnderlyingIndexName>
     </key>
     <column id="451" parent="317" name="sense_lastW_id">
-      <AutoIncrement>18</AutoIncrement>
+      <AutoIncrement>27</AutoIncrement>
       <DasType>int|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>

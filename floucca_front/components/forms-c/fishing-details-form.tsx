@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
 import { Trash2, Plus, Search, X } from "lucide-react";
-import { getSpecies } from "@/services/landingService";
+import { getSpecies, getGears } from "@/services/landingService";
 
 interface MapLocation {
   id: number;
@@ -54,6 +54,13 @@ interface Species {
   specie_name: string;
 }
 
+interface Gear {
+  gear_code: number;
+  gear_name: string;
+  equipment_id: string;
+  equipment_name: string;
+}
+
 const FishingDetails: React.FC<FishingDetailsProps> = ({
   required = false,
   todaysGears,
@@ -61,6 +68,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
   onChange,
 }) => {
   const [speciesList, setSpeciesList] = useState<Species[]>([]);
+  const [gearsList, setGearsList] = useState<Gear[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
@@ -94,26 +102,38 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
 
   const currentValues = watch("current");
 
-  // Fetch species from API when component mounts
+  // Fetch species and gears from API when component mounts
   useEffect(() => {
-    const fetchSpeciesData = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch species data
         try {
-          const data = await getSpecies();
-          setSpeciesList(data);
+          const speciesData = await getSpecies();
+          setSpeciesList(speciesData);
         } catch (error) {
           console.error("Error fetching species:", error);
         }
+
+        // Fetch gears data
+        try {
+          const gearsData = await getGears();
+          setGearsList(gearsData);
+        } catch (error) {
+          console.error("Error fetching gears:", error);
+        }
       } catch (error) {
-        console.error("Error in fetchSpeciesData:", error);
+        console.error("Error in fetchData:", error);
       }
     };
 
-    fetchSpeciesData();
+    fetchData();
   }, []);
 
+  // Update parent component when fields change
   useEffect(() => {
-    onChange({ fish_entries: fields });
+    // Create a deep copy of fields to avoid any reference issues
+    const entriesCopy = fields.map(entry => ({...entry}));
+    onChange({ fish_entries: entriesCopy });
   }, [fields, onChange]);
 
   const filteredSpecies = speciesList.filter((s) =>
@@ -124,7 +144,8 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     const values = getValues("current");
     if (!isEntryValid(values) || !selectedLocation) return;
 
-    append({
+    // Add the new entry
+    const newEntry = {
       location_id: selectedLocation.id,
       gear_code: Number(values.gear_code),
       specie_code: Number(values.specie_code),
@@ -132,20 +153,17 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       fish_length: Number(values.fish_length),
       fish_quantity: Number(values.fish_quantity),
       price: Number(values.price),
-    });
-
-    // Reset form fields after adding
-    reset({
-      current: {
-        ...values,
-        specie_code: undefined,
-        fish_weight: undefined,
-        fish_length: undefined,
-        fish_quantity: undefined,
-        price: undefined,
-      },
-      fish_entries: getValues("fish_entries"),
-    });
+    };
+    
+    append(newEntry);
+  
+    setValue("current.gear_code", "" as any);
+    setValue("current.specie_code", "" as any);
+    setValue("current.fish_weight", "" as any);
+    setValue("current.fish_length", "" as any);
+    setValue("current.fish_quantity", "" as any);
+    setValue("current.price", "" as any);
+    
     setSelectedSpecies(null);
   };
 
@@ -162,21 +180,46 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
   };
 
   const handleSpeciesSelect = (species: Species) => {
-    setValue("current.specie_code", Number(species.specie_code));
+    setValue("current.specie_code", species.specie_code);
     setSelectedSpecies(species);
     setIsDropdownOpen(false);
     setSearchTerm("");
   };
 
   const getGearName = (code: number) => {
+    const gearFromList = gearsList.find((g) => g.gear_code === code);
+    if (gearFromList) return gearFromList.gear_name;
+    
     const gear = todaysGears.find((g) => g.gear_code === code);
-    return gear ? `Gear ${gear.gear_code}` : "";
+    if (gear) {
+      if (gear.gear_details && gear.gear_details.length > 0) {
+        const nameDetail = gear.gear_details.find(d => d.detail_name.toLowerCase() === 'name');
+        if (nameDetail) return nameDetail.detail_value;
+      }
+      return `Gear ${gear.gear_code}`;
+    }
+    return `Unknown Gear (${code})`;
   };
 
   const getSpecieName = (code: number) => {
     const species = speciesList.find((s) => s.specie_code === code);
     return species ? species.specie_name : `Species ${code}`;
   };
+
+  // Clear the dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const targetElement = event.target as HTMLElement;
+      if (!targetElement.closest('.species-dropdown')) {
+        setIsDropdownOpen(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   if (!selectedLocation) {
     return (
@@ -225,7 +268,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
             </select>
           </div>
 
-          <div className="form-group">
+          <div className="form-group species-dropdown">
             <label className="block text-gray-700 text-sm font-medium mb-2">
               Fish Species {required && <span className="text-red-500">*</span>}
             </label>
@@ -242,7 +285,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedSpecies(null);
-                        setValue("current.specie_code", 0); // Use 0 instead of undefined
+                        setValue("current.specie_code", "" as any);
                       }}
                       className="text-gray-500 hover:text-gray-700"
                     >
@@ -277,7 +320,11 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
                       <div
                         key={species.specie_code}
                         className="px-3 py-2 hover:bg-blue-50 cursor-pointer"
-                        onClick={() => handleSpeciesSelect(species)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleSpeciesSelect(species);
+                        }}
                       >
                         {species.specie_name}
                       </div>
@@ -299,6 +346,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
             <FormInput
               label="Weight (kg)"
               name="current.fish_weight"
+              placeholder="Fish weight"
               type="number"
               required={required}
               register={register}
@@ -310,6 +358,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
             <FormInput
               label="Length (cm)"
               name="current.fish_length"
+              placeholder="Fish length"
               type="number"
               required={required}
               register={register}
@@ -321,6 +370,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
             <FormInput
               label="Quantity"
               name="current.fish_quantity"
+              placeholder="Fish quantity"
               type="number"
               required={required}
               register={register}
@@ -332,6 +382,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
             <FormInput
               label="Price (LBP)"
               name="current.price"
+              placeholder="Enter price"
               type="number"
               required={required}
               register={register}
@@ -354,27 +405,34 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       {fields.length > 0 ? (
         <div className="space-y-4 mt-6">
           <h3 className="font-medium text-gray-700">Added Entries</h3>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 space-y-3">
             {fields.map((entry, index) => (
               <div
                 key={entry.id}
                 className="p-4 bg-gray-50 rounded-lg transition-colors"
               >
                 <div className="flex items-center justify-between">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-900">
+                  <div className="grid grid-cols-2 md:grid-cols-5 flex-1">
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-900 ">
                         {getSpecieName(entry.specie_code)}
                       </span>
                     </div>
-                    <span className="text-gray-600">
-                      {entry.fish_weight}kg, {entry.fish_quantity} fish
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-600">{entry.fish_length}cm</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600 ">
+                        {getGearName(entry.gear_code)}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-600">{entry.price} LBP</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600 truncate">
+                        {entry.fish_weight}kg, {entry.fish_quantity} fish
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600 truncate">{entry.fish_length}cm</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600 truncate">{entry.price} LBP</span>
                     </div>
                   </div>
                   <button

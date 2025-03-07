@@ -19,15 +19,31 @@ const FormInput: React.FC<FormInputProps> = ({
   type = "text",
   required = false,
   placeholder = "",
-  min=0,
+  min = 0,
   max,
   register,
   error,
 }) => {
-  // Handle keydown to prevent typing negative sign for number inputs
+  // Handle keydown to prevent typing "-" or "e" for number inputs
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (type === "number" && e.key === "-" || e.key === "e") {
+    if (type === "number" && (e.key === "-" || e.key === "e")) {
       e.preventDefault();
+    }
+  };
+
+  // Handle onChange to restrict input value dynamically
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    if (type === "number") {
+      let numericValue = Number(value);
+      
+      // Ensure value stays within min and max limits
+      if (numericValue < (min ?? 0)) {
+        e.target.value = String(min ?? 0);
+      } else if (max !== undefined && numericValue > max) {
+        e.target.value = String(max);
+      }
     }
   };
 
@@ -44,8 +60,8 @@ const FormInput: React.FC<FormInputProps> = ({
         id={name}
         {...register(name, { 
           required,
-          validate: type === "number" ? value => 
-            value >= 0 || "Value must be a positive number" : undefined,
+          validate: type === "number" ? (value) => 
+            (value >= (min ?? 0) && value <= (max ?? Infinity)) || `Value must be between ${min} and ${max}` : undefined,
           valueAsNumber: type === "number"
         })}
         placeholder={placeholder}
@@ -55,6 +71,7 @@ const FormInput: React.FC<FormInputProps> = ({
         min={type === "number" ? min : 0}
         max={type === "number" ? max : undefined}
         onKeyDown={handleKeyDown}
+        onChange={handleChange} // Prevents values exceeding max
         required={required}
       />
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}

@@ -20,13 +20,15 @@ import { UserRoleModule } from './backend/user_role/user_role.module';
 import { UserCoopModule } from './backend/user_coop/user_coop.module';
 import {FormulasModule} from "./formulas/formulas.module";
 import { UserModule } from './backend/users/users.module';
+import { ConfigModule } from '@nestjs/config';
+
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,
     EffortTodayModule, FishModule, FishModule, FleetModule,
     FormModule, GearModule, GearUsageModule, GearDetailModule,
   ScheduleModule, SenseLastwModule, LandingsModule, PortsModule,
   RegionModule, RoleModule, SpecieModule, UserRoleModule, 
-  UserCoopModule, FormulasModule, UserModule],
+  UserCoopModule, FormulasModule, UserModule, ConfigModule.forRoot()],
   providers: [],
 })
 export class AppModule {}

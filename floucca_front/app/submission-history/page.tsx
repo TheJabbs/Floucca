@@ -1,27 +1,51 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Calendar, Clock, Fish, MapPin, Users, Ruler, Scale, Hash } from 'lucide-react';
+import { Calendar, Clock, Fish, MapPin, Users, Ruler, Scale, Hash, Anchor } from 'lucide-react';
 
 interface SubmittedForm {
-  form_id: number;
-  user_id: number;
-  port_id: number;
-  period_date: string;
-  fisher_name: string;
-  creation_time: string;
+  form: {
+    form_id: number;
+    user_id: number;
+    port_id: number;
+    fisher_name: string;
+    period_date?: string;
+    boat_detail?: number;
+  };
   ports: {
     port_name: string;
   };
   boat_details: {
-    boat_id: number;
     fleet_owner: string;
+    fleet_registration: number;
     fleet_size: number;
     fleet_crew: number;
     fleet_max_weight: number;
     fleet_length: number;
-    fleet_registration: number;
   };
+  landing?: {
+    latitude: number;
+    longitude: number;
+  };
+  fish: Array<{
+    specie_code: number;
+    gear_code: number;
+    fish_weight: number;
+    fish_length: number;
+    fish_quantity: number;
+  }>;
+  effort?: {
+    hours_fished: number;
+  };
+  gearDetail: Array<{
+    gear_code: number;
+    detail_name: string;
+    detail_value: string;
+  }>;
+  lastw: Array<{
+    gear_code: number;
+    days_fished: number;
+  }>;
 }
 
 interface FilterOptions {
@@ -68,7 +92,8 @@ const SubmissionHistory = () => {
     fetchForms();
   }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -77,16 +102,9 @@ const SubmissionHistory = () => {
     });
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const onFilterSubmit = (data: FilterOptions) => {
     console.log('Filter applied:', data);
+    // Implement filter logic to call backend API with filter params
   };
 
   const toggleExpand = (formId: number) => {
@@ -94,11 +112,11 @@ const SubmissionHistory = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6">Submission History</h1>
 
       {/* Filter Form */}
-      <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="mb-6 p-4 bg-white rounded-lg border shadow-sm">
         <h2 className="text-lg font-semibold mb-3">Filter Submissions</h2>
         <form onSubmit={handleSubmit(onFilterSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -146,18 +164,18 @@ const SubmissionHistory = () => {
         <div className="space-y-4">
           {forms.map(form => (
             <div 
-              key={form.form_id}
-              className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden"
+              key={form.form.form_id}
+              className="bg-white rounded-lg border shadow-sm overflow-hidden"
             >
               {/* Summary Row (always visible) */}
               <div 
                 className="p-4 cursor-pointer hover:bg-gray-50 flex items-center justify-between"
-                onClick={() => toggleExpand(form.form_id)}
+                onClick={() => toggleExpand(form.form.form_id)}
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5">
                     <Fish className="w-4 h-4 text-blue-600" />
-                    <h3 className="font-medium">{form.fisher_name}</h3>
+                    <h3 className="font-medium">{form.form.fisher_name}</h3>
                   </div>
                   <div className="flex items-center space-x-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">
@@ -166,7 +184,7 @@ const SubmissionHistory = () => {
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      <span>{formatDate(form.creation_time)}</span>
+                      <span>{formatDate(form.form.period_date)}</span>
                     </div>
                   </div>
                 </div>
@@ -178,7 +196,7 @@ const SubmissionHistory = () => {
               </div>
 
               {/* Expanded Details */}
-              {expandedFormId === form.form_id && (
+              {expandedFormId === form.form.form_id && (
                 <div className="p-4 border-t border-gray-100">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Boat Details */}
@@ -188,40 +206,77 @@ const SubmissionHistory = () => {
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4 text-blue-600" />
                           <span className="text-gray-600">Owner:</span>
-                          <span className="font-medium">{form.boat_details.fleet_owner}</span>
+                          <span className="font-medium">{form.boat_details.fleet_owner || 'Unknown'}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Hash className="w-4 h-4 text-blue-600" />
                           <span className="text-gray-600">Registration:</span>
-                          <span className="font-medium">{form.boat_details.fleet_registration}</span>
+                          <span className="font-medium">{form.boat_details.fleet_registration || 'N/A'}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Ruler className="w-4 h-4 text-blue-600" />
                           <span className="text-gray-600">Length:</span>
-                          <span className="font-medium">{form.boat_details.fleet_length} m</span>
+                          <span className="font-medium">{form.boat_details.fleet_length || 'N/A'} m</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Scale className="w-4 h-4 text-blue-600" />
                           <span className="text-gray-600">Max Weight:</span>
-                          <span className="font-medium">{form.boat_details.fleet_max_weight} kg</span>
+                          <span className="font-medium">{form.boat_details.fleet_max_weight || 'N/A'} kg</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-blue-600" />
+                          <span className="text-gray-600">Crew:</span>
+                          <span className="font-medium">{form.boat_details.fleet_crew || 'N/A'}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Submission Details */}
+                    {/* Fishing Activity Details */}
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <h4 className="font-medium text-gray-800 mb-2">Submission Details</h4>
+                      <h4 className="font-medium text-gray-800 mb-2">Fishing Activity</h4>
                       <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-600" />
-                          <span className="text-gray-600">Date:</span>
-                          <span className="font-medium">{formatDate(form.creation_time)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-gray-600" />
-                          <span className="text-gray-600">Time:</span>
-                          <span className="font-medium">{formatTime(form.creation_time)}</span>
-                        </div>
+                        {form.fish && form.fish.length > 0 ? (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <Fish className="w-4 h-4 text-gray-600" />
+                              <span className="text-gray-600">Catch:</span>
+                              <span className="font-medium">{form.fish.length} species recorded</span>
+                            </div>
+                            {form.fish.slice(0, 2).map((fish, index) => (
+                              <div key={index} className="flex items-center gap-2 ml-6">
+                                <span className="text-gray-600">Species {fish.specie_code}:</span>
+                                <span className="font-medium">{fish.fish_quantity} fish, {fish.fish_weight}kg</span>
+                              </div>
+                            ))}
+                            {form.fish.length > 2 && (
+                              <div className="ml-6 text-blue-600 text-xs">
+                                + {form.fish.length - 2} more species
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Fish className="w-4 h-4 text-gray-600" />
+                            <span className="text-gray-600">Catch:</span>
+                            <span className="font-medium">No catch recorded</span>
+                          </div>
+                        )}
+                        
+                        {form.effort && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-gray-600" />
+                            <span className="text-gray-600">Hours Fished:</span>
+                            <span className="font-medium">{form.effort.hours_fished}</span>
+                          </div>
+                        )}
+                        
+                        {form.lastw && form.lastw.length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <Anchor className="w-4 h-4 text-gray-600" />
+                            <span className="text-gray-600">Gears Used:</span>
+                            <span className="font-medium">{form.lastw.length}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

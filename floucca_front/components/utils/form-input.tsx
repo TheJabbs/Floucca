@@ -19,24 +19,21 @@ const FormInput: React.FC<FormInputProps> = ({
   type = "text",
   required = false,
   placeholder = "",
-  min=0,
+  min,
   max,
   register,
   error,
 }) => {
-  // Handle keydown to prevent typing negative sign for number inputs
+  // Prevent invalid characters in number inputs
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (type === "number" && e.key === "-" || e.key === "e") {
+    if (type === "number" && (e.key === "-" || e.key === "e")) {
       e.preventDefault();
     }
   };
 
   return (
     <div className="form-group mb-2">
-      <label
-        htmlFor={name}
-        className="block text-gray-700 text-sm font-semibold mb-1"
-      >
+      <label htmlFor={name} className="block text-gray-700 text-sm font-semibold mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
@@ -44,18 +41,20 @@ const FormInput: React.FC<FormInputProps> = ({
         id={name}
         {...register(name, { 
           required,
-          validate: type === "number" ? value => 
-            value >= 0 || "Value must be a positive number" : undefined,
-          valueAsNumber: type === "number"
+          valueAsNumber: type === "number",
+          validate: type === "number" ? (value) => 
+            (!isNaN(value) && (min === undefined || value >= min) && (max === undefined || value <= max)) || 
+            `Value must be between ${min} and ${max}` 
+            : undefined,
         })}
         placeholder={placeholder}
         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
           error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
         }`}
-        min={type === "number" ? min : 0}
-        max={type === "number" ? max : undefined}
         onKeyDown={handleKeyDown}
         required={required}
+        min={type === "number" ? min : undefined}
+        max={type === "number" ? max : undefined}
       />
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>

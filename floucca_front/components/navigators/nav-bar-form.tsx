@@ -13,7 +13,7 @@ const Navbar: React.FC = () => {
         <nav className="bg-white border-b shadow-sm">
             <div className="container mx-auto px-[5%] py-4 flex justify-between items-center">
                 <Link
-                    href="/effort-and-landing"
+                    href="/dataoperator/forms/effort-and-landing"
                     className={`${
                         pathname === '/effort-and-landing' ? 'text-blue-600 font-semibold' : 'text-gray-800'
                     } font-medium hover:text-blue-600`}
@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
                     Effort and Landing
                 </Link>
                 <Link
-                    href="/sense-form"
+                    href="/dataoperator/forms/sense-form"
                     className={`${
                         pathname === '/fleet-senses' ? 'text-blue-600 font-semibold' : 'text-gray-800'
                     } font-medium hover:text-blue-600`}

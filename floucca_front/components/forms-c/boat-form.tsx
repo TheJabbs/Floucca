@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
-import { Anchor, Users, Scale, Ruler, FileText, Hash } from "lucide-react";
+import { Anchor, Scale, FileText } from "lucide-react";
 
 interface BoatInfoProps {
   required?: boolean;
@@ -34,7 +34,7 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
   });
 
   useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
+    const subscription = watch((value) => {
       if (value.fleet_owner !== undefined) {
         onChange(value as BoatFormValues);
       }

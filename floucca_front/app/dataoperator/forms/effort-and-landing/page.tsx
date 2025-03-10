@@ -1,7 +1,8 @@
 "use client";
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
+import { useFormsData } from "../useFormData";
 import BoatInfo from "@/components/forms-c/boat-form";
 import EffortToday from "@/components/forms-c/effort-today-form";
 import EffortLastWeek from "@/components/forms-c/effort-last-week-form";
@@ -9,7 +10,7 @@ import SubmitButton from "@/components/utils/submit-button";
 import { usePort } from "@/contexts/PortContext";
 import PortDropdown from "@/components/forms-c/port-dropdown";
 import Notification from "@/components/utils/notification";
-import { submitLandingForm, LandingFormDTO } from "@/services/landingService";
+import { submitLandingForm, LandingFormDTO, getGears, getSpecies, getPorts } from "@/services/landingService";
 
 const MapWithMarkers = dynamic(
   () => import("@/components/forms-c/map-with-markers"),
@@ -17,7 +18,6 @@ const MapWithMarkers = dynamic(
 );
 import FishingDetails from "@/components/forms-c/fishing-details-form";
 
-// Form interfaces
 interface BoatData {
   fleet_owner: string;
   fleet_registration: number;
@@ -34,6 +34,7 @@ interface EffortTodayData {
     gear_details: {
       detail_name: string;
       detail_value: string;
+      equipment_id: string;
     }[];
   }[];
 }
@@ -60,7 +61,7 @@ interface FishingDetailsData {
     fish_weight: number;
     fish_length: number;
     fish_quantity: number;
-    price: number; 
+    price: number;
   }[];
 }
 
@@ -89,8 +90,11 @@ interface FormNotification {
   message: string;
 }
 
-function Page() {
+function EffortAndLandingPage() {
   const { selectedPort } = usePort();
+
+  // State for API data
+  const {gears, species, ports} = useFormsData();
 
   const defaultValues = {
     LandingFormDTO: {
@@ -126,12 +130,12 @@ function Page() {
     defaultValues,
   });
 
-  // Track dependencies for FishingDetails
+  // Shared state for components
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [selectedGears, setSelectedGears] = useState<
     {
       gear_code: number;
-      gear_details: { detail_name: string; detail_value: string }[];
+      gear_details: { detail_name: string; detail_value: string; equipment_id: string }[];
     }[]
   >([]);
 
@@ -143,9 +147,7 @@ function Page() {
   const [resetCounter, setResetCounter] = useState(0);
 
   // Notification state
-  const [notification, setNotification] = useState<FormNotification | null>(
-    null
-  );
+  const [notification, setNotification] = useState<FormNotification | null>(null);
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
   const [formValidation, setFormValidation] = useState<FormValidation>({
@@ -426,7 +428,7 @@ function Page() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Landing Form</h1>
         <div className="w-72">
-          <PortDropdown />
+          <PortDropdown ports={ports} />
         </div>
       </div>
 
@@ -440,12 +442,14 @@ function Page() {
         <EffortLastWeek
           required={false}
           onChange={handleEffortLastWeekChange}
+          gears={gears}  // Pass gears data
           key={`effort-last-week-${resetCounter}`}
         />
 
         <EffortToday
           required={false}
           onChange={handleEffortTodayChange}
+          gears={gears}  // Pass gears data
           key={`effort-today-${resetCounter}`}
         />
 
@@ -462,6 +466,8 @@ function Page() {
               required={true}
               selectedLocation={selectedLocation}
               todaysGears={selectedGears}
+              gears={gears}         // Pass gears data
+              species={species}     // Pass species data
               onChange={handleFishingDetailsChange}
               key={`fishing-details-${resetCounter}`}
             />
@@ -487,4 +493,4 @@ function Page() {
   );
 }
 
-export default Page;
+export default EffortAndLandingPage;

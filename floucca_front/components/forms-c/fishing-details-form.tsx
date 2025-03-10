@@ -1,8 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
 import { Trash2, Plus, Search, X } from "lucide-react";
-import { getSpecies, getGears } from "@/services/landingService";
+
+interface Gear {
+  gear_code: number;
+  gear_name: string;
+  equipment_id: string;
+  equipment_name: string;
+}
+
+interface Species {
+  specie_code: number;
+  specie_name: string;
+}
 
 interface MapLocation {
   id: number;
@@ -15,6 +26,8 @@ interface FishingDetailsProps {
   required?: boolean;
   todaysGears: GearEntry[];
   selectedLocation: MapLocation | null;
+  gears: Gear[]; 
+  species: Species[]; 
   onChange: (fishingData: FishingDetailsData) => void;
 }
 
@@ -49,26 +62,14 @@ interface FormValues {
   fish_entries: FishEntry[];
 }
 
-interface Species {
-  specie_code: number;
-  specie_name: string;
-}
-
-interface Gear {
-  gear_code: number;
-  gear_name: string;
-  equipment_id: string;
-  equipment_name: string;
-}
-
 const FishingDetails: React.FC<FishingDetailsProps> = ({
   required = false,
   todaysGears,
   selectedLocation,
+  gears,
+  species,
   onChange,
 }) => {
-  const [speciesList, setSpeciesList] = useState<Species[]>([]);
-  const [gearsList, setGearsList] = useState<Gear[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
@@ -102,33 +103,6 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
 
   const currentValues = watch("current");
 
-  // Fetch species and gears from API when component mounts
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch species data
-        try {
-          const speciesData = await getSpecies();
-          setSpeciesList(speciesData);
-        } catch (error) {
-          console.error("Error fetching species:", error);
-        }
-
-        // Fetch gears data
-        try {
-          const gearsData = await getGears();
-          setGearsList(gearsData);
-        } catch (error) {
-          console.error("Error fetching gears:", error);
-        }
-      } catch (error) {
-        console.error("Error in fetchData:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   // Update parent component when fields change
   useEffect(() => {
     // Create a deep copy of fields to avoid any reference issues
@@ -136,7 +110,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     onChange({ fish_entries: entriesCopy });
   }, [fields, onChange]);
 
-  const filteredSpecies = speciesList.filter((s) =>
+  const filteredSpecies = species.filter((s) =>
     s.specie_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -178,7 +152,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
   };
 
   const getGearName = (code: number) => {
-    const gearFromList = gearsList.find((g) => g.gear_code === code);
+    const gearFromList = gears.find((g) => g.gear_code === code);
     if (gearFromList) return gearFromList.gear_name;
     
     const gear = todaysGears.find((g) => g.gear_code === code);
@@ -193,8 +167,8 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
   };
 
   const getSpecieName = (code: number) => {
-    const species = speciesList.find((s) => s.specie_code === code);
-    return species ? species.specie_name : `Species ${code}`;
+    const speciesItem = species.find((s) => s.specie_code === code);
+    return speciesItem ? speciesItem.specie_name : `Species ${code}`;
   };
 
   // Clear the dropdown when clicking outside

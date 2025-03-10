@@ -2,13 +2,14 @@
 
 import React from "react";
 import { Fish } from "lucide-react";
+import Link from "next/link";
 
 export default function FormHeader() {
   return (
     <header className="bg-white border-b">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 cursor-pointer">
             <Fish className="h-8 w-8 text-blue-600" />
             <div>
               <h1 className="text-2xl font-bold text-blue-600 tracking-tight">
@@ -16,7 +17,7 @@ export default function FormHeader() {
               </h1>
               <p className="text-sm text-gray-500 -mt-1">Fish Landing System</p>
             </div>
-          </div>
+          </Link>
 
           <div className="text-right">
             <p className="text-sm font-medium text-gray-900">

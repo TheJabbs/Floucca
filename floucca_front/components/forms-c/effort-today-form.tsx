@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import FormInput from "../utils/form-input";
-import { Plus, Trash2, AlertCircle, Loader } from "lucide-react";
-import { getGears } from "../../services/landingService";
+import { Plus, Trash2, AlertCircle } from "lucide-react";
+
+// Define interfaces for props and data structures
+interface Gear {
+  gear_code: number;
+  gear_name: string;
+  equipment_id: string;
+  equipment_name: string;
+}
 
 interface EffortTodayProps {
   required?: boolean;
+  gears: Gear[]; // Receive gears data as prop instead of fetching
   onChange: (effortData: EffortTodayData) => void;
 }
 
@@ -21,7 +29,7 @@ interface GearEntry {
   gear_details: {
     detail_name: string;
     detail_value: string;
-    equipment_id: string; // Added equipment_id
+    equipment_id: string;
   }[];
 }
 
@@ -30,19 +38,12 @@ interface EffortTodayData {
   gear_entries: GearEntry[];
 }
 
-interface Gear {
-  gear_code: number;
-  gear_name: string;
-  equipment_id: string;
-  equipment_name: string;
-}
-
 const EffortToday: React.FC<EffortTodayProps> = ({
   required = false,
+  gears,
   onChange,
 }) => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [gears, setGears] = useState<Gear[]>([]);
+  // Local state for the currently selected gear and its specifications
   const [currentGearCode, setCurrentGearCode] = useState<number>(0);
   const [currentSpecs, setCurrentSpecs] = useState<Record<string, string>>({});
 
@@ -63,23 +64,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
     name: "gear_entries",
   });
 
-  // Fetch gears from API on component mount
-  useEffect(() => {
-    const fetchGears = async () => {
-      try {
-        setLoading(true);
-        const gearsData = await getGears();
-        setGears(gearsData);
-      } catch (error) {
-        console.error("Error fetching gears:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGears();
-  }, []);
-
+  // Update parent component with current form data
   const updateParentForm = () => {
     const currentData = {
       hours_fished: getValues("hours_fished"),
@@ -90,11 +75,11 @@ const EffortToday: React.FC<EffortTodayProps> = ({
 
   useEffect(() => {
     updateParentForm();
-  }, [fields.length]);
+  }, [fields, getValues("hours_fished")]);
 
   const handleGearChange = (gearCode: number) => {
     setCurrentGearCode(Number(gearCode));
-    setCurrentSpecs({});
+    setCurrentSpecs({}); // Reset specs when gear changes
   };
 
   const handleSpecChange = (specName: string, value: string) => {
@@ -110,16 +95,11 @@ const EffortToday: React.FC<EffortTodayProps> = ({
     const selectedGear = gears.find((g) => g.gear_code === currentGearCode);
     if (!selectedGear) return;
 
-    const gearDetails = Object.entries(currentSpecs).map(([name, value]) => {
-      // Find the corresponding equipment_id for this spec
-      const equipmentId = selectedGear.equipment_id || "";
-
-      return {
-        detail_name: name,
-        detail_value: value,
-        equipment_id: equipmentId,
-      };
-    });
+    const gearDetails = Object.entries(currentSpecs).map(([name, value]) => ({
+      detail_name: name,
+      detail_value: value,
+      equipment_id: selectedGear.equipment_id || "",
+    }));
 
     append({
       gear_code: currentGearCode,
@@ -132,16 +112,14 @@ const EffortToday: React.FC<EffortTodayProps> = ({
   };
 
   const getCurrentGearSpecs = (): GearSpec[] => {
-    // Filter gears to find the ones that match the current gear code
     const matchingGears = gears.filter((g) => g.gear_code === currentGearCode);
-
+    
     if (matchingGears.length === 0) return [];
 
-    // Map to the format needed for input fields
     return matchingGears.map((gear) => ({
       equipment_id: gear.equipment_id,
       equipment_name: gear.equipment_name,
-      type: "number", // Default to number, adjust as needed
+      type: "number", // Default type, can be customized if needed
     }));
   };
 
@@ -151,10 +129,24 @@ const EffortToday: React.FC<EffortTodayProps> = ({
 
   const areSpecsComplete = () => {
     const requiredSpecs = getCurrentGearSpecs();
-    return requiredSpecs.every((spec) =>
+    return requiredSpecs.every((spec) => 
       currentSpecs[spec.equipment_name]?.trim()
     );
   };
+
+  const availableGears = gears.filter(
+    (gear) => !fields.some((field) => field.gear_code === gear.gear_code)
+  );
+
+  const uniqueGearOptions = Array.from(
+    new Set(availableGears.map((gear) => gear.gear_code))
+  ).map((gearCode) => {
+    const gear = availableGears.find((g) => g.gear_code === gearCode);
+    return {
+      gear_code: gearCode,
+      gear_name: gear?.gear_name || "",
+    };
+  });
 
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6">
@@ -163,6 +155,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
       </div>
 
       <div className="space-y-3">
+        {/* Hours fished input */}
         <div className="flex items-center gap-2">
           <FormInput
             label="Hours Fished Today"
@@ -177,6 +170,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
           />
         </div>
 
+        {/* Gear selection and details */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             Fishing Gear Details
@@ -184,88 +178,69 @@ const EffortToday: React.FC<EffortTodayProps> = ({
           </label>
 
           <div className="space-y-2">
-            {loading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader className="w-5 h-5 animate-spin text-blue-500 mr-2" />
-                <span>Loading gears...</span>
-              </div>
-            ) : (
-              <select
-                value={currentGearCode}
-                onChange={(e) => handleGearChange(Number(e.target.value))}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                disabled={fields.length === gears.length}
-              >
-                <option value={0}>Select Gear</option>
-                {/* Group gears by gear_code and display each unique gear only once */}
-                {Array.from(new Set(gears.map((gear) => gear.gear_code)))
-                  .map((gearCode) => {
-                    const gear = gears.find((g) => g.gear_code === gearCode);
-                    return {
-                      gear_code: gearCode,
-                      gear_name: gear?.gear_name || "",
-                    };
-                  })
-                  .filter(
-                    (gear) =>
-                      !fields.some(
-                        (field) => field.gear_code === gear.gear_code
-                      )
-                  )
-                  .map((gear) => (
-                    <option key={gear.gear_code} value={gear.gear_code}>
-                      {gear.gear_name}
-                    </option>
-                  ))}
-              </select>
-            )}
+            {/* Gear dropdown */}
+            <select
+              value={currentGearCode}
+              onChange={(e) => handleGearChange(Number(e.target.value))}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              disabled={fields.length === gears.length}
+            >
+              <option value={0}>Select Gear</option>
+              {uniqueGearOptions.map((gear) => (
+                <option key={gear.gear_code} value={gear.gear_code}>
+                  {gear.gear_name}
+                </option>
+              ))}
+            </select>
 
+            {/* Display gear specification inputs when a gear is selected */}
             {currentGearCode !== 0 && (
               <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  {getCurrentGearSpecs().map((spec) => (
-                    <div key={spec.equipment_id} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                          {spec.equipment_id}
-                        </span>
-                        <label className="block text-sm font-medium text-gray-700">
-                          {spec.equipment_name}
-                        </label>
-                        <input
-                          type={spec.type}
-                          value={currentSpecs[spec.equipment_name] || ""}
-                          onChange={(e) =>
-                            handleSpecChange(
-                              spec.equipment_name,
-                              e.target.value
-                            )
+                {getCurrentGearSpecs().map((spec) => (
+                  <div key={spec.equipment_id} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        {spec.equipment_id}
+                      </span>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {spec.equipment_name}
+                      </label>
+                      <input
+                        type={spec.type}
+                        value={currentSpecs[spec.equipment_name] || ""}
+                        onChange={(e) =>
+                          handleSpecChange(
+                            spec.equipment_name,
+                            e.target.value
+                          )
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "-" || e.key === "e") {
+                            e.preventDefault();
                           }
-                          onKeyDown={(e) => {
-                            if (e.key === "-" || e.key === "e") {
-                              e.preventDefault();
-                            }
-                          }}
-                          min={0}
-                          className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder={`Enter ${spec.equipment_name.toLowerCase()}`}
-                        />
-                        <button
-                          onClick={addGear}
-                          disabled={!areSpecsComplete()}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                          type="button"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Gear
-                        </button>
-                      </div>
+                        }}
+                        min={0}
+                        className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder={`Enter ${spec.equipment_name.toLowerCase()}`}
+                      />
+                      <button
+                        onClick={addGear}
+                        disabled={!areSpecsComplete()}
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        type="button"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Gear
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
 
+        {/* Display added gears */}
         {fields.length > 0 ? (
           <div className="space-y-2">
             <h3 className="font-medium text-gray-700 flex items-center gap-2">
@@ -295,13 +270,15 @@ const EffortToday: React.FC<EffortTodayProps> = ({
                               {detail.detail_name}:
                             </span>
                             {detail.detail_value}
-                            
                           </span>
                         ))}
                       </div>
                     </div>
                     <button
-                      onClick={() => remove(index)}
+                      onClick={() => {
+                        remove(index);
+                        updateParentForm();
+                      }}
                       className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
                       type="button"
                     >

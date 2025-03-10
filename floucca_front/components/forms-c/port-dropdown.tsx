@@ -1,37 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { usePort } from '@/contexts/PortContext';
-import { getPorts } from '@/services/landingService';
 
 interface Port {
-  id: number;
-  name: string;
+  port_id: number;
+  port_name: string;
 }
 
 interface PortDropdownProps {
+  ports: Port[];
   onPortChange?: (portId: number) => void;
   className?: string;
 }
 
-const PortDropdown: React.FC<PortDropdownProps> = ({ onPortChange, className }) => {
-  const [ports, setPorts] = useState<Port[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+const PortDropdown: React.FC<PortDropdownProps> = ({ ports, onPortChange, className }) => {
   const { selectedPort, setSelectedPort } = usePort();
-
-  useEffect(() => {
-    getPorts()
-      .then((ports) => {
-        setPorts(ports.map((port) => ({
-          id: port.port_id,
-          name: port.port_name,
-        })));
-      })
-      .catch((error) => {
-        console.error("Error fetching ports:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
 
   const handlePortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const portId = event.target.value;
@@ -44,10 +26,6 @@ const PortDropdown: React.FC<PortDropdownProps> = ({ onPortChange, className }) 
       onPortChange?.(0);
     }
   };
-
-  if (loading) {
-    return <p className="text-gray-500">Loading ports...</p>;
-  }
 
   return (
     <div className={`${className || ''}`}>
@@ -65,8 +43,8 @@ const PortDropdown: React.FC<PortDropdownProps> = ({ onPortChange, className }) 
           Select a port
         </option>
         {ports.map((port) => (
-          <option key={port.id} value={port.id.toString()}>
-            {port.name}
+          <option key={port.port_id} value={port.port_id.toString()}>
+            {port.port_name}
           </option>
         ))}
       </select>

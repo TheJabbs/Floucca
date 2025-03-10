@@ -3,6 +3,24 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:4000";
 
+// Data interfaces
+export interface Gear {
+  gear_code: number;
+  gear_name: string;
+  equipment_id: string;
+  equipment_name: string;
+}
+
+export interface Species {
+  specie_code: number;
+  specie_name: string;
+}
+
+export interface Port {
+  port_id: number;
+  port_name: string;
+}
+
 export interface LandingFormDTO {
   form: {
     port_id: number;
@@ -105,7 +123,7 @@ export const submitLandingForm = async (formData: LandingFormDTO): Promise<ApiRe
 /**
  * Fetches all ports from the API
  */
-export const getPorts = async (): Promise<{port_id: number, port_name: string}[]> => {
+export const getPorts = async (): Promise<Port[]> => {
   try {
     const response = await axios.get(`${API_BASE_URL}/ports`);
     return response.data;
@@ -118,7 +136,7 @@ export const getPorts = async (): Promise<{port_id: number, port_name: string}[]
 /**
  * Fetches all species from the API
  */
-export const getSpecies = async (): Promise<{specie_code: number, specie_name: string}[]> => {
+export const getSpecies = async (): Promise<Species[]> => {
   try {
     const response = await axios.get(`${API_BASE_URL}/species/all`);
     return response.data;
@@ -131,7 +149,7 @@ export const getSpecies = async (): Promise<{specie_code: number, specie_name: s
 /**
  * Fetches all gears from the API
  */
-export const getGears = async (): Promise<{gear_code: number, gear_name: string, equipment_id: string, equipment_name: string}[]> => {
+export const getGears = async (): Promise<Gear[]> => {
   try {
     const response = await axios.get(`${API_BASE_URL}/api/dev/gear/all/gear`);
     return response.data;

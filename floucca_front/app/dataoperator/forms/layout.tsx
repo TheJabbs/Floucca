@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, ReactNode } from "react";
-import { getGears, getSpecies, getPorts, Gear, Species, Port } from "@/services/landingService";
+import { getGears, getSpecies, getPorts, Gear, Species, Port } from "@/services/formsServices";
 
 // Define the context data structure
 interface FormsDataContextType {
@@ -27,30 +27,20 @@ export default function FormsLayout({ children }: FormsLayoutProps) {
     ports: []
   });
 
-// In your layout.tsx
 useEffect(() => {
   const fetchData = async () => {
-    console.log("Starting to fetch data...");
     try {
       setIsLoading(true);
-      
-      // Fetch all required data in parallel
-      console.log("Before API calls");
       const [gears, species, ports] = await Promise.all([
         getGears(),
         getSpecies(),
         getPorts()
       ]);
-      console.log("After API calls - received data:", 
-        {gears: gears.length, species: species.length, ports: ports.length});
-      
       setSharedData({ gears, species, ports });
-      console.log("Set shared data complete");
     } catch (error) {
       console.error("Error fetching forms data:", error);
       setError("Failed to load required data");
     } finally {
-      console.log("Setting loading to false");
       setIsLoading(false);
     }
   };

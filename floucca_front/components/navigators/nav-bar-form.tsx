@@ -21,15 +21,15 @@ const Navbar: React.FC = () => {
                     Effort and Landing
                 </Link>
                 <Link
-                    href="/dataoperator/forms/sense-form"
+                    href="/dataoperator/forms/census-form"
                     className={`${
-                        pathname === '/fleet-senses' ? 'text-blue-600 font-semibold' : 'text-gray-800'
+                        pathname === '/fleet-census' ? 'text-blue-600 font-semibold' : 'text-gray-800'
                     } font-medium hover:text-blue-600`}
                 >
-                    Fleet Senses
+                    Fleet Census
                 </Link>
                 <Link
-                    href="/submission-history"
+                    href="/dataoperator/submission-history"
                     className={`${
                         pathname === '/submission-history' ? 'text-blue-600 font-semibold' : 'text-gray-800'
                     } font-medium hover:text-blue-600`}

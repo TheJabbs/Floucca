@@ -104,7 +104,6 @@ const SubmissionHistory = () => {
 
   const onFilterSubmit = (data: FilterOptions) => {
     console.log('Filter applied:', data);
-    // Implement filter logic to call backend API with filter params
   };
 
   const toggleExpand = (formId: number) => {

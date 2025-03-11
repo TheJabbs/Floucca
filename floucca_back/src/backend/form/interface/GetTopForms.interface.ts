@@ -6,6 +6,7 @@ export interface GetTopFormsInterface {
     fisher_name: string;
     period_date?: Date;
     boat_detail?: number;
+    creation_time: Date;
   };
 
   ports: {

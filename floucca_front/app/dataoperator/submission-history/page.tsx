@@ -1,7 +1,8 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Calendar, Clock, Fish, MapPin, Users, Ruler, Scale, Hash, Anchor } from 'lucide-react';
+import { Calendar, Clock, Fish, MapPin, Users, Ruler, Scale, Hash, Anchor, RefreshCw } from 'lucide-react';
+import { getFromCache, saveToCache, isCacheValid } from '@/components/utils/cache-utils';
 
 interface SubmittedForm {
   form: {
@@ -54,12 +55,15 @@ interface FilterOptions {
   portId?: number;
 }
 
+// Cache key constants
+const SUBMISSIONS_CACHE_KEY = 'flouca_submissions';
+const CACHE_EXPIRATION = 30 * 60 * 1000; 
+
 const SubmissionHistory = () => {
   const [forms, setForms] = useState<SubmittedForm[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedFormId, setExpandedFormId] = useState<number | null>(null);
-  
   const { register, handleSubmit } = useForm<FilterOptions>({
     defaultValues: {
       startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
@@ -67,29 +71,67 @@ const SubmissionHistory = () => {
     }
   });
 
-  useEffect(() => {
-    const fetchForms = async () => {
-      setLoading(true);
-      try {
-        const userId = 1;
-        
-        const response = await fetch(`http://localhost:4000/api/dev/form/top/${userId}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch submissions');
-        }
-        const data = await response.json();
-        
-        setForms(data);
-        setError(null);
-      } catch (err) {
-        setError('Error loading submissions. Please try again later.');
-        console.error('Fetch error:', err);
-      } finally {
-        setLoading(false);
+  // Function to fetch submissions from API
+  const fetchSubmissionsFromApi = async () => {
+    try {
+      const userId = 1;
+      console.log("Fetching submissions from API");
+      const response = await fetch(`http://localhost:4000/api/dev/form/top/${userId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch submissions');
       }
-    };
+      const data = await response.json();
+      
+      saveToCache(SUBMISSIONS_CACHE_KEY, data);
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+      throw error;
+    }
+  };
 
-    fetchForms();
+  const loadSubmissions = async () => {
+    setLoading(true);
+    try {
+      // Try to get data from cache first
+      const cachedData = getFromCache<SubmittedForm[]>(SUBMISSIONS_CACHE_KEY, CACHE_EXPIRATION);
+      
+      if (cachedData) {
+        console.log("Using cached submissions data");
+        setForms(cachedData);
+      } else {
+        // Fetch fresh data if cache is invalid or missing
+        const freshData = await fetchSubmissionsFromApi();
+        setForms(freshData);
+      }
+      
+      setError(null);
+    } catch (err) {
+      setError('Error loading submissions. Please try again later.');
+      console.error('Fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Force refresh submissions from API
+  const refreshSubmissions = async () => {
+    setLoading(true);
+    try {
+      const freshData = await fetchSubmissionsFromApi();
+      setForms(freshData);
+      setError(null);
+    } catch (err) {
+      setError('Error refreshing submissions. Please try again later.');
+      console.error('Refresh error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSubmissions();
   }, []);
 
   const formatDate = (dateString?: string) => {
@@ -104,6 +146,7 @@ const SubmissionHistory = () => {
 
   const onFilterSubmit = (data: FilterOptions) => {
     console.log('Filter applied:', data);
+    // Implementation for filtering can be added here
   };
 
   const toggleExpand = (formId: number) => {
@@ -112,7 +155,16 @@ const SubmissionHistory = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">Submission History</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Submission History</h1>
+        <button 
+          onClick={refreshSubmissions}
+          className="flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Refresh
+        </button>
+      </div>
 
       {/* Filter Form */}
       <div className="mb-6 p-4 bg-white rounded-lg border shadow-sm">
@@ -146,11 +198,7 @@ const SubmissionHistory = () => {
       </div>
 
       {/* Submissions List */}
-      {loading ? (
-        <div className="flex justify-center py-10">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-        </div>
-      ) : error ? (
+      {error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
           {error}
         </div>
@@ -289,6 +337,18 @@ const SubmissionHistory = () => {
               )}
             </div>
           ))}
+        </div>
+      )}
+      
+      {/* Last updated information */}
+      {!loading && forms.length > 0 && (
+        <div className="mt-6 text-center text-sm text-gray-500">
+          <p>
+            Last updated: {new Date(isCacheValid(SUBMISSIONS_CACHE_KEY) 
+              ? Number(localStorage.getItem(`${SUBMISSIONS_CACHE_KEY}_timestamp`)) 
+              : Date.now()
+            ).toLocaleString()}
+          </p>
         </div>
       )}
     </div>

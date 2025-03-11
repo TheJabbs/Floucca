@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useFormsData } from "../useFormData";
+import { useFormsData } from "@/contexts/FormDataContext";
 import { usePort } from "@/contexts/PortContext";
 import PortDropdown from "@/components/forms-c/port-dropdown";
 import BoatInfo from "@/components/forms-c/boat-form";
@@ -10,6 +10,7 @@ import GearUsageForm from "@/components/forms-c/gear-form";
 import SubmitButton from "@/components/utils/submit-button";
 import Notification from "@/components/utils/notification";
 import { submitFleetSensesForm } from "@/services/formsServices";
+import { removeFromCache } from "@/components/utils/cache-utils";
 
 interface BoatData {
   fleet_owner: string;
@@ -33,7 +34,8 @@ interface FleetSensesForm {
 
 function FleetSensesPage() {
   const { selectedPort } = usePort();
-  const { ports, gears } = useFormsData();
+  // Use cached data from our context
+  const { ports, gears, isLoading, error } = useFormsData();
   
   const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
@@ -130,7 +132,7 @@ function FleetSensesPage() {
       const apiPayload = {
         formDto: {
           port_id: formData.port,
-          user_id: 1, // Assuming user ID is available elsewhere or hardcoded for now
+          user_id: 1,
           fisher_name: formData.boatData.fleet_owner,
         },
         boatDetailDto: formData.boatData,
@@ -143,6 +145,10 @@ function FleetSensesPage() {
       console.log("Submitting fleet senses data:", apiPayload);
       
       const response = await submitFleetSensesForm(apiPayload);
+      
+      // Clear submission history cache to reflect the new submission
+      removeFromCache('flouca_submissions');
+      removeFromCache('flouca_submissions_timestamp');
       
       setNotification({
         type: "success",
@@ -169,6 +175,32 @@ function FleetSensesPage() {
     }
   };
 
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-10">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // Show error state if data fetching failed
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+          <p>{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">

@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
-import { useFormsData } from "../useFormData";
+import { useFormsData } from "@/contexts/FormDataContext";
 import BoatInfo from "@/components/forms-c/boat-form";
 import EffortToday from "@/components/forms-c/effort-today-form";
 import EffortLastWeek from "@/components/forms-c/effort-last-week-form";
@@ -10,7 +10,8 @@ import SubmitButton from "@/components/utils/submit-button";
 import { usePort } from "@/contexts/PortContext";
 import PortDropdown from "@/components/forms-c/port-dropdown";
 import Notification from "@/components/utils/notification";
-import { submitLandingForm, LandingFormDTO, getGears, getSpecies, getPorts } from "@/services/formsServices";
+import { submitLandingForm, LandingFormDTO } from "@/services/formsServices";
+import { removeFromCache } from "@/components/utils/cache-utils";
 
 const MapWithMarkers = dynamic(
   () => import("@/components/forms-c/map-with-markers"),
@@ -93,8 +94,8 @@ interface FormNotification {
 function EffortAndLandingPage() {
   const { selectedPort } = usePort();
 
-  // State for API data
-  const {gears, species, ports} = useFormsData();
+  // Get the cached form data from our FormsDataContext
+  const { gears, species, ports, isLoading, error: dataError, refetch } = useFormsData();
 
   const defaultValues = {
     LandingFormDTO: {
@@ -388,6 +389,10 @@ function EffortAndLandingPage() {
       // Handle successful response
       console.log("API Response:", response);
 
+      // Clear the submission history cache to force a refresh on the next visit
+      removeFromCache('flouca_submissions');
+      removeFromCache('flouca_submissions_timestamp');
+
       // Show success message
       setNotification({
         type: "success",
@@ -422,6 +427,30 @@ function EffortAndLandingPage() {
     setValue("LandingFormDTO.port", selectedPort);
     updateValidation("port", !!selectedPort);
   }, [selectedPort, setValue]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-10">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (dataError) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+          <p>{dataError}</p>
+          <button 
+            onClick={() => refetch()} 
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">

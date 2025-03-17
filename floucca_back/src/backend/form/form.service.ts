@@ -92,6 +92,8 @@ export class FormService {
                 fisher_name: form.fisher_name,
                 period_date: form.period_date,
                 boat_detail: form.boat_detail,
+                creation_time: form.creation_time,
+
             },
 
             ports: form.ports,

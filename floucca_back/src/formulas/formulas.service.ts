@@ -12,6 +12,9 @@ import {mapLandingsMapForSpecieCountMapper} from "./utils/mapLandingsMapForSpeci
 import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/getFilteredLastW.interface";
 import {mapEffortMapMapper} from "./utils/mapEffortMap.mapper";
 import {mapLandingsMapForSpeciePriceMapper} from "./utils/mapLandingsMapForSpeciePrice.mapper";
+import _ from "lodash";
+import {GetEffortAndLandingInterface} from "./interface/getEffortAndLanding.interface"; //
+
 
 @Injectable()
 export class FormulasService {
@@ -22,6 +25,56 @@ export class FormulasService {
         private readonly senseLastWService: SenseLastwService,
         private readonly gearService: GearService
     ) {}
+
+    //Services for the controller
+
+
+    async getEffortAndLanding(filter: GeneralFilterDto): Promise<GetEffortAndLandingInterface> {
+        const filterCopy = _.cloneDeep(filter);
+
+        const [dataCopy, data2Copy] = await Promise.all([
+            this.senseLastWService.getEffortsByFilter(filterCopy).then(_.cloneDeep),
+            this.landingsService.getLandingsByFilter(filterCopy).then(_.cloneDeep)
+        ]);
+
+        const pba = await this.getPba(_.cloneDeep(dataCopy));
+
+        const estEffort = await this.getEstimateEffort(pba, _.cloneDeep(dataCopy));
+        const estCatch = await this.getEstimateCatchForAllSpecies(_.cloneDeep(filterCopy), pba, _.cloneDeep(dataCopy));
+
+        const [avgPrice, estValue, cpue, estCatch2, activeDays, sampleEffort ] = await Promise.all([
+            this.getAvgFishPrice(_.cloneDeep(filterCopy)),
+            this.getEstimatedSpeciesValue(_.cloneDeep(filterCopy), 1, _.cloneDeep(estCatch)),
+            this.getSpeciesCpue(_.cloneDeep(filterCopy), 1, _.cloneDeep(estCatch), _.cloneDeep(estEffort)),
+            this.getEstimateSpeciesCatch(_.cloneDeep(data2Copy), 1, _.cloneDeep(estCatch)),
+            this.getActiveDays(_.cloneDeep(dataCopy)),
+            this.getEffortBySpecies(_.cloneDeep(dataCopy), _.cloneDeep(filterCopy))
+        ]);
+
+        return {
+            effort : {
+                records: dataCopy.length,
+                gears: dataCopy.length,
+                activeDays: activeDays,
+                pba: pba,
+                estEffort: estEffort
+            },
+            landings: {
+                records: data2Copy.length,
+                avgPrice: avgPrice,
+                estValue: estValue,
+                cpue: cpue,
+                estCatch: estCatch2,
+                sampleEffort: sampleEffort
+            }
+        }
+    }
+
+
+
+
+    //Operational Formulas
+
 
     /**
      * Calculates Catch Per Unit Effort (CPUE) by dividing the total fish weight
@@ -48,11 +101,10 @@ export class FormulasService {
      * by the CPUE value obtained from the given filter criteria.
      */
     //TODO: Check if this is the correct implementation
-    async getEffortBySpecies(filter: GeneralFilterDto) {
-        const landings = await this.landingsService.getLandingsByFilter(filter);
+    async getEffortBySpecies(data: GetFilteredInterface[], filter: GeneralFilterDto) {
 
         // mapping landings by port ID (stratum) and then by species
-        let mapLandings: Map<number, GetFilteredInterface[]> = mapLandingsAndEffortMapper(landings);
+        let mapLandings: Map<number, GetFilteredInterface[]> = mapLandingsAndEffortMapper(data);
         let speciesMap = mapLandingsMapForSpecieCountMapper(mapLandings);
 
         let filterList = [];
@@ -81,8 +133,7 @@ export class FormulasService {
      * days fished to the total number of examined days.
      */
     //TODO: Check if this is the correct implementation
-    async getPba(filter: GeneralFilterDto) {
-        const data = await this.senseLastWService.getEffortsByFilter(filter);
+    async getPba(data : GetFilteredLastWInterface[]) {
 
         let map: Map<number, GetFilteredLastWInterface[]> = mapLandingsAndEffortMapper(data);
         let speciesMap = mapEffortMapMapper(map);
@@ -108,9 +159,8 @@ export class FormulasService {
      * the number of days in the period, and the Proportion of Boats Active (PBA).
      */
     //ToDo: Check if this is the correct implementation I made it take pba as a parameter to prevent redundancy
-    async getTotalEffort(filter: GeneralFilterDto, pba: number) {
+    async getTotalEffort(filter: GeneralFilterDto,data: GetFilteredLastWInterface[], pba: number) {
         delete filter.gear_code; // Remove specific gear filtering to get total effort
-        const data = await this.senseLastWService.getEffortsByFilter(filter);
         const periodDate = new Date(filter.period);
         const days = getDaysInMonthByDate(periodDate.toDateString());
         const numberGear = data.length;
@@ -122,8 +172,7 @@ export class FormulasService {
      * Calculates the number of active fishing days by considering the number of gears
      * and the total days fished across all efforts.
      */
-    async getActiveDays(filter: GeneralFilterDto) {
-        const data = await this.senseLastWService.getEffortsByFilter(filter);
+    async getActiveDays(data: GetFilteredLastWInterface[]) {
         const allGears = await this.gearService.getAllGear();
 
         let activeDays = 0;
@@ -138,10 +187,9 @@ export class FormulasService {
      * Estimates fishing effort by multiplying active days, the total number of gears,
      * and the Proportion of Boats Active (PBA).
      */
-    async getEstimateEffort(filter: GeneralFilterDto) {
-        const activeDays = await this.getActiveDays(filter);
+    async getEstimateEffort(pba: number, data: GetFilteredLastWInterface[]) {
+        const activeDays = await this.getActiveDays(data);
         const allGears = await this.gearService.getAllGear();
-        const pba = await this.getPba(filter);
 
         return activeDays * allGears.length * pba;
     }
@@ -150,9 +198,9 @@ export class FormulasService {
      * Computes the estimated catch by multiplying the estimated fishing effort
      * with the Catch Per Unit Effort (CPUE).
      */
-    async getEstimateCatch(filter: GeneralFilterDto) {
+    async getEstimateCatchForAllSpecies(filter: GeneralFilterDto, pba: number, data: GetFilteredLastWInterface[]) {
         delete filter.gear_code; // Remove specific gear filtering for total estimate
-        return await this.getEstimateEffort(filter) * await this.getCpue(filter);
+        return await this.getEstimateEffort(pba, data) * await this.getCpue(filter);
     }
 
     /**
@@ -252,12 +300,7 @@ export class FormulasService {
         return count > 0 ? sumWeight / count / kg : 0;
     }
 
-    async getEstimateSpeciesCatch(filter: GeneralFilterDto, specie_code: number) {
-        // Get the estimated total catch
-        const estimatedTotalCatch = await this.getEstimateCatch(filter);
-
-        // Fetch landings data
-        const data = await this.landingsService.getLandingsByFilter(filter);
+    async getEstimateSpeciesCatch(data: GetFilteredInterface[], specie_code: number, estimatedTotalCatch: number) {
 
         let sampleSpeciesCatch = 0;
         let sampleTotalCatch = 0;
@@ -278,21 +321,16 @@ export class FormulasService {
         return estimatedTotalCatch * (sampleSpeciesCatch / sampleTotalCatch);
     }
 
-    async getSpeciesCpue(filter: GeneralFilterDto, specie_code: number) {
-        const [estimatedSpeciesCatch, estimatedTotalEffort] = await Promise.all([
-            this.getEstimateSpeciesCatch(filter, specie_code),
-            this.getEstimateEffort(filter)
-        ]);
+    async getSpeciesCpue(filter: GeneralFilterDto, specie_code: number, estimatedSpeciesCatch: number, estimatedTotalEffort: number) {
 
         if (estimatedTotalEffort === 0) return 0;
 
         return estimatedSpeciesCatch / estimatedTotalEffort;
     }
 
-    async getEstimatedSpeciesValue(filter: GeneralFilterDto, specie_code: number) {
-        const [estimatedPrice, estimatedSpeciesCatch] = await Promise.all([
+    async getEstimatedSpeciesValue(filter: GeneralFilterDto, specie_code: number, estimatedSpeciesCatch: number) {
+        const [estimatedPrice,] = await Promise.all([
             this.getAvgFishPrice(filter),
-            this.getEstimateSpeciesCatch(filter, specie_code)
         ]);
 
         return estimatedPrice * estimatedSpeciesCatch;

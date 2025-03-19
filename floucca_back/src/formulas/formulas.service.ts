@@ -13,7 +13,8 @@ import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/getFil
 import {mapEffortMapMapper} from "./utils/mapEffortMap.mapper";
 import {mapLandingsMapForSpeciePriceMapper} from "./utils/mapLandingsMapForSpeciePrice.mapper";
 import _ from "lodash";
-import {GetEffortAndLandingInterface} from "./interface/getEffortAndLanding.interface"; //
+import {GetEffortAndLandingInterface} from "./interface/getEffortAndLanding.interface";
+import {GetAllGearInterface} from "../backend/gear/interface/GetAllGear.interface"; //
 
 
 @Injectable()
@@ -39,22 +40,27 @@ export class FormulasService {
 
         const pba = await this.getPba(_.cloneDeep(dataCopy));
 
-        const estEffort = await this.getEstimateEffort(pba, _.cloneDeep(dataCopy));
-        const estCatch = await this.getEstimateCatchForAllSpecies(_.cloneDeep(filterCopy), pba, _.cloneDeep(dataCopy));
+        const allGears = await this.gearService.getAllGear();
+        const estEffort = await this.getEstimateEffort(pba, _.cloneDeep(dataCopy), allGears);
+        const estCatch = await this.getEstimateCatchForAllSpecies(_.cloneDeep(filterCopy), estEffort);
+
+        let effortFilter = _.cloneDeep(filterCopy);
+        delete effortFilter.gear_code
+        delete effortFilter.specie_code
 
         const [avgPrice, estValue, cpue, estCatch2, activeDays, sampleEffort ] = await Promise.all([
             this.getAvgFishPrice(_.cloneDeep(filterCopy)),
-            this.getEstimatedSpeciesValue(_.cloneDeep(filterCopy), 1, _.cloneDeep(estCatch)),
+            this.getEstimatedSpeciesValue(_.cloneDeep(filterCopy), 1, estCatch),
             this.getSpeciesCpue(_.cloneDeep(filterCopy), 1, _.cloneDeep(estCatch), _.cloneDeep(estEffort)),
-            this.getEstimateSpeciesCatch(_.cloneDeep(data2Copy), 1, _.cloneDeep(estCatch)),
-            this.getActiveDays(_.cloneDeep(dataCopy)),
-            this.getEffortBySpecies(_.cloneDeep(dataCopy), _.cloneDeep(filterCopy))
+            this.getEstimateCatchForAllSpecies(_.cloneDeep(filterCopy),  estCatch),
+            this.getActiveDays(dataCopy, allGears),
+            this.getEffortBySpecies(dataCopy, effortFilter)
         ]);
 
         return {
             effort : {
                 records: dataCopy.length,
-                gears: dataCopy.length,
+                gears: allGears.length,
                 activeDays: activeDays,
                 pba: pba,
                 estEffort: estEffort
@@ -172,8 +178,7 @@ export class FormulasService {
      * Calculates the number of active fishing days by considering the number of gears
      * and the total days fished across all efforts.
      */
-    async getActiveDays(data: GetFilteredLastWInterface[]) {
-        const allGears = await this.gearService.getAllGear();
+    async getActiveDays(data: GetFilteredLastWInterface[], allGears: GetAllGearInterface[]) {
 
         let activeDays = 0;
         data.forEach(effort => {
@@ -187,9 +192,8 @@ export class FormulasService {
      * Estimates fishing effort by multiplying active days, the total number of gears,
      * and the Proportion of Boats Active (PBA).
      */
-    async getEstimateEffort(pba: number, data: GetFilteredLastWInterface[]) {
-        const activeDays = await this.getActiveDays(data);
-        const allGears = await this.gearService.getAllGear();
+    async getEstimateEffort(pba: number, data: GetFilteredLastWInterface[], allGears: GetAllGearInterface[]) {
+        const activeDays = await this.getActiveDays(data, allGears);
 
         return activeDays * allGears.length * pba;
     }
@@ -198,9 +202,9 @@ export class FormulasService {
      * Computes the estimated catch by multiplying the estimated fishing effort
      * with the Catch Per Unit Effort (CPUE).
      */
-    async getEstimateCatchForAllSpecies(filter: GeneralFilterDto, pba: number, data: GetFilteredLastWInterface[]) {
+    async getEstimateCatchForAllSpecies(filter: GeneralFilterDto, estEffort: number) {
         delete filter.gear_code; // Remove specific gear filtering for total estimate
-        return await this.getEstimateEffort(pba, data) * await this.getCpue(filter);
+        return estEffort * await this.getCpue(filter);
     }
 
     /**

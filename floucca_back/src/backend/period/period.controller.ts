@@ -1,7 +1,6 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {PeriodService} from "./period.service";
 import {UpdateGearDetailDto} from "../gear_detail/dto/UpdateGearDetail.dto";
-import {GetAllPeriodInterface} from "./interface/getAllPeriod.interface";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 
 @Controller('api/dev/period')

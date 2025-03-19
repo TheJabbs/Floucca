@@ -1,210 +1,87 @@
 "use client";
 
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  ReactNode,
-  useContext,
-} from "react";
-import {
-  getGears,
-  getSpecies,
-  getPorts,
-  Gear,
-  Species,
-  Port,
-} from "@/services/formsServices";
+import React, { createContext, ReactNode, useContext } from "react";
+import { getGears, getSpecies, getPorts } from "@/services"; 
+import { useDataContext } from "@/hooks/useDataContext";
 
-// Define the context data structure
-interface FormsDataContextType {
-  gears: Gear[];
-  species: Species[];
-  ports: Port[];
+export interface FormDataType {
+  gears: any[];
+  species: any[];
+  ports: any[];
   isLoading: boolean;
   error: string | null;
   lastFetched: number | null;
   refetch: () => Promise<void>;
 }
 
-// Default context values
-const defaultContextValue: FormsDataContextType = {
-  gears: [],
-  species: [],
-  ports: [],
-  isLoading: true,
-  error: null,
-  lastFetched: null,
-  refetch: async () => {},
-};
-
-// Cache keys for localStorage
 const CACHE_KEYS = {
-  GEARS: "flouca_cached_gears",
-  SPECIES: "flouca_cached_species",
-  PORTS: "flouca_cached_ports",
-  LAST_FETCHED: "flouca_last_fetched",
+  FORM_GEARS: "flouca_form_gears",
+  FORM_SPECIES: "flouca_form_species",
+  FORM_PORTS: "flouca_form_ports",
 };
 
-const CACHE_EXPIRATION = 60 * 60 * 1000;
-
-export const FormsDataContext =
-  createContext<FormsDataContextType>(defaultContextValue);
+const FormsDataContext = createContext<FormDataType | undefined>(undefined);
 
 export function useFormsData() {
   const context = useContext(FormsDataContext);
-
   if (!context) {
     throw new Error("useFormsData must be used within a FormsDataProvider");
   }
-
   return context;
 }
 
-interface FormsDataProviderProps {
-  children: ReactNode;
-}
+// Provider component
+export function FormsDataProvider({ children }: { children: ReactNode }) {
+  // Use our custom hook for each data type
+  const gearContext = useDataContext(getGears, CACHE_KEYS.FORM_GEARS);
+  const speciesContext = useDataContext(getSpecies, CACHE_KEYS.FORM_SPECIES);
+  const portContext = useDataContext(getPorts, CACHE_KEYS.FORM_PORTS);
 
-export function FormsDataProvider({ children }: FormsDataProviderProps) {
-  const [gears, setGears] = useState<Gear[]>([]);
-  const [species, setSpecies] = useState<Species[]>([]);
-  const [ports, setPorts] = useState<Port[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastFetched, setLastFetched] = useState<number | null>(null);
-
-  // load data from cache
-  const loadFromCache = () => {
-    try {
-      // last fetch timestamp
-      const cachedLastFetched = localStorage.getItem(CACHE_KEYS.LAST_FETCHED);
-      const lastFetchTime = cachedLastFetched
-        ? parseInt(cachedLastFetched, 10)
-        : null;
-
-      // Check if cache is expired
-      const isExpired = lastFetchTime
-        ? Date.now() - lastFetchTime > CACHE_EXPIRATION
-        : true;
-
-      if (isExpired) {
-        console.log("Cache is expired or doesn't exist");
-        return false;
-      }
-
-      // Load cached data
-      const cachedGears = localStorage.getItem(CACHE_KEYS.GEARS);
-      const cachedSpecies = localStorage.getItem(CACHE_KEYS.SPECIES);
-      const cachedPorts = localStorage.getItem(CACHE_KEYS.PORTS);
-
-      // If any cache is missing, fetch fresh data
-      if (!cachedGears || !cachedSpecies || !cachedPorts) {
-        return false;
-      }
-
-      // Parse and set cached data
-      setGears(JSON.parse(cachedGears));
-      setSpecies(JSON.parse(cachedSpecies));
-      setPorts(JSON.parse(cachedPorts));
-      setLastFetched(lastFetchTime);
-      setIsLoading(false);
-
-      console.log("Data loaded from cache successfully");
-      return true;
-    } catch (error) {
-      console.error("Error loading from cache:", error);
-      return false;
-    }
+  // Combined refetch function
+  const refetchAll = async () => {
+    await Promise.all([
+      gearContext.refetch(),
+      speciesContext.refetch(),
+      portContext.refetch()
+    ]);
   };
 
-  // Function to save data to cache
-  const saveToCache = (data: {
-    gears: Gear[];
-    species: Species[];
-    ports: Port[];
-  }) => {
-    try {
-      const now = Date.now();
-      localStorage.setItem(CACHE_KEYS.GEARS, JSON.stringify(data.gears));
-      localStorage.setItem(CACHE_KEYS.SPECIES, JSON.stringify(data.species));
-      localStorage.setItem(CACHE_KEYS.PORTS, JSON.stringify(data.ports));
-      localStorage.setItem(CACHE_KEYS.LAST_FETCHED, now.toString());
-      setLastFetched(now);
-      console.log("Data saved to cache successfully");
-    } catch (error) {
-      console.error("Error saving to cache:", error);
-    }
-  };
+  const isLoading = gearContext.isLoading || speciesContext.isLoading || portContext.isLoading;
+  
+  // Determine overall error state (first error encountered)
+  const error = gearContext.error || speciesContext.error || portContext.error;
 
-  // Function to fetch data from API
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  // Find the most recent fetch time
+  const lastFetchedTimes = [
+    gearContext.lastFetched,
+    speciesContext.lastFetched,
+    portContext.lastFetched
+  ].filter(Boolean) as number[];
+  
+  const lastFetched = lastFetchedTimes.length > 0 
+    ? Math.max(...lastFetchedTimes) 
+    : null;
 
-      console.log("Fetching fresh data from API...");
-
-      const [fetchedGears, fetchedSpecies, fetchedPorts] = await Promise.all([
-        getGears(),
-        getSpecies(),
-        getPorts(),
-      ]);
-
-      setGears(fetchedGears);
-      setSpecies(fetchedSpecies);
-      setPorts(fetchedPorts);
-
-      saveToCache({
-        gears: fetchedGears,
-        species: fetchedSpecies,
-        ports: fetchedPorts,
-      });
-
-      console.log("Fresh data fetched and cached successfully");
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setError("Failed to load required data. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const initializeData = async () => {
-      // Try to load from cache first
-      const cacheLoaded = loadFromCache();
-
-      // If cache is not available or expired, fetch fresh data
-      if (!cacheLoaded) {
-        await fetchData();
-      }
-    };
-
-    initializeData();
-  }, []);
-
-  // Context value
-  const contextValue: FormsDataContextType = {
-    gears,
-    species,
-    ports,
+  // Create the combined context value
+  const value: FormDataType = {
+    gears: gearContext.data,
+    species: speciesContext.data,
+    ports: portContext.data,
     isLoading,
     error,
     lastFetched,
-    refetch: fetchData,
+    refetch: refetchAll
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-10">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
   return (
-    <FormsDataContext.Provider value={contextValue}>
-      {children}
+    <FormsDataContext.Provider value={value}>
+      {isLoading ? (
+        <div className="flex justify-center py-10">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+        </div>
+      ) : (
+        children
+      )}
     </FormsDataContext.Provider>
   );
 }

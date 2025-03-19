@@ -1,62 +1,46 @@
 "use client";
-import React, { useState } from "react";
-import { Filter, X, Check } from "lucide-react";
-
-interface StatsPeriod {
-  id: string;
-  label: string;
-}
-
-interface GearType {
-  id: number;
-  name: string;
-}
-
-interface FilterOption {
-  id: string;
-  name: string;
-  type: 'port' | 'region' | 'coop';
-}
-
-// Sample data (to be replaced with real data)
-const PERIODS: StatsPeriod[] = [
-  { id: "last-week", label: "Last Week" },
-  { id: "last-month", label: "Last Month" },
-  { id: "last-quarter", label: "Last Quarter" },
-  { id: "last-year", label: "Last Year" }
-];
-
-const GEARS: GearType[] = [
-  { id: 1, name: "Fishing Net" },
-  { id: 2, name: "Fishing Rod" },
-  { id: 3, name: "Long Line" },
-  { id: 4, name: "Trap" }
-];
-
-const FILTER_OPTIONS: FilterOption[] = [
-  { id: "port-1", name: "Tripoli Port", type: "port" },
-  { id: "port-2", name: "Beirut Port", type: "port" },
-  { id: "port-3", name: "Sidon Port", type: "port" },
-  { id: "region-1", name: "North Lebanon", type: "region" },
-  { id: "region-2", name: "Mount Lebanon", type: "region" },
-  { id: "region-3", name: "South Lebanon", type: "region" },
-  { id: "coop-1", name: "North Coop", type: "coop" },
-  { id: "coop-2", name: "Central Coop", type: "coop" },
-  { id: "coop-3", name: "South Coop", type: "coop" }
-];
+import React, { useState, useEffect } from "react";
+import { Filter, X, Check, Loader2 } from "lucide-react";
+import { useStatsData } from "@/contexts/StatsDataContext";
 
 const StatsPage: React.FC = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState<string>(PERIODS[0].id);
-  const [selectedGear, setSelectedGear] = useState<number>(GEARS[0].id);
+  // Get data from context
+  const { 
+    gears, 
+    ports, 
+    regions, 
+    coops, 
+    formattedPeriods, 
+    isLoading, 
+    error 
+  } = useStatsData();
   
+  // Filter states
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+  const [selectedGear, setSelectedGear] = useState<number>(0);
   const [activeFilterType, setActiveFilterType] = useState<'port' | 'region' | 'coop'>('port');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  
+  // Stats data
+  const [statsData, setStatsData] = useState<any>(null);
+  const [isStatsLoading, setIsStatsLoading] = useState(false);
+
+  // Set initial selections when data is loaded
+  useEffect(() => {
+    if (!isLoading && formattedPeriods.length > 0 && selectedPeriod === "") {
+      setSelectedPeriod(formattedPeriods[0].value);
+    }
+    
+    if (!isLoading && gears.length > 0 && selectedGear === 0) {
+      setSelectedGear(gears[0].gear_code);
+    }
+  }, [isLoading, formattedPeriods, gears, selectedPeriod, selectedGear]);
 
   const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPeriod(e.target.value);
   };
+  
   const handleGearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedGear(Number(e.target.value));
   };
@@ -77,17 +61,37 @@ const StatsPage: React.FC = () => {
   };
 
   const applyFilters = () => {
-    console.log("Applying filters:", {
+    console.log("Applied filters:", {
       period: selectedPeriod,
       gear: selectedGear,
       filterType: activeFilterType,
       filters: selectedFilters
     });
+    
     setIsFilterPanelOpen(false);
+    // In the future, add API call to fetch stats here
   };
 
   const getCurrentFilterOptions = () => {
-    return FILTER_OPTIONS.filter(option => option.type === activeFilterType);
+    switch (activeFilterType) {
+      case 'port':
+        return ports.map(port => ({
+          id: port.port_id.toString(),
+          name: port.port_name
+        }));
+      case 'region':
+        return regions.map(region => ({
+          id: region.region_code.toString(),
+          name: region.region_name
+        }));
+      case 'coop':
+        return coops.map(coop => ({
+          id: coop.coop_code.toString(),
+          name: coop.coop_name
+        }));
+      default:
+        return [];
+    }
   };
 
   const getFilterTypeLabel = () => {
@@ -97,6 +101,30 @@ const StatsPage: React.FC = () => {
       case 'coop': return 'Cooperatives';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-10">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg">
+          <p>{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -126,8 +154,8 @@ const StatsPage: React.FC = () => {
                 onChange={handlePeriodChange}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
-                {PERIODS.map(period => (
-                  <option key={period.id} value={period.id}>
+                {formattedPeriods.map(period => (
+                  <option key={period.value} value={period.value}>
                     {period.label}
                   </option>
                 ))}
@@ -144,15 +172,16 @@ const StatsPage: React.FC = () => {
                 onChange={handleGearChange}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
-                {GEARS.map(gear => (
-                  <option key={gear.id} value={gear.id}>
-                    {gear.name}
+                {gears.map(gear => (
+                  <option key={gear.gear_code} value={gear.gear_code}>
+                    {gear.gear_name}
                   </option>
                 ))}
               </select>
             </div>
           </div>
         </div>
+        
         {isFilterPanelOpen && (
           <div className="bg-white p-4 rounded-lg border shadow-sm">
             <div className="flex justify-between items-center mb-3">
@@ -240,30 +269,52 @@ const StatsPage: React.FC = () => {
             Fishing Data
           </h2>
           
-          <div className="overflow-x-auto">
-            <table className="w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Johnny
-                  </th>
-                  <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Maya
-                  </th>
-                  <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Becca
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                    No data available.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          {isStatsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Species
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Total Weight (kg)
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Average Price
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {statsData && statsData.length > 0 ? (
+                    statsData.map((item: any, index: number) => (
+                      <tr key={index}>
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          {item.species || `Species ${item.specie_code}`}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          {item.total_weight || 0}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          {item.average_price || 0} LBP
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                        No data available. Apply filters to see results.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>

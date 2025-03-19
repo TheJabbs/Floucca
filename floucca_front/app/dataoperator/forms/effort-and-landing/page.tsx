@@ -10,7 +10,7 @@ import SubmitButton from "@/components/utils/submit-button";
 import { usePort } from "@/contexts/PortContext";
 import PortDropdown from "@/components/forms-c/port-dropdown";
 import Notification from "@/components/utils/notification";
-import { submitLandingForm, LandingFormDTO } from "@/services/formsServices";
+import { submitLandingForm, LandingFormDTO } from "@/services";
 import { removeFromCache } from "@/components/utils/cache-utils";
 
 const MapWithMarkers = dynamic(

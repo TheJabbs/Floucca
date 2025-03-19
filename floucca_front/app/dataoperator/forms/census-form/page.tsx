@@ -9,7 +9,7 @@ import BoatInfo from "@/components/forms-c/boat-form";
 import GearUsageForm from "@/components/forms-c/gear-form";
 import SubmitButton from "@/components/utils/submit-button";
 import Notification from "@/components/utils/notification";
-import { submitFleetSensesForm } from "@/services/formsServices";
+import { submitFleetSensesForm } from "@/services";
 import { removeFromCache } from "@/components/utils/cache-utils";
 
 interface BoatData {

@@ -15,7 +15,7 @@ import { removeFromCache } from "@/components/utils/cache-utils";
 interface BoatData {
   fleet_owner: string;
   fleet_registration: number;
-  fleet_size: number;
+  fleet_hp: number;
   fleet_crew: number;
   fleet_max_weight: number;
   fleet_length: number;
@@ -51,7 +51,7 @@ function FleetSensesPage() {
       boatData: {
         fleet_owner: "",
         fleet_registration: 0,
-        fleet_size: 0,
+        fleet_hp: 0,
         fleet_crew: 0,
         fleet_max_weight: 0,
         fleet_length: 0,
@@ -90,7 +90,7 @@ function FleetSensesPage() {
     const isBoatValid = currentBoatData && 
       !!currentBoatData.fleet_owner && 
       currentBoatData.fleet_registration > 0 &&
-      currentBoatData.fleet_size > 0 &&
+      currentBoatData.fleet_hp > 0 &&
       currentBoatData.fleet_crew > 0 &&
       currentBoatData.fleet_max_weight > 0 &&
       currentBoatData.fleet_length > 0;
@@ -113,7 +113,7 @@ function FleetSensesPage() {
       boatData: {
         fleet_owner: "",
         fleet_registration: 0,
-        fleet_size: 0,
+        fleet_hp: 0,
         fleet_crew: 0,
         fleet_max_weight: 0,
         fleet_length: 0,

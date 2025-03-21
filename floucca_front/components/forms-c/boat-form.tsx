@@ -11,7 +11,7 @@ interface BoatInfoProps {
 interface BoatFormValues {
   fleet_owner: string;
   fleet_registration: number;
-  fleet_size: number;
+  fleet_hp: number;
   fleet_crew: number;
   fleet_max_weight: number;
   fleet_length: number;
@@ -26,7 +26,7 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
     defaultValues: {
       fleet_owner: "",
       fleet_registration: undefined,
-      fleet_size: undefined,
+      fleet_hp: undefined,
       fleet_crew: undefined,
       fleet_max_weight: undefined,
       fleet_length: undefined,
@@ -91,12 +91,12 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
             <div className="flex items-center gap-2">
               <FormInput
                 label="Boat Fleet Size"
-                name="fleet_size"
+                name="fleet_hp"
                 required={required}
-                placeholder="Enter fleet size"
+                placeholder="Enter fleet hourse power"
                 type="number"
                 register={register}
-                error={errors.fleet_size?.message}
+                error={errors.fleet_hp?.message}
               />
             </div>
             <div className="flex items-center gap-2">

@@ -19,7 +19,7 @@ const FormInput: React.FC<FormInputProps> = ({
   type = "text",
   required = false,
   placeholder = "",
-  min,
+  min=0,
   max,
   register,
   error,

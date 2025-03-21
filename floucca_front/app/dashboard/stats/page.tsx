@@ -21,6 +21,28 @@ const StatsPage: React.FC = () => {
   const [activeFilterType, setActiveFilterType] = useState<'port' | 'region' | 'coop'>('port');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+  // Effort and Landings Data (Static for now, ready for API fetching)
+  const [effortData, setEffortData] = useState({
+    records: 24,
+    gears: 100,
+    activeDays: 31,
+    pba: 0.994,
+    estEffort: 3082,
+  });
+
+  const [landingsData, setLandingsData] = useState({
+    records: 23,
+    avgPrice: 6058.47,
+    estValue: 259586892,
+    cpue: 13.90,
+    estCatch: 42847,
+    sampleEffort: 23,
+  });
+
+  const [isEffortLoading, setIsEffortLoading] = useState(false);
+  const [isLandingsLoading, setIsLandingsLoading] = useState(false);
+
   
   // Stats data
   const [statsData, setStatsData] = useState<any>(null);
@@ -69,7 +91,12 @@ const StatsPage: React.FC = () => {
     });
     
     setIsFilterPanelOpen(false);
+    setIsStatsLoading(true);
+    setIsEffortLoading(true);
+    setIsLandingsLoading(true);
     // In the future, add API call to fetch stats here
+    //example
+    
   };
 
   const getCurrentFilterOptions = () => {
@@ -265,10 +292,6 @@ const StatsPage: React.FC = () => {
         )}
         
         <div className="bg-white p-4 rounded-lg border shadow-sm overflow-x-auto">
-          <h2 className="text-lg font-medium mb-3">
-            Fishing Data
-          </h2>
-          
           {isStatsLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
@@ -282,10 +305,22 @@ const StatsPage: React.FC = () => {
                       Species
                     </th>
                     <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total Weight (kg)
+                      Aver.Weight (kg)
                     </th>
                     <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Average Price
+                      N.fish in catch
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Price
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Value
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      CPUE
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Est. catch
                     </th>
                   </tr>
                 </thead>
@@ -294,20 +329,20 @@ const StatsPage: React.FC = () => {
                     statsData.map((item: any, index: number) => (
                       <tr key={index}>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          {item.species || `Species ${item.specie_code}`}
+                          {item.species}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          {item.total_weight || 0}
+                          {item.total_weight}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          {item.average_price || 0} LBP
+                          {item.average_price}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                        No data available. Apply filters to see results.
+                      <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                        No data available.
                       </td>
                     </tr>
                   )}
@@ -316,8 +351,61 @@ const StatsPage: React.FC = () => {
             </div>
           )}
         </div>
+
+              {/* Effort */}
+      <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
+        <h2 className="text-lg font-medium mb-3">Effort (WEEKLY)</h2>
+        <table className="w-full border-collapse border border-gray-300">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="border p-2">Records</th>
+              <th className="border p-2">Boats/Gears</th>
+              <th className="border p-2">Active Days</th>
+              <th className="border p-2">PBA</th>
+              <th className="border p-2">Estimated Effort</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border p-2">{effortData.records}</td>
+              <td className="border p-2">{effortData.gears}</td>
+              <td className="border p-2">{effortData.activeDays}</td>
+              <td className="border p-2">{effortData.pba}</td>
+              <td className="border p-2">{effortData.estEffort}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Landings*/}
+      <div className="bg-white p-4 rounded-lg border shadow-sm">
+        <h2 className="text-lg font-medium mb-3">Landings</h2>
+        <table className="w-full border-collapse border border-gray-300">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="border p-2">Records</th>
+              <th className="border p-2">Average Price</th>
+              <th className="border p-2">Estimated Value</th>
+              <th className="border p-2">CPUE</th>
+              <th className="border p-2">Estimated Catch</th>
+              <th className="border p-2">Sample Effort</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border p-2">{landingsData.records}</td>
+              <td className="border p-2">{landingsData.avgPrice}</td>
+              <td className="border p-2">{landingsData.estValue}</td>
+              <td className="border p-2">{landingsData.cpue}</td>
+              <td className="border p-2">{landingsData.estCatch}</td>
+              <td className="border p-2">{landingsData.sampleEffort}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+
+      </div>
   );
 };
 

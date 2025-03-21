@@ -10,7 +10,7 @@ export interface FleetSensesFormDTO {
   boatDetailDto: {
     fleet_owner: string;
     fleet_registration: number;
-    fleet_size: number;
+    fleet_hp: number;
     fleet_crew: number;
     fleet_max_weight: number;
     fleet_length: number;

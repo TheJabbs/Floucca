@@ -40,7 +40,7 @@ export class FormulasService {
     async getReport(filter: GeneralFilterDto): Promise<{uperTable: GetEffortAndLandingInterface, lowerTable: FishDataInterface[]}> {
         const uperTable = await this.getEffortAndLanding(filter);
         const lowerTable = await this.getSingularFishData(filter, uperTable.landings.estCatch);
-
+        console.log(filter);
         return {
             uperTable: uperTable,
             lowerTable: lowerTable

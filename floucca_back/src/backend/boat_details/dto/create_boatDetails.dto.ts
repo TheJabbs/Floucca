@@ -14,7 +14,7 @@ export class CreateBoatDetailsDto {
 
   @IsOptional()
   @IsInt()
-  fleet_size?: number;
+  fleet_hp?: number;
 
   @IsOptional()
   @IsInt()

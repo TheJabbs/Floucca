@@ -40,7 +40,7 @@ export class FormService {
                     select: {
                         fleet_owner: true,
                         fleet_registration: true,
-                        fleet_size: true,
+                        fleet_hp: true,
                         fleet_crew: true,
                         fleet_max_weight: true,
                         fleet_length: true,

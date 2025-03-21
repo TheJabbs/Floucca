@@ -10,7 +10,7 @@ datasource db {
 model boat_details {
   boat_id            Int    @id @default(autoincrement())
   fleet_owner        String @default("Unknown") @db.VarChar(30)
-  fleet_size         Int?
+  fleet_hp           Int?
   fleet_crew         Int?
   fleet_max_weight   Float? @db.Float
   fleet_length       Float? @db.Float

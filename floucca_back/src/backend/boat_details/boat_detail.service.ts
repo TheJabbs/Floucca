@@ -13,7 +13,7 @@ export class BoatDetailsServices {
       select: {
         boat_id: true,
         fleet_owner: true,
-        fleet_size: true,
+        fleet_hp: true,
         fleet_crew: true,
         fleet_max_weight: true,
         fleet_length: true,
@@ -39,7 +39,7 @@ async getBoatDetailsByBDID(
     select: {
       boat_id: true,
       fleet_owner: true,
-      fleet_size: true,
+      fleet_hp: true,
       fleet_crew: true,
       fleet_max_weight: true,
       fleet_length: true,
@@ -62,7 +62,7 @@ async getBoatDetailsByBDID(
       select: {
         boat_id: true,
         fleet_owner: true,
-        fleet_size: true,
+        fleet_hp: true,
         fleet_crew: true,
         fleet_max_weight: true,
         fleet_length: true,

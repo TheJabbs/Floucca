@@ -265,10 +265,6 @@ const StatsPage: React.FC = () => {
         )}
         
         <div className="bg-white p-4 rounded-lg border shadow-sm overflow-x-auto">
-          <h2 className="text-lg font-medium mb-3">
-            Fishing Data
-          </h2>
-          
           {isStatsLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
@@ -282,10 +278,22 @@ const StatsPage: React.FC = () => {
                       Species
                     </th>
                     <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total Weight (kg)
+                      Aver.Weight (kg)
                     </th>
                     <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Average Price
+                      N.fish in catch
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Price
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Value
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      CPUE
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Est. catch
                     </th>
                   </tr>
                 </thead>
@@ -294,20 +302,20 @@ const StatsPage: React.FC = () => {
                     statsData.map((item: any, index: number) => (
                       <tr key={index}>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          {item.species || `Species ${item.specie_code}`}
+                          {item.species}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          {item.total_weight || 0}
+                          {item.total_weight}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
-                          {item.average_price || 0} LBP
+                          {item.average_price}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                        No data available. Apply filters to see results.
+                      <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                        No data available.
                       </td>
                     </tr>
                   )}

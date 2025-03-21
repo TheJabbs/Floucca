@@ -44,7 +44,7 @@ export class FormulasController {
 
     @Post('report/effort&landing')
     async getEffortAndLanding(@Body() filter: GeneralFilterDto) {
-        return this.service.getEffortAndLanding(filter);
+        return this.service.getReport(filter);
     }
 
 

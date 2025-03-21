@@ -14,7 +14,9 @@ import {mapEffortMapMapper} from "./utils/mapEffortMap.mapper";
 import {mapLandingsMapForSpeciePriceMapper} from "./utils/mapLandingsMapForSpeciePrice.mapper";
 import _ from "lodash";
 import {GetEffortAndLandingInterface} from "./interface/getEffortAndLanding.interface";
-import {GetAllGearInterface} from "../backend/gear/interface/GetAllGear.interface"; //
+import {GetAllGearInterface} from "../backend/gear/interface/GetAllGear.interface";
+import {GetAllLandingsInterface} from "../backend/landings/interface/getAllLandings.interface";
+import {FishDataInterface} from "./interface/fishData.interface"; //
 
 
 @Injectable()
@@ -30,23 +32,41 @@ export class FormulasService {
     //Services for the controller
 
 
+    /**
+     * This subsection is to get all the data for the form reports
+     * */
+
+    //This function returns the entire page
+    async getReport(filter: GeneralFilterDto): Promise<{uperTable: GetEffortAndLandingInterface, lowerTable: FishDataInterface[]}> {
+        const uperTable = await this.getEffortAndLanding(filter);
+        const lowerTable = await this.getSingularFishData(filter, uperTable.landings.estCatch);
+
+        return {
+            uperTable: uperTable,
+            lowerTable: lowerTable
+        }
+    }
+
     async getEffortAndLanding(filter: GeneralFilterDto): Promise<GetEffortAndLandingInterface> {
         const filterCopy = _.cloneDeep(filter);
+        let effortFilter = _.cloneDeep(filterCopy);
+        delete effortFilter.gear_code
+        delete effortFilter.specie_code
 
         const [dataCopy, data2Copy] = await Promise.all([
             this.senseLastWService.getEffortsByFilter(filterCopy).then(_.cloneDeep),
             this.landingsService.getLandingsByFilter(filterCopy).then(_.cloneDeep)
         ]);
 
-        const pba = await this.getPba(_.cloneDeep(dataCopy));
+        const [pba, allGears] = await Promise.all([
+            this.getPba(_.cloneDeep(dataCopy)),
+            this.gearService.getAllGear().then(_.cloneDeep)
+        ]) ;
 
-        const allGears = await this.gearService.getAllGear();
         const estEffort = await this.getEstimateEffort(pba, _.cloneDeep(dataCopy), allGears);
         const estCatch = await this.getEstimateCatchForAllSpecies(_.cloneDeep(filterCopy), estEffort);
 
-        let effortFilter = _.cloneDeep(filterCopy);
-        delete effortFilter.gear_code
-        delete effortFilter.specie_code
+
 
         const [avgPrice, estValue, cpue, estCatch2, activeDays, sampleEffort ] = await Promise.all([
             this.getAvgFishPrice(_.cloneDeep(filterCopy)),
@@ -74,6 +94,45 @@ export class FormulasService {
                 sampleEffort: sampleEffort
             }
         }
+    }
+
+    //ToDo: I will make it more efficient by fetching all the data at once
+    async getSingularFishData(filter: GeneralFilterDto, estTotalCatch: number): Promise<FishDataInterface[]> {
+        let filterArray : GeneralFilterDto[] = [];
+
+        filter.specie_code.forEach(specie_code => {
+            filterArray.push({...filter, specie_code: [specie_code]});
+        })
+
+        const data = await Promise.all(filterArray.map(f => this.landingsService.getLandingsByFilter(f)));
+        let fishData: FishDataInterface[] = [];
+
+        for (let i = 0; i < filterArray.length; i++) {
+            const [cpue, estCatch, avgPrice, avgFishWeight, avgFishQuantity, avgFishLength, avgFishWeightByKilo] = await Promise.all([
+                this.getCpue(filterArray[i]),
+                this.getEstimateSpeciesCatch(data[i], filterArray[i].specie_code[0], estTotalCatch),
+                this.getAvgFishPrice(filterArray[i]),
+                this.getAvgFishWeight(filterArray[i]),
+                this.getTotalCatch(filterArray[i]),
+                this.getAvgFishLength(filterArray[i]),
+                this.getAvgFishWeightByKilo(filterArray[i], 1)
+            ]);
+
+            const fishValue = avgPrice * estCatch;
+
+            fishData.push({
+                specie_code: filterArray[i].specie_code[0],
+                avg_fish_weight: avgFishWeight,
+                avg_fish_quantity: avgFishQuantity,
+                avg_fish_length: avgFishLength,
+                avg_price: avgPrice,
+                fish_value: fishValue,
+                cpue: cpue,
+                est_catch: estCatch
+            });
+        }
+
+        return fishData;
     }
 
 
@@ -338,6 +397,19 @@ export class FormulasService {
         ]);
 
         return estimatedPrice * estimatedSpeciesCatch;
+    }
+
+    async getTotalCatch(filter: GeneralFilterDto) {
+        const landings = await this.landingsService.getLandingsByFilter(filter);
+
+        let totalCatch = 0;
+        landings.forEach(landing => {
+            landing.fish.forEach(fish => {
+                totalCatch += fish.fish_quantity;
+            });
+        });
+
+        return totalCatch;
     }
 
 

@@ -14,3 +14,4 @@ export * from './landingService';
 export * from './fleetSensesService';
 
 // Stats and analytics
+export * from './effortAndLandingService'; 

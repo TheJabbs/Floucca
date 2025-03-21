@@ -1,34 +1,39 @@
 import React from "react";
-import TableHeader from "./TableHeader";
-import TableRow from "./TableRow";
 
-const effortData = [
-  { label: "Records", value: 24 },
-  { label: "Boats/Gears", value: 100 },
-  { label: "Active Days", value: 31.0 },
-  { label: "PBA", value: 0.994 },
-  { label: "Est Effort", value: "3,082" },
-  { label: "Spatial Accur.", value: 0.93 },
-  { label: "Method for Accur.", value: "SPST" },
-  { label: "N.days", value: "-" },
-  { label: "Temp. Accur.", value: 1.0 },
-  { label: "Method for Accur.", value: 1.0 },
-  { label: "SUI", value: 1.0 },
-  { label: "CV (%)", value: "0.6 %" },
-];
+interface EffortProps {
+  effort?: {
+    records: number;
+    gears: number;
+    activeDays: number;
+    pba: number;
+    estEffort: number;
+  };
+}
 
-const EffortTable = () => {
+const EffortTable: React.FC<EffortProps> = ({ effort }) => {
+  if (!effort) return <p>No effort data available.</p>;
+
   return (
-    <div className="border rounded-lg shadow-lg overflow-hidden w-full bg-white">
-      <TableHeader title="Effort (WEEKLY)" />
-      <table className="w-full border-collapse">
-        <tbody>
-          {effortData.map((item) => (
-            <TableRow key={item.label} label={item.label} value={item.value} />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Records</th>
+          <th>Gears</th>
+          <th>Active Days</th>
+          <th>PBA</th>
+          <th>Estimated Effort</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{effort.records ?? "N/A"}</td>
+          <td>{effort.gears ?? "N/A"}</td>
+          <td>{effort.activeDays ?? "N/A"}</td>
+          <td>{effort.pba ?? "N/A"}</td>
+          <td>{effort.estEffort ?? "N/A"}</td>
+        </tr>
+      </tbody>
+    </table>
   );
 };
 

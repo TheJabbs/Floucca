@@ -1,36 +1,42 @@
 import React from "react";
-import TableHeader from "./TableHeader";
-import TableRow from "./TableRow";
 
-const landingsData = [
-  { label: "Records", value: 23 },
-  { label: "Sample Catch", value: "319.8" },
-  { label: "Sample Effort", value: 23.0 },
-  { label: "Aver Price", value: "6,058.47" },
-  { label: "Est Value", value: "259,586,892" },
-  { label: "CPUE", value: "13.90" },
-  { label: "Est Catch", value: "42,847" },
-  { label: "Spatial Accur.", value: 0.90 },
-  { label: "Method for Accur.", value: "SPST" },
-  { label: "N.days", value: 6 },
-  { label: "Temp. Accur.", value: 0.88 },
-  { label: "Method for Accur.", value: "SPST" },
-  { label: "SUI", value: 0.67 },
-  { label: "CV (%)", value: "37.8 %" },
-];
+interface LandingsProps {
+  landings?: {
+    records: number;
+    avgPrice: number;
+    estValue: number;
+    cpue: number;
+    estCatch: number;
+    sampleEffort: number;
+  };
+}
 
-const LandingsTable = () => {
+const LandingsTable: React.FC<LandingsProps> = ({ landings }) => {
+  if (!landings) return <p>No landings data available.</p>;
+
   return (
-    <div className="border rounded-lg shadow-lg overflow-hidden w-full bg-white mt-4">
-      <TableHeader title="Landings" />
-      <table className="w-full border-collapse">
-        <tbody>
-          {landingsData.map((item) => (
-            <TableRow key={item.label} label={item.label} value={item.value} />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Records</th>
+          <th>Average Price</th>
+          <th>Estimated Value</th>
+          <th>CPUE</th>
+          <th>Estimated Catch</th>
+          <th>Sample Effort</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{landings.records ?? "N/A"}</td>
+          <td>{landings.avgPrice ?? "N/A"}</td>
+          <td>{landings.estValue ?? "N/A"}</td>
+          <td>{landings.cpue ?? "N/A"}</td>
+          <td>{landings.estCatch ?? "N/A"}</td>
+          <td>{landings.sampleEffort ?? "N/A"}</td>
+        </tr>
+      </tbody>
+    </table>
   );
 };
 

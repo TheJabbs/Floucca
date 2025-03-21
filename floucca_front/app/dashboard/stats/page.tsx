@@ -1,24 +1,33 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Filter, X, Check, Loader2 } from "lucide-react";
+import { Filter, X, Check } from "lucide-react";
 import { useStatsData } from "@/contexts/StatsDataContext";
+import EffortTable from "@/components/stats/tables/effort-table";
+import LandingsTable from "@/components/stats/tables/landings-table";
+import SpeciesTable from "@/components/stats/tables/species-table";
+
+// Define interfaces to ensure type safety
+interface SpeciesData {
+  species: string;
+  averageWeight: number;
+  fishCount: number;
+  price: number;
+  value: number;
+  cpue: number;
+  estCatch: number;
+}
 
 const StatsPage: React.FC = () => {
   // Get data from context
-  const { 
-    gears, 
-    ports, 
-    regions, 
-    coops, 
-    formattedPeriods, 
-    isLoading, 
-    error 
-  } = useStatsData();
-  
+  const { gears, ports, regions, coops, formattedPeriods, isLoading, error } =
+    useStatsData();
+
   // Filter states
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
   const [selectedGear, setSelectedGear] = useState<number>(0);
-  const [activeFilterType, setActiveFilterType] = useState<'port' | 'region' | 'coop'>('port');
+  const [activeFilterType, setActiveFilterType] = useState<
+    "port" | "region" | "coop"
+  >("port");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
@@ -35,17 +44,35 @@ const StatsPage: React.FC = () => {
     records: 23,
     avgPrice: 6058.47,
     estValue: 259586892,
-    cpue: 13.90,
+    cpue: 13.9,
     estCatch: 42847,
     sampleEffort: 23,
   });
 
+  // Species data with proper typing
+  const [statsData, setStatsData] = useState([
+    {
+      species: "Sea Bass",
+      averageWeight: 1.2,
+      fishCount: 1450,
+      price: 15000,
+      value: 21750000,
+      cpue: 7.8,
+      estCatch: 11310,
+    },
+    {
+      species: "Cod",
+      averageWeight: 2.5,
+      fishCount: 980,
+      price: 22000,
+      value: 53900000,
+      cpue: 10.3,
+      estCatch: 10094,
+    },
+  ]);
+  
   const [isEffortLoading, setIsEffortLoading] = useState(false);
   const [isLandingsLoading, setIsLandingsLoading] = useState(false);
-
-  
-  // Stats data
-  const [statsData, setStatsData] = useState<any>(null);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
 
   // Set initial selections when data is loaded
@@ -53,7 +80,7 @@ const StatsPage: React.FC = () => {
     if (!isLoading && formattedPeriods.length > 0 && selectedPeriod === "") {
       setSelectedPeriod(formattedPeriods[0].value);
     }
-    
+
     if (!isLoading && gears.length > 0 && selectedGear === 0) {
       setSelectedGear(gears[0].gear_code);
     }
@@ -62,12 +89,12 @@ const StatsPage: React.FC = () => {
   const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPeriod(e.target.value);
   };
-  
+
   const handleGearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedGear(Number(e.target.value));
   };
 
-  const handleFilterTypeChange = (type: 'port' | 'region' | 'coop') => {
+  const handleFilterTypeChange = (type: "port" | "region" | "coop") => {
     if (type !== activeFilterType) {
       setActiveFilterType(type);
       setSelectedFilters([]);
@@ -75,9 +102,9 @@ const StatsPage: React.FC = () => {
   };
 
   const toggleFilter = (filterId: string) => {
-    setSelectedFilters(prev => 
+    setSelectedFilters((prev) =>
       prev.includes(filterId)
-        ? prev.filter(id => id !== filterId)
+        ? prev.filter((id) => id !== filterId)
         : [...prev, filterId]
     );
   };
@@ -87,34 +114,31 @@ const StatsPage: React.FC = () => {
       period: selectedPeriod,
       gear: selectedGear,
       filterType: activeFilterType,
-      filters: selectedFilters
+      filters: selectedFilters,
     });
-    
+
     setIsFilterPanelOpen(false);
     setIsStatsLoading(true);
     setIsEffortLoading(true);
     setIsLandingsLoading(true);
-    // In the future, add API call to fetch stats here
-    //example
-    
   };
 
   const getCurrentFilterOptions = () => {
     switch (activeFilterType) {
-      case 'port':
-        return ports.map(port => ({
+      case "port":
+        return ports.map((port) => ({
           id: port.port_id.toString(),
-          name: port.port_name
+          name: port.port_name,
         }));
-      case 'region':
-        return regions.map(region => ({
+      case "region":
+        return regions.map((region) => ({
           id: region.region_code.toString(),
-          name: region.region_name
+          name: region.region_name,
         }));
-      case 'coop':
-        return coops.map(coop => ({
+      case "coop":
+        return coops.map((coop) => ({
           id: coop.coop_code.toString(),
-          name: coop.coop_name
+          name: coop.coop_name,
         }));
       default:
         return [];
@@ -123,9 +147,12 @@ const StatsPage: React.FC = () => {
 
   const getFilterTypeLabel = () => {
     switch (activeFilterType) {
-      case 'port': return 'Ports';
-      case 'region': return 'Regions';
-      case 'coop': return 'Cooperatives';
+      case "port":
+        return "Ports";
+      case "region":
+        return "Regions";
+      case "coop":
+        return "Cooperatives";
     }
   };
 
@@ -142,7 +169,7 @@ const StatsPage: React.FC = () => {
       <div className="container mx-auto p-6">
         <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg">
           <p>{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
           >
@@ -158,7 +185,7 @@ const StatsPage: React.FC = () => {
       <div className="flex justify-between items-center mb-4 lg:mb-6">
         <h1 className="text-2xl font-bold">Fishing Statistics</h1>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
             className="px-3 py-1.5 bg-blue-100 text-blue-800 rounded-lg flex items-center gap-1 hover:bg-blue-200 text-sm"
           >
@@ -172,7 +199,10 @@ const StatsPage: React.FC = () => {
         <div className="bg-white p-4 rounded-lg border shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="period" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="period"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Time Period
               </label>
               <select
@@ -181,16 +211,19 @@ const StatsPage: React.FC = () => {
                 onChange={handlePeriodChange}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
-                {formattedPeriods.map(period => (
+                {formattedPeriods.map((period) => (
                   <option key={period.value} value={period.value}>
                     {period.label}
                   </option>
                 ))}
               </select>
             </div>
-            
+
             <div>
-              <label htmlFor="gear" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="gear"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Gear Type
               </label>
               <select
@@ -199,7 +232,7 @@ const StatsPage: React.FC = () => {
                 onChange={handleGearChange}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
-                {gears.map(gear => (
+                {gears.map((gear) => (
                   <option key={gear.gear_code} value={gear.gear_code}>
                     {gear.gear_name}
                   </option>
@@ -208,66 +241,66 @@ const StatsPage: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         {isFilterPanelOpen && (
           <div className="bg-white p-4 rounded-lg border shadow-sm">
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-lg font-medium">Filters</h2>
-              <button 
+              <button
                 onClick={() => setIsFilterPanelOpen(false)}
                 className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
                 <button
                   className={`px-3 py-1.5 rounded-lg text-sm ${
-                    activeFilterType === 'port' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                    activeFilterType === "port"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
-                  onClick={() => handleFilterTypeChange('port')}
+                  onClick={() => handleFilterTypeChange("port")}
                 >
                   by Port
                 </button>
                 <button
                   className={`px-3 py-1.5 rounded-lg text-sm ${
-                    activeFilterType === 'region' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                    activeFilterType === "region"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
-                  onClick={() => handleFilterTypeChange('region')}
+                  onClick={() => handleFilterTypeChange("region")}
                 >
                   by Region
                 </button>
                 <button
                   className={`px-3 py-1.5 rounded-lg text-sm ${
-                    activeFilterType === 'coop' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                    activeFilterType === "coop"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
-                  onClick={() => handleFilterTypeChange('coop')}
+                  onClick={() => handleFilterTypeChange("coop")}
                 >
                   by Cooperative
                 </button>
               </div>
-              
+
               <div>
                 <h3 className="text-sm font-medium text-gray-700 mb-2">
                   Select {getFilterTypeLabel()}:
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {getCurrentFilterOptions().map(option => (
+                  {getCurrentFilterOptions().map((option) => (
                     <button
                       key={option.id}
                       onClick={() => toggleFilter(option.id)}
                       className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${
                         selectedFilters.includes(option.id)
-                          ? 'bg-blue-100 text-blue-800 border border-blue-300'
-                          : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
+                          ? "bg-blue-100 text-blue-800 border border-blue-300"
+                          : "bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100"
                       }`}
                     >
                       {selectedFilters.includes(option.id) && (
@@ -278,7 +311,7 @@ const StatsPage: React.FC = () => {
                   ))}
                 </div>
               </div>
-              
+
               <div className="flex justify-end">
                 <button
                   onClick={applyFilters}
@@ -290,122 +323,16 @@ const StatsPage: React.FC = () => {
             </div>
           </div>
         )}
-        
         <div className="bg-white p-4 rounded-lg border shadow-sm overflow-x-auto">
-          {isStatsLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Species
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aver.Weight (kg)
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      N.fish in catch
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Value
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      CPUE
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Est. catch
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {statsData && statsData.length > 0 ? (
-                    statsData.map((item: any, index: number) => (
-                      <tr key={index}>
-                        <td className="px-4 py-2 whitespace-nowrap">
-                          {item.species}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
-                          {item.total_weight}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
-                          {item.average_price}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                        No data available.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
+        <EffortTable isLoading={isEffortLoading} effortData={effortData} />
+        <div className="border-t border-gray-300 my-4"></div>
+        <LandingsTable isLoading={isLandingsLoading} landingsData={landingsData} />
         </div>
-
-              {/* Effort */}
-      <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
-        <h2 className="text-lg font-medium mb-3">Effort (WEEKLY)</h2>
-        <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="border p-2">Records</th>
-              <th className="border p-2">Boats/Gears</th>
-              <th className="border p-2">Active Days</th>
-              <th className="border p-2">PBA</th>
-              <th className="border p-2">Estimated Effort</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border p-2">{effortData.records}</td>
-              <td className="border p-2">{effortData.gears}</td>
-              <td className="border p-2">{effortData.activeDays}</td>
-              <td className="border p-2">{effortData.pba}</td>
-              <td className="border p-2">{effortData.estEffort}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Landings*/}
-      <div className="bg-white p-4 rounded-lg border shadow-sm">
-        <h2 className="text-lg font-medium mb-3">Landings</h2>
-        <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="border p-2">Records</th>
-              <th className="border p-2">Average Price</th>
-              <th className="border p-2">Estimated Value</th>
-              <th className="border p-2">CPUE</th>
-              <th className="border p-2">Estimated Catch</th>
-              <th className="border p-2">Sample Effort</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border p-2">{landingsData.records}</td>
-              <td className="border p-2">{landingsData.avgPrice}</td>
-              <td className="border p-2">{landingsData.estValue}</td>
-              <td className="border p-2">{landingsData.cpue}</td>
-              <td className="border p-2">{landingsData.estCatch}</td>
-              <td className="border p-2">{landingsData.sampleEffort}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="bg-white p-4 rounded-lg border shadow-sm overflow-x-auto">
+        <SpeciesTable isLoading={isStatsLoading} statsData={statsData} />
+        </div>
       </div>
     </div>
-
-      </div>
   );
 };
 

@@ -22,7 +22,7 @@ import FishingDetails from "@/components/forms-c/fishing-details-form";
 interface BoatData {
   fleet_owner: string;
   fleet_registration: number;
-  fleet_size: number;
+  fleet_hp: number;
   fleet_crew: number;
   fleet_max_weight: number;
   fleet_length: number;
@@ -103,7 +103,7 @@ function EffortAndLandingPage() {
       boatData: {
         fleet_owner: "",
         fleet_registration: 0,
-        fleet_size: 0,
+        fleet_hp: 0,
         fleet_crew: 0,
         fleet_max_weight: 0,
         fleet_length: 0,
@@ -224,7 +224,7 @@ function EffortAndLandingPage() {
       const isValid =
         !!data.fleet_owner &&
         data.fleet_registration > 0 &&
-        data.fleet_size > 0 &&
+        data.fleet_hp > 0 &&
         data.fleet_crew > 0 &&
         data.fleet_max_weight > 0 &&
         data.fleet_length > 0;
@@ -325,7 +325,7 @@ function EffortAndLandingPage() {
         boat_details: {
           fleet_owner: boatData.fleet_owner || "Unknown",
           fleet_registration: boatData.fleet_registration || 0,
-          fleet_size: boatData.fleet_size || 0,
+          fleet_hp: boatData.fleet_hp || 0,
           fleet_crew: boatData.fleet_crew || 0,
           fleet_max_weight: boatData.fleet_max_weight || 0,
           fleet_length: boatData.fleet_length || 0,

@@ -55,6 +55,7 @@ const FormInput: React.FC<FormInputProps> = ({
         required={required}
         min={type === "number" ? min : undefined}
         max={type === "number" ? max : undefined}
+        step={type === "number" ? "any" : undefined} 
       />
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>

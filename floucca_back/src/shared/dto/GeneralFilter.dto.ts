@@ -1,8 +1,17 @@
-import {IsArray, IsDate, IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString} from "class-validator";
+import {
+    IsArray,
+    IsDateString,
+    IsInt, IsNotEmpty,
+    IsOptional,
+    IsPositive
+} from "class-validator";
+import {Transform} from "class-transformer";
 
 export class GeneralFilterDto {
-    @IsDate()
-    period: Date;
+    @IsDateString()
+    @IsNotEmpty()
+    @Transform(({ value }) => new Date(value).toISOString())
+    period: string;
 
     @IsArray()
     @IsOptional()

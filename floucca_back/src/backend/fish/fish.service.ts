@@ -29,15 +29,15 @@ export class FishService {
     }
 
     async createFish(fish: CreateFishDto): Promise<ResponseMessage<any>> {
-       if(await this.validate(fish)){
-           const newFish = await this.prismaService.fish.create({
-               data: fish
-           });
-           return {
-               message: "Fish created successfully",
-               data: newFish
-           }
-       }
+        if (await this.validate(fish)) {
+            const newFish = await this.prismaService.fish.create({
+                data: fish
+            });
+            return {
+                message: "Fish created successfully",
+                data: newFish
+            }
+        }
     }
 
     async updateFish(fish_id: number, fish: UpdateFishDto): Promise<ResponseMessage<any>> {
@@ -47,7 +47,7 @@ export class FishService {
 
         if (!check) throw new NotFoundException("Fish not found");
 
-        if(await this.validate(fish)){
+        if (await this.validate(fish)) {
             const updatedFish = await this.prismaService.fish.update({
                 where: {fish_id: fish_id},
                 data: fish
@@ -69,32 +69,41 @@ export class FishService {
         });
     }
 
+    async getFishSpecieByGear(gear_code: number[]): Promise<number[]> {
+        const species = await this.prismaService.fish.findMany({
+            distinct: ['specie_code'],
+            where: {gear_code: {in: gear_code}},
+            select: {specie_code: true}
+        });
+
+        return species.map(specie => specie.specie_code);
+    }
 
 
     //===============================================
     async validate(d: any): Promise<boolean> {
-        if(d.specie_code){
+        if (d.specie_code) {
             const check = await this.prismaService.specie.findUnique({
                 where: {specie_code: d.specie_code}
             })
 
-            if(!check) return false;
+            if (!check) return false;
         }
 
-        if(d.landing_id){
+        if (d.landing_id) {
             const check = await this.prismaService.landing.findUnique({
                 where: {landing_id: d.landing_id}
             })
 
-            if(!check) return false;
+            if (!check) return false;
         }
 
-        if(d.gear_code){
+        if (d.gear_code) {
             const check = await this.prismaService.gear.findUnique({
                 where: {gear_code: d.gear_code}
             })
 
-            if(!check) return false;
+            if (!check) return false;
         }
 
         return true;

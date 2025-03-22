@@ -45,8 +45,7 @@ export class FormulasController {
     @Post('report/effort&landing')
     async getEffortAndLanding(@Body() filter: GeneralFilterDto) {
         console.log("Received filters:", filter);
-        console.log("Type of period:", typeof filter.period, filter.period);
-        
+
         return this.service.getReport(filter);
     }
 

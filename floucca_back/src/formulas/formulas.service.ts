@@ -50,7 +50,7 @@ export class FormulasService {
         ]);
 
         const uperTable = await this.getEffortAndLanding(effortData, landingData, JSON.parse(JSON.stringify(filter)));
-        const lowerTable = await this.getSingularFishData(landingData, uperTable.landings.estCatch);
+        const lowerTable = await this.getSingularFishData(landingData, uperTable.landings.estCatch, uperTable.effort.estEffort);
         return {
             uperTable: uperTable,
             lowerTable: lowerTable
@@ -73,7 +73,7 @@ export class FormulasService {
             this.getAvgFishPrice(landingData),
             this.getEstimatedSpeciesValue(landingData, estCatch),
             this.getSpeciesCpue(estCatch, estEffort),
-            this.getEstimateCatchForAllSpecies(landingData, estCatch),
+            this.getEstimateSpeciesCatch(landingData, estCatch),
             this.getActiveDays(effortData, allGears),
         ]);
 
@@ -98,21 +98,21 @@ export class FormulasService {
         }
     }
 
-    //ToDo: I will make it more efficient by fetching all the data at once
-    async getSingularFishData(landingData: GetFilteredInterface[], estTotalCatch: number): Promise<FishDataInterface[]> {
+    async getSingularFishData(landingData: GetFilteredInterface[], estTotalCatch: number, totalEffort: number): Promise<FishDataInterface[]> {
         const map = mapSpeciesMapper(landingData);
         let fishData: FishDataInterface[] = [];
 
         for (const [specie, count] of map.entries()) {
-            const [cpue, estCatch, avgPrice, avgFishWeight, avgFishQuantity, avgFishLength, avgFishWeightByKilo] = await Promise.all([
-                this.getSpeciesCpue(await this.getEstimateSpeciesCatch(landingData, specie, estTotalCatch), await this.getEstimateEffort(await this.getPba(landingData), landingData, await this.gearService.getAllGear())),
-                this.getEstimateSpeciesCatch(landingData, specie, estTotalCatch),
-                this.getAvgFishPrice(landingData),
-                this.getAvgFishWeight(landingData),
-                this.getAvgFishQuantity(landingData),
-                this.getAvgFishLength(landingData),
-                this.getAvgFishWeightByKilo(landingData, 1000)
+            const [ estCatch, avgPrice, avgFishWeight, avgFishQuantity, avgFishLength, avgFishWeightByKilo] = await Promise.all([
+                this.getEstimateSpeciesCatch(count, estTotalCatch),
+                this.getAvgFishPrice(count),
+                this.getAvgFishWeight(count),
+                this.getAvgFishQuantity(count),
+                this.getAvgFishLength(count),
+                this.getAvgFishWeightByKilo(count, 1)
             ]);
+
+            const cpue = await this.getSpeciesCpue(estCatch, totalEffort);
 
             fishData.push({
                 specie_code: specie,
@@ -324,17 +324,15 @@ export class FormulasService {
         return count > 0 ? sumWeight / count / kg : 0;
     }
 
-    async getEstimateSpeciesCatch(data: GetFilteredInterface[], specie_code: number, estimatedTotalCatch: number) {
+    async getEstimateSpeciesCatch(data: GetFilteredInterface[], estimatedTotalCatch: number) {
 
         let sampleSpeciesCatch = 0;
         let sampleTotalCatch = 0;
 
         data.forEach(landing => {
             landing.fish.forEach(fish => {
-                sampleTotalCatch += fish.fish_weight;
-                if (fish.specie_code === specie_code) {
-                    sampleSpeciesCatch += fish.fish_weight;
-                }
+                sampleTotalCatch += fish.fish_quantity;
+                sampleSpeciesCatch += fish.fish_quantity;
             });
         });
 

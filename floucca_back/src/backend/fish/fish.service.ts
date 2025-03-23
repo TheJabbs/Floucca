@@ -69,10 +69,17 @@ export class FishService {
         });
     }
 
-    async getFishSpecieByGear(gear_code: number[]): Promise<number[]> {
+    async getFishSpecieByGear(period: string, gear_code: number[]): Promise<number[]> {
         const species = await this.prismaService.fish.findMany({
             distinct: ['specie_code'],
-            where: {gear_code: {in: gear_code}},
+            where: {
+                gear_code: {in: gear_code},
+                landing:{
+                    form:{
+                        period_date: period
+                    }
+                }
+            },
             select: {specie_code: true}
         });
 

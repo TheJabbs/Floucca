@@ -17,7 +17,8 @@ import {GetEffortAndLandingInterface} from "./interface/getEffortAndLanding.inte
 import {GetAllGearInterface} from "../backend/gear/interface/GetAllGear.interface";
 import {GetAllLandingsInterface} from "../backend/landings/interface/getAllLandings.interface";
 import {FishDataInterface} from "./interface/fishData.interface";
-import {mapLandingsBySpecieMapper} from "./utils/mapLandingsBySpecie.mapper"; //
+import {mapLandingsBySpecieMapper} from "./utils/mapLandingsBySpecie.mapper";
+import {mapSpeciesMapper} from "./utils/mapSpecies.mapper"; //
 
 
 @Injectable()
@@ -41,18 +42,18 @@ export class FormulasService {
     //This function returns the entire page
     async getReport(filter: GeneralFilterDto): Promise<any> {
 
-        filter.specie_code = await this.fishService.getFishSpecieByGear(filter.gear_code);
+        filter.specie_code = await this.fishService.getFishSpecieByGear(filter.period, filter.gear_code);
 
         const [effortData, landingData] = await Promise.all([
             this.senseLastWService.getEffortsByFilter(filter),
             this.landingsService.getLandingsByFilter(filter)
         ]);
 
-        const uperTable = await this.getEffortAndLanding(effortData, landingData, filter);
-        // const lowerTable = await this.getSingularFishData(filter, uperTable.landings.estCatch);
+        const uperTable = await this.getEffortAndLanding(effortData, landingData, JSON.parse(JSON.stringify(filter)));
+        const lowerTable = await this.getSingularFishData(landingData, uperTable.landings.estCatch);
         return {
             uperTable: uperTable,
-            // lowerTable: lowerTable
+            lowerTable: lowerTable
         }
     }
 
@@ -98,38 +99,30 @@ export class FormulasService {
     }
 
     //ToDo: I will make it more efficient by fetching all the data at once
-    async getSingularFishData(filter: GeneralFilterDto, estTotalCatch: number): Promise<FishDataInterface[]> {
-        let filterArray: GeneralFilterDto[] = [];
-
-        filter.specie_code.forEach(specie_code => {
-            filterArray.push({...filter, specie_code: [specie_code]});
-        })
-
-        const data = await Promise.all(filterArray.map(f => this.landingsService.getLandingsByFilter(f)));
+    async getSingularFishData(landingData: GetFilteredInterface[], estTotalCatch: number): Promise<FishDataInterface[]> {
+        const map = mapSpeciesMapper(landingData);
         let fishData: FishDataInterface[] = [];
 
-        for (let i = 0; i < filterArray.length; i++) {
+        for (const [specie, count] of map.entries()) {
             const [cpue, estCatch, avgPrice, avgFishWeight, avgFishQuantity, avgFishLength, avgFishWeightByKilo] = await Promise.all([
-                this.getCpue(data[i]),
-                this.getEstimateSpeciesCatch(data[i], filterArray[i].specie_code[0], estTotalCatch),
-                this.getAvgFishPrice(data[i]),
-                this.getAvgFishWeight(filterArray[i]),
-                this.getTotalCatch(filterArray[i]),
-                this.getAvgFishLength(filterArray[i]),
-                this.getAvgFishWeightByKilo(filterArray[i], 1)
+                this.getSpeciesCpue(await this.getEstimateSpeciesCatch(landingData, specie, estTotalCatch), await this.getEstimateEffort(await this.getPba(landingData), landingData, await this.gearService.getAllGear())),
+                this.getEstimateSpeciesCatch(landingData, specie, estTotalCatch),
+                this.getAvgFishPrice(landingData),
+                this.getAvgFishWeight(landingData),
+                this.getAvgFishQuantity(landingData),
+                this.getAvgFishLength(landingData),
+                this.getAvgFishWeightByKilo(landingData, 1000)
             ]);
 
-            const fishValue = avgPrice * estCatch;
-
             fishData.push({
-                specie_code: filterArray[i].specie_code[0],
+                specie_code: specie,
                 avg_fish_weight: avgFishWeight,
                 avg_fish_quantity: avgFishQuantity,
                 avg_fish_length: avgFishLength,
                 avg_price: avgPrice,
-                fish_value: fishValue,
+                fish_value: avgPrice * avgFishQuantity,
                 cpue: cpue,
-                est_catch: estCatch
+                est_catch: estCatch,
             });
         }
 
@@ -270,15 +263,13 @@ export class FormulasService {
         return count > 0 ? sumPrice / count : 0;
     }
 
-    async getAvgFishWeight(filter: GeneralFilterDto) {
-        const {gear_code, ...newFilter} = filter;
+    async getAvgFishWeight(dataLanding:  GetFilteredInterface[]) {
 
-        const data = await this.landingsService.getLandingsByFilter(newFilter);
 
         let sumWeight = 0;
         let count = 0;
 
-        data.forEach(landing => {
+        dataLanding.forEach(landing => {
             landing.fish.forEach(fish => {
                 sumWeight += fish.fish_weight;
                 count++;
@@ -288,10 +279,7 @@ export class FormulasService {
         return count > 0 ? sumWeight / count : 0;
     }
 
-    async getAvgFishLength(filter: GeneralFilterDto) {
-        const {gear_code, ...newFilter} = filter;
-
-        const data = await this.landingsService.getLandingsByFilter(newFilter);
+    async getAvgFishLength (data: GetFilteredInterface[]) {
 
         let sumLength = 0;
         let count = 0;
@@ -306,10 +294,7 @@ export class FormulasService {
         return count > 0 ? sumLength / count : 0;
     }
 
-    async getAvgFishQuantity(filter: GeneralFilterDto) {
-        const {gear_code, ...newFilter} = filter;
-
-        const data = await this.landingsService.getLandingsByFilter(newFilter);
+    async getAvgFishQuantity(data: GetFilteredInterface[]) {
 
         let sumQuantity = 0;
         let count = 0;
@@ -324,10 +309,7 @@ export class FormulasService {
         return count > 0 ? sumQuantity / count : 0;
     }
 
-    async getAvgFishWeightByKilo(filter: GeneralFilterDto, kg: number) {
-        const {gear_code, ...newFilter} = filter;
-
-        const data = await this.landingsService.getLandingsByFilter(newFilter);
+    async getAvgFishWeightByKilo(data: GetFilteredInterface[], kg: number) {
 
         let sumWeight = 0;
         let count = 0;

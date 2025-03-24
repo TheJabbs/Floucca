@@ -6,7 +6,8 @@ import {
   getPorts, 
   getRegions, 
   getCoops, 
-  getPeriods 
+  getPeriods,
+  getSpecies 
 } from "@/services";
 import { useDataContext, formatPeriodDate } from "@/hooks/useDataContext";
 
@@ -16,6 +17,7 @@ export interface StatsDataType {
   regions: any[];
   coops: any[];
   periods: any[];
+  species: any[];
   formattedPeriods: { value: string, label: string }[];
   isLoading: boolean;
   error: string | null;
@@ -29,6 +31,7 @@ const CACHE_KEYS = {
   STATS_REGIONS: "flouca_stats_regions",
   STATS_COOPS: "flouca_stats_coops",
   STATS_PERIODS: "flouca_stats_periods",
+  STATS_SPECIES: "flouca_stats_species",
 };
 
 const StatsDataContext = createContext<StatsDataType | undefined>(undefined);
@@ -49,6 +52,7 @@ export function StatsDataProvider({ children }: { children: ReactNode }) {
   const regionContext = useDataContext(getRegions, CACHE_KEYS.STATS_REGIONS);
   const coopContext = useDataContext(getCoops, CACHE_KEYS.STATS_COOPS);
   const periodContext = useDataContext(getPeriods, CACHE_KEYS.STATS_PERIODS);
+  const speciesContext = useDataContext(getSpecies, CACHE_KEYS.STATS_SPECIES);
 
   const formattedPeriods = periodContext.data.map(period => ({
     value: period.period_date,
@@ -61,7 +65,8 @@ export function StatsDataProvider({ children }: { children: ReactNode }) {
       portContext.refetch(),
       regionContext.refetch(),
       coopContext.refetch(),
-      periodContext.refetch()
+      periodContext.refetch(),
+      speciesContext.refetch()
     ]);
   };
 
@@ -70,34 +75,38 @@ export function StatsDataProvider({ children }: { children: ReactNode }) {
     portContext.isLoading || 
     regionContext.isLoading ||
     coopContext.isLoading ||
-    periodContext.isLoading;
+    periodContext.isLoading ||
+    speciesContext.isLoading;
   
   const error = 
     gearContext.error || 
     portContext.error || 
     regionContext.error ||
     coopContext.error ||
-    periodContext.error;
+    periodContext.error ||
+    speciesContext.error;
 
   const lastFetchedTimes = [
     gearContext.lastFetched,
     portContext.lastFetched,
     regionContext.lastFetched,
     coopContext.lastFetched,
-    periodContext.lastFetched
+    periodContext.lastFetched,
+    speciesContext.lastFetched
   ].filter(Boolean) as number[];
   
   const lastFetched = lastFetchedTimes.length > 0 
     ? Math.max(...lastFetchedTimes) 
     : null;
 
-  // Create the combined context value
-  const value: StatsDataType = {
+
+    const value: StatsDataType = {
     gears: gearContext.data,
     ports: portContext.data,
     regions: regionContext.data,
     coops: coopContext.data,
     periods: periodContext.data,
+    species: speciesContext.data,
     formattedPeriods,
     isLoading,
     error,

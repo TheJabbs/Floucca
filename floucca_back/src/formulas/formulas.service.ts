@@ -103,19 +103,22 @@ export class FormulasService {
         let fishData: FishDataInterface[] = [];
 
         for (const [specie, count] of map.entries()) {
-            const [ estCatch, avgPrice, avgFishWeight, avgFishQuantity, avgFishLength, avgFishWeightByKilo] = await Promise.all([
+            const [ estCatch, avgPrice, avgFishWeight, avgFishQuantity, avgFishLength, avgFishWeightByKilo, totalCatch] = await Promise.all([
                 this.getEstimateSpeciesCatch(count, estTotalCatch),
                 this.getAvgFishPrice(count),
                 this.getAvgFishWeight(count),
                 this.getAvgFishQuantity(count),
                 this.getAvgFishLength(count),
-                this.getAvgFishWeightByKilo(count, 1)
+                this.getAvgFishWeightByKilo(count, 1),
+                this.getTotalCatch(count)
             ]);
 
             const cpue = await this.getSpeciesCpue(estCatch, totalEffort);
 
             fishData.push({
                 specie_code: specie,
+                specie_name: count[0].fish[0].specieName,
+                all_fished: totalCatch,
                 avg_fish_weight: avgFishWeight,
                 avg_fish_quantity: avgFishQuantity,
                 avg_fish_length: avgFishLength,
@@ -358,8 +361,7 @@ export class FormulasService {
         return estimatedPrice * estimatedSpeciesCatch;
     }
 
-    async getTotalCatch(filter: GeneralFilterDto) {
-        const landings = await this.landingsService.getLandingsByFilter(filter);
+    async getTotalCatch(landings: GetFilteredInterface[]) {
 
         let totalCatch = 0;
         landings.forEach(landing => {

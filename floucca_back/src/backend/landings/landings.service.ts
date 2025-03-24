@@ -7,6 +7,7 @@ import {UpdateLandingsDto} from "./dto/updateLandings.dto";
 import {CreateFormLandingDto} from "./dto/CreateFormLanding.dto";
 import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
 import {GetFilteredInterface} from "./interface/getFiltered.interface";
+import {filterToFilteredInterfaceMapper} from "../fish/mapper/filterToFilteredInterface.mapper";
 
 @Injectable()
 export class LandingsService {
@@ -219,7 +220,12 @@ export class LandingsService {
                         fish_weight: true,
                         fish_quantity: true,
                         fish_length: true,
-                        price: true
+                        price: true,
+                        specie:{
+                            select:{
+                                specie_name: true
+                            }
+                        }
                     }
                 }
             }
@@ -229,7 +235,7 @@ export class LandingsService {
             throw new NotFoundException('No landings found');
         }
 
-        return landings;
+        return filterToFilteredInterfaceMapper(landings);
     }
 
 

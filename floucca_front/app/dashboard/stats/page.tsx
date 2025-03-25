@@ -6,6 +6,7 @@ import EffortTable from "@/components/stats/tables/effort-table";
 import LandingsTable from "@/components/stats/tables/landings-table";
 import SpeciesTable from "@/components/stats/tables/species-table";
 import { fetchStatisticsData, mapSpeciesData } from "@/services/statsService";
+import EffortBarPlot from "@/components/stats/charts/effortBarPlot";
 
 const StatsPage: React.FC = () => {
   // Get data from context
@@ -227,6 +228,7 @@ const StatsPage: React.FC = () => {
           <>
             <div className="bg-white p-4 rounded-lg border shadow-sm overflow-x-auto">
               <EffortTable isLoading={isEffortLoading} effortData={effortData} />
+              <EffortBarPlot isLoading={isEffortLoading} data={effortData ? [effortData] : []} />
               <div className="border-t border-gray-300 my-4"></div>
               <LandingsTable isLoading={isLandingsLoading} landingsData={landingsData} />
             </div>

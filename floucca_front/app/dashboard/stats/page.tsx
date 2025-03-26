@@ -228,7 +228,7 @@ const StatsPage: React.FC = () => {
           <>
             <div className="bg-white p-4 rounded-lg border shadow-sm overflow-x-auto">
               <EffortTable isLoading={isEffortLoading} effortData={effortData} />
-              <EffortBarPlot isLoading={isEffortLoading} data={effortData ? [effortData] : []} />
+              {/* <EffortBarPlot isLoading={isEffortLoading} data={effortData ? [effortData] : []} /> */}
               <div className="border-t border-gray-300 my-4"></div>
               <LandingsTable isLoading={isLandingsLoading} landingsData={landingsData} />
             </div>

@@ -59,29 +59,28 @@ export class FormulasService {
 
     async getEffortAndLanding(effortData: GetFilteredLastWInterface[], landingData: GetFilteredInterface[], filter: GeneralFilterDto): Promise<GetEffortAndLandingInterface> {
         delete filter.gear_code
-        console.log(effortData, landingData, filter);
-        const pba = await this.getPba(JSON.parse(JSON.stringify(effortData)));
-        const allGears = await this.gearService.getAllGear();
-        const totalGears = await this.landingsService.getLandingsByFilter(filter)
+        const [pba, allGears, totalGears] = await Promise.all([
+            this.getPba(JSON.parse(JSON.stringify(effortData))),
+            this.gearService.getAllGear(),
+            this.landingsService.getLandingsByFilter(filter)
+        ]);
 
-        console.log(pba, allGears, totalGears);
+        
 
         const estEffort = await this.getEstimateEffort(pba, effortData, allGears);
+        console.log(estEffort);
         const estCatch = await this.getEstimateCatchForAllSpecies(landingData, estEffort);
 
-        console.log(estEffort, estCatch);
 
-        const avgPrice = await this.getAvgFishPrice(landingData);
-        const estValue = await this.getEstimatedSpeciesValue(landingData, estCatch);
-        const cpue = await this.getSpeciesCpue(estCatch, estEffort);
-        const estCatch2 = await this.getEstimateSpeciesCatch(landingData, estCatch);
-        const activeDays = await this.getActiveDays(effortData, allGears);
-
-        console.log(avgPrice, estValue, cpue, estCatch2, activeDays);
+        const [avgPrice, estValue, cpue, estCatch2, activeDays] = await Promise.all([
+            this.getAvgFishPrice(landingData),
+            this.getEstimatedSpeciesValue(landingData, estCatch),
+            this.getSpeciesCpue(estCatch, estEffort),
+            this.getEstimateSpeciesCatch(landingData, estCatch),
+            this.getActiveDays(effortData, allGears),
+        ]);
 
         const sampleEffort = await this.getEffortBySpecies(landingData, cpue)
-
-        console.log(sampleEffort);
 
         return {
             effort: {
@@ -234,11 +233,15 @@ export class FormulasService {
      * Estimates fishing effort by multiplying active days, the total number of gears,
      * and the Proportion of Boats Active (PBA).
      */
-    async getEstimateEffort(pba: number, data: GetFilteredLastWInterface[], allGears: GetAllGearInterface[]) {
+    async getEstimateEffort(
+        pba: number, 
+        data: GetFilteredLastWInterface[], 
+        allGears: GetAllGearInterface[]
+    ): Promise<number> {
         const activeDays = await this.getActiveDays(data, allGears);
-
         return activeDays * allGears.length * pba;
     }
+    
 
     /**
      * Computes the estimated catch by multiplying the estimated fishing effort

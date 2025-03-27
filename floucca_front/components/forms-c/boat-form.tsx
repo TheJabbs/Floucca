@@ -90,7 +90,7 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <FormInput
-                label="Boat Fleet Size"
+                label="Boat Fleet Hourse Power"
                 name="fleet_hp"
                 required={required}
                 placeholder="Enter fleet hourse power"

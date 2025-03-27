@@ -52,6 +52,16 @@ const FormInput: React.FC<FormInputProps> = ({
           error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
         }`}
         onKeyDown={handleKeyDown}
+        onInput={(e) => {
+          const value = parseInt(e.currentTarget.value, 10);
+          if (max !== undefined && value > max) {
+            e.currentTarget.value = max.toString();
+          }
+          if (min !== undefined && value < min) {
+            e.currentTarget.value = min.toString();
+          }
+        }}
+        
         required={required}
         min={type === "number" ? min : undefined}
         max={type === "number" ? max : undefined}

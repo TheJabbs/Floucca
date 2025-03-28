@@ -1,0 +1,95 @@
+{
+  "pages": {
+    "/_not-found/page": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/app/_not-found/page-2b6c8b0fc52d085b.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/css/60e1c60accac34aa.css",
+      "static/chunks/138-d709d339011b3ab0.js",
+      "static/chunks/app/layout-164b3977ec062abb.js"
+    ],
+    "/dashboard/page": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/app/dashboard/page-204e5a91726c5fbb.js"
+    ],
+    "/page": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/app/page-a138c4508fea9ac3.js"
+    ],
+    "/dashboard/stats/page": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/472-fadf34cbd822a9c6.js",
+      "static/chunks/108-23ea2ad9a71e75d8.js",
+      "static/chunks/app/dashboard/stats/page-8d395bb7014036fd.js"
+    ],
+    "/dashboard/stats/layout": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/472-fadf34cbd822a9c6.js",
+      "static/chunks/app/dashboard/stats/layout-bebfab2165848981.js"
+    ],
+    "/dataoperator/submission-history/page": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/466-eda28f9a1a1510b0.js",
+      "static/chunks/app/dataoperator/submission-history/page-bb085eb2c6716752.js"
+    ],
+    "/dataoperator/layout": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/138-d709d339011b3ab0.js",
+      "static/chunks/app/dataoperator/layout-1e8c95217c501d3a.js"
+    ],
+    "/dataoperator/forms/census-form/page": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/472-fadf34cbd822a9c6.js",
+      "static/chunks/466-eda28f9a1a1510b0.js",
+      "static/chunks/642-f4116fc4e38efe89.js",
+      "static/chunks/app/dataoperator/forms/census-form/page-ba78595c1b7f55ed.js"
+    ],
+    "/dataoperator/forms/layout": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/472-fadf34cbd822a9c6.js",
+      "static/chunks/app/dataoperator/forms/layout-529964a6d9def382.js"
+    ],
+    "/dataoperator/forms/effort-and-landing/page": [
+      "static/chunks/webpack-bcbdcf175f00c24f.js",
+      "static/chunks/fd9d1056-ead2362675505401.js",
+      "static/chunks/23-d4fb947737aa1be9.js",
+      "static/chunks/main-app-590351e24f659986.js",
+      "static/chunks/472-fadf34cbd822a9c6.js",
+      "static/chunks/466-eda28f9a1a1510b0.js",
+      "static/chunks/642-f4116fc4e38efe89.js",
+      "static/chunks/app/dataoperator/forms/effort-and-landing/page-78d52031241df173.js"
+    ]
+  }
+}

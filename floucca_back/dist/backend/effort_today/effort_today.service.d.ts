@@ -1,7 +1,7 @@
 import { EffortTodayInterface } from "./interface/effort_today.interface";
-import { CreateEffortTodayDto } from "./dto/effort_today.Dto";
+import { CreateEffortTodayDto } from "./dto/effort_today.dto";
 import { PrismaService } from "../../prisma/prisma.service";
-import { UpdateEffortDto } from "./dto/updateEffort.dto";
+import { UpdateEffortDto } from "./dto/update_effort.dto";
 import { ResponseMessage } from "../../shared/interface/response.interface";
 export declare class EffortTodayService {
     private readonly prisma;

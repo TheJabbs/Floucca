@@ -17,8 +17,8 @@ const common_1 = require("@nestjs/common");
 const fleet_service_1 = require("./fleet.service");
 const dto_1 = require("./dto");
 const id_dto_1 = require("../../shared/dto/id.dto");
-const CreateFleetForm_dto_1 = require("./dto/CreateFleetForm.dto");
-const formGearUsageToGearUsage_mapper_1 = require("../../utils/transformation/formGearUsageToGearUsage.mapper");
+const create_fleet_form_dto_1 = require("./dto/create_fleet_form.dto");
+const form_gear_usage_to_gear_usage_mapper_1 = require("../../utils/transformation/form_gear_usage_to_gear_usage.mapper");
 let FleetController = class FleetController {
     constructor(fleetService) {
         this.fleetService = fleetService;
@@ -47,7 +47,7 @@ let FleetController = class FleetController {
         const form = senseForm.formDto;
         const boatDetails = senseForm.boatDetailDto;
         console.log(JSON.stringify(senseForm, null, 2));
-        const gearUsage = (0, formGearUsageToGearUsage_mapper_1.transformFormGearUsageToGearUsage)(senseForm.gearUsageDto);
+        const gearUsage = (0, form_gear_usage_to_gear_usage_mapper_1.transformFormGearUsageToGearUsage)(senseForm.gearUsageDto);
         const senseFormContent = {
             form: form,
             boatDetails: boatDetails,
@@ -104,7 +104,7 @@ __decorate([
     (0, common_1.Post)("/form/create"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [CreateFleetForm_dto_1.CreateFleetFormDto]),
+    __metadata("design:paramtypes", [create_fleet_form_dto_1.CreateFleetFormDto]),
     __metadata("design:returntype", void 0)
 ], FleetController.prototype, "createSenseForm", null);
 exports.FleetController = FleetController = __decorate([

@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PeriodController = void 0;
 const common_1 = require("@nestjs/common");
 const period_service_1 = require("./period.service");
-const UpdateGearDetail_dto_1 = require("../gear_detail/dto/UpdateGearDetail.dto");
+const update_gear_detail_dto_1 = require("../gear_detail/dto/update_gear_detail.dto");
 let PeriodController = class PeriodController {
     constructor(periodService) {
         this.periodService = periodService;
@@ -52,7 +52,7 @@ __decorate([
     __param(0, (0, common_1.Param)('period_id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Date, UpdateGearDetail_dto_1.UpdateGearDetailDto]),
+    __metadata("design:paramtypes", [Date, update_gear_detail_dto_1.UpdateGearDetailDto]),
     __metadata("design:returntype", Promise)
 ], PeriodController.prototype, "updatePeriod", null);
 __decorate([

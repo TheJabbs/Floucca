@@ -17,7 +17,7 @@ const effort_today_service_1 = require("./effort_today.service");
 const common_1 = require("@nestjs/common");
 const effort_today_dto_1 = require("./dto/effort_today.dto");
 const id_dto_1 = require("../../shared/dto/id.dto");
-const updateEffort_dto_1 = require("./dto/updateEffort.dto");
+const update_effort_dto_1 = require("./dto/update_effort.dto");
 let EffortTodayController = class EffortTodayController {
     constructor(effortTodayService) {
         this.effortTodayService = effortTodayService;
@@ -72,7 +72,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [updateEffort_dto_1.UpdateEffortDto, id_dto_1.idDTO]),
+    __metadata("design:paramtypes", [update_effort_dto_1.UpdateEffortDto, id_dto_1.idDTO]),
     __metadata("design:returntype", void 0)
 ], EffortTodayController.prototype, "updateEffortToday", null);
 __decorate([

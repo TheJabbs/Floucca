@@ -22,4 +22,4 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], DateRangeDto.prototype, "end", void 0);
-//# sourceMappingURL=DaterangeDto.dto.js.map
+//# sourceMappingURL=daterangedto.dto.js.map

@@ -1,11 +1,11 @@
 import { PrismaService } from "../../prisma/prisma.service";
-import { GetAllLandingsInterface } from "./interface/getAllLandings.interface";
-import { CreateLandingDto } from "./dto/createLandings.dto";
+import { GetAllLandingsInterface } from "./interface/get_all_landings.interface";
+import { CreateLandingDto } from "./dto/create_landings.dto";
 import { ResponseMessage } from "../../shared/interface/response.interface";
-import { UpdateLandingsDto } from "./dto/updateLandings.dto";
-import { CreateFormLandingDto } from "./dto/CreateFormLanding.dto";
-import { GeneralFilterDto } from "../../shared/dto/GeneralFilter.dto";
-import { GetFilteredInterface } from "./interface/getFiltered.interface";
+import { UpdateLandingsDto } from "./dto/update_landings.dto";
+import { CreateFormLandingDto } from "./dto/create_form_landing.dto";
+import { GeneralFilterDto } from "../../shared/dto/general_filter.dto";
+import { GetFilteredInterface } from "./interface/get_filtered.interface";
 export declare class LandingsService {
     private readonly prisma;
     constructor(prisma: PrismaService);

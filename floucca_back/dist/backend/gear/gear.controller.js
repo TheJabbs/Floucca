@@ -15,8 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GearController = void 0;
 const common_1 = require("@nestjs/common");
 const gear_service_1 = require("./gear.service");
-const GearId_dto_1 = require("./dto/GearId.dto");
-const CreateGear_dto_1 = require("./dto/CreateGear.dto");
+const gear_id_dto_1 = require("./dto/gear_id.dto");
+const create_gear_dto_1 = require("./dto/create_gear.dto");
 let GearController = class GearController {
     constructor(service) {
         this.service = service;
@@ -48,21 +48,21 @@ __decorate([
     (0, common_1.Get)("/gear/:gear_code"),
     __param(0, (0, common_1.Param)("gear_code")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [GearId_dto_1.GearIdDto]),
+    __metadata("design:paramtypes", [gear_id_dto_1.GearIdDto]),
     __metadata("design:returntype", void 0)
 ], GearController.prototype, "getGearByCode", null);
 __decorate([
     (0, common_1.Post)("/create/gear"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [CreateGear_dto_1.CreateGearDto]),
+    __metadata("design:paramtypes", [create_gear_dto_1.CreateGearDto]),
     __metadata("design:returntype", void 0)
 ], GearController.prototype, "createGear", null);
 __decorate([
     (0, common_1.Delete)("/delete/gear/:gear_code"),
     __param(0, (0, common_1.Param)("gear_code")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [GearId_dto_1.GearIdDto]),
+    __metadata("design:paramtypes", [gear_id_dto_1.GearIdDto]),
     __metadata("design:returntype", void 0)
 ], GearController.prototype, "deleteGear", null);
 __decorate([
@@ -70,7 +70,7 @@ __decorate([
     __param(0, (0, common_1.Param)("gear_code")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [GearId_dto_1.GearIdDto, CreateGear_dto_1.CreateGearDto]),
+    __metadata("design:paramtypes", [gear_id_dto_1.GearIdDto, create_gear_dto_1.CreateGearDto]),
     __metadata("design:returntype", void 0)
 ], GearController.prototype, "updateGear", null);
 exports.GearController = GearController = __decorate([

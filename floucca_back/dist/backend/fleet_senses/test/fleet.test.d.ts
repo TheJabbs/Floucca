@@ -1,5 +1,5 @@
 import { FleetService } from "../fleet.service";
-import { FormGearUsageDto } from "../../gear_usage/dto/FormGearUsage.dto";
+import { FormGearUsageDto } from "../../gear_usage/dto/form_gear_usage.dto";
 export declare class FleetTesterController {
     private readonly fleetService;
     constructor(fleetService: FleetService);

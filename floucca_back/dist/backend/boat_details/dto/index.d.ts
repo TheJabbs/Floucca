@@ -1,2 +1,2 @@
-export * from './boat_details_ID.dto';
-export * from './create_boatDetails.dto';
+export * from './boat_details_id.dto';
+export * from './create_boatdetails.dto';

@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FormulasController = void 0;
 const common_1 = require("@nestjs/common");
 const formulas_service_1 = require("./formulas.service");
-const GeneralFilter_dto_1 = require("../shared/dto/GeneralFilter.dto");
+const general_filter_dto_1 = require("../shared/dto/general_filter.dto");
 let FormulasController = class FormulasController {
     constructor(service) {
         this.service = service;
@@ -30,7 +30,7 @@ __decorate([
     (0, common_1.Post)('report/effort&landing'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [GeneralFilter_dto_1.GeneralFilterDto]),
+    __metadata("design:paramtypes", [general_filter_dto_1.GeneralFilterDto]),
     __metadata("design:returntype", Promise)
 ], FormulasController.prototype, "getEffortAndLanding", null);
 exports.FormulasController = FormulasController = __decorate([

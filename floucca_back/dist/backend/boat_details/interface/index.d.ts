@@ -1,2 +1,2 @@
 export * from './boat_detail.interface';
-export * from './successResp_interface';
+export * from './successresp_interface';

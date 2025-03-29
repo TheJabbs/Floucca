@@ -47,4 +47,4 @@ __decorate([
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], CreateBoatDetailsDto.prototype, "fleet_registration", void 0);
-//# sourceMappingURL=create_boatDetails.dto.js.map
+//# sourceMappingURL=create_boatdetails.dto.js.map

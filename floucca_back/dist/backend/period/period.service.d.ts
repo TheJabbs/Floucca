@@ -1,6 +1,6 @@
 import { ResponseMessage } from "../../shared/interface/response.interface";
-import { GetAllPeriodInterface } from "./interface/getAllPeriod.interface";
-import { UpdateGearDetailDto } from "../gear_detail/dto/UpdateGearDetail.dto";
+import { GetAllPeriodInterface } from "./interface/get_all_period.interface";
+import { UpdateGearDetailDto } from "../gear_detail/dto/update_gear_detail.dto";
 import { PrismaService } from "../../prisma/prisma.service";
 export declare class PeriodService {
     private readonly prisma;

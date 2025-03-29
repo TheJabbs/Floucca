@@ -15,13 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FleetTesterController = void 0;
 const common_1 = require("@nestjs/common");
 const fleet_service_1 = require("../fleet.service");
-const formGearUsageToGearUsage_mapper_1 = require("../../../utils/transformation/formGearUsageToGearUsage.mapper");
+const form_gear_usage_to_gear_usage_mapper_1 = require("../../../utils/transformation/form_gear_usage_to_gear_usage.mapper");
 let FleetTesterController = class FleetTesterController {
     constructor(fleetService) {
         this.fleetService = fleetService;
     }
     async createSenseForm(test) {
-        const tester = (0, formGearUsageToGearUsage_mapper_1.transformFormGearUsageToGearUsage)(test);
+        const tester = (0, form_gear_usage_to_gear_usage_mapper_1.transformFormGearUsageToGearUsage)(test);
         console.log(tester);
     }
 };

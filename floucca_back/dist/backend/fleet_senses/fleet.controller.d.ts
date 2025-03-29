@@ -1,13 +1,13 @@
 import { FleetService } from "./fleet.service";
 import { CreateFleetDto } from "./dto";
 import { idDTO } from "../../shared/dto/id.dto";
-import { CreateFleetFormDto } from "./dto/CreateFleetForm.dto";
+import { CreateFleetFormDto } from "./dto/create_fleet_form.dto";
 export declare class FleetController {
     private readonly fleetService;
     constructor(fleetService: FleetService);
-    getAllFleetSenses(): Promise<import("./Interface/GetAllFleetInterface").GetAllFleetInterface[]>;
-    getFleetSensesByFSID(FSID: idDTO): Promise<import("./Interface/GetAllFleetInterface").GetAllFleetInterface>;
-    getAllFleetByDate(start: string, end: string): Promise<import("./Interface/GetAllFleetInterface").GetAllFleetInterface[]>;
+    getAllFleetSenses(): Promise<import("./interface/get_all_fleet.interface").GetAllFleetInterface[]>;
+    getFleetSensesByFSID(FSID: idDTO): Promise<import("./interface/get_all_fleet.interface").GetAllFleetInterface>;
+    getAllFleetByDate(start: string, end: string): Promise<import("./interface/get_all_fleet.interface").GetAllFleetInterface[]>;
     createFleetSenses(newFleet: CreateFleetDto): Promise<import("../../shared/interface/response.interface").ResponseMessage<any>>;
     deleteFleetSenses(FSID: idDTO): Promise<import("../../shared/interface/response.interface").ResponseMessage<any>>;
     updateFleetSenses(FSID: idDTO, updatedFleet: CreateFleetDto): Promise<import("../../shared/interface/response.interface").ResponseMessage<any>>;

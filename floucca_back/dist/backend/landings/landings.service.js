@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LandingsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
-const filterToFilteredInterface_mapper_1 = require("../fish/mapper/filterToFilteredInterface.mapper");
+const filter_to_filtered_interface_mapper_1 = require("../fish/mapper/filter_to_filtered_interface.mapper");
 let LandingsService = class LandingsService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -198,7 +198,7 @@ let LandingsService = class LandingsService {
         if (!landings || landings.length === 0) {
             throw new common_1.NotFoundException('No landings found');
         }
-        return (0, filterToFilteredInterface_mapper_1.filterToFilteredInterfaceMapper)(landings);
+        return (0, filter_to_filtered_interface_mapper_1.filterToFilteredInterfaceMapper)(landings);
     }
     async validate(d) {
         if (d.form_id) {

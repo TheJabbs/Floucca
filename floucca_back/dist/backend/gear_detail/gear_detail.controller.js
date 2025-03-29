@@ -14,10 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GearDetailController = void 0;
 const common_1 = require("@nestjs/common");
-const CreateGearDetail_dto_1 = require("./dto/CreateGearDetail.dto");
+const create_gear_detail_dto_1 = require("./dto/create_gear_detail.dto");
 const gear_detail_service_1 = require("./gear_detail.service");
 const id_dto_1 = require("../../shared/dto/id.dto");
-const UpdateGearDetail_dto_1 = require("./dto/UpdateGearDetail.dto");
+const update_gear_detail_dto_1 = require("./dto/update_gear_detail.dto");
 let GearDetailController = class GearDetailController {
     constructor(service) {
         this.service = service;
@@ -56,7 +56,7 @@ __decorate([
     (0, common_1.Post)("/create/gear_detail"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [CreateGearDetail_dto_1.CreateGearDetailDto]),
+    __metadata("design:paramtypes", [create_gear_detail_dto_1.CreateGearDetailDto]),
     __metadata("design:returntype", void 0)
 ], GearDetailController.prototype, "createGearDetail", null);
 __decorate([
@@ -71,7 +71,7 @@ __decorate([
     __param(0, (0, common_1.Param)("gear_detail_code")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [id_dto_1.idDTO, UpdateGearDetail_dto_1.UpdateGearDetailDto]),
+    __metadata("design:paramtypes", [id_dto_1.idDTO, update_gear_detail_dto_1.UpdateGearDetailDto]),
     __metadata("design:returntype", void 0)
 ], GearDetailController.prototype, "updateGearDetail", null);
 exports.GearDetailController = GearDetailController = __decorate([

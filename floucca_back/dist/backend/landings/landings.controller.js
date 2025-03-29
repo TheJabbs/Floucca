@@ -16,9 +16,9 @@ exports.LandingsController = void 0;
 const common_1 = require("@nestjs/common");
 const landings_service_1 = require("./landings.service");
 const id_dto_1 = require("../../shared/dto/id.dto");
-const createLandings_dto_1 = require("./dto/createLandings.dto");
-const updateLandings_dto_1 = require("./dto/updateLandings.dto");
-const CreateFormLanding_dto_1 = require("./dto/CreateFormLanding.dto");
+const create_landings_dto_1 = require("./dto/create_landings.dto");
+const update_landings_dto_1 = require("./dto/update_landings.dto");
+const create_form_landing_dto_1 = require("./dto/create_form_landing.dto");
 let LandingsController = class LandingsController {
     constructor(service) {
         this.service = service;
@@ -60,7 +60,7 @@ __decorate([
     (0, common_1.Post)("/create/landings"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [createLandings_dto_1.CreateLandingDto]),
+    __metadata("design:paramtypes", [create_landings_dto_1.CreateLandingDto]),
     __metadata("design:returntype", void 0)
 ], LandingsController.prototype, "createLanding", null);
 __decorate([
@@ -75,14 +75,14 @@ __decorate([
     __param(0, (0, common_1.Param)("landing_id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [id_dto_1.idDTO, updateLandings_dto_1.UpdateLandingsDto]),
+    __metadata("design:paramtypes", [id_dto_1.idDTO, update_landings_dto_1.UpdateLandingsDto]),
     __metadata("design:returntype", void 0)
 ], LandingsController.prototype, "updateLanding", null);
 __decorate([
     (0, common_1.Post)("/create/form"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [CreateFormLanding_dto_1.CreateFormLandingDto]),
+    __metadata("design:paramtypes", [create_form_landing_dto_1.CreateFormLandingDto]),
     __metadata("design:returntype", void 0)
 ], LandingsController.prototype, "createFormLanding", null);
 exports.LandingsController = LandingsController = __decorate([

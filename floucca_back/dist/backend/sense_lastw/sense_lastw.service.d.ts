@@ -1,10 +1,10 @@
 import { PrismaService } from '../../prisma/prisma.service';
 import { ResponseMessage } from '../../shared/interface/response.interface';
-import { GetAllSenseLastw } from './interface/getAllSense_lastw.interface';
+import { GetAllSenseLastw } from './interface/get_all_sense_lastw.interface';
 import { CreateSenseLastwDto } from './dto/create-sense_lastw.dto';
 import { UpdateSenseLastwDto } from './dto/update-sense_lastw.dto';
-import { GeneralFilterDto } from "../../shared/dto/GeneralFilter.dto";
-import { GetFilteredLastWInterface } from "./interface/getFilteredLastW.interface";
+import { GeneralFilterDto } from "../../shared/dto/general_filter.dto";
+import { GetFilteredLastWInterface } from "./interface/get_filtered_lastw.interface";
 export declare class SenseLastwService {
     private readonly prisma;
     constructor(prisma: PrismaService);

@@ -1,8 +1,8 @@
 import { PrismaService } from "../../prisma/prisma.service";
 import { ResponseMessage } from "../../shared/interface/response.interface";
-import { GetAllGearDetail } from "./interface/GetAllGearDetail.Interface";
-import { CreateGearDetailDto } from "./dto/CreateGearDetail.dto";
-import { UpdateGearDetailDto } from "./dto/UpdateGearDetail.dto";
+import { GetAllGearDetail } from "./interface/get_all_gear_detail.interface";
+import { CreateGearDetailDto } from "./dto/create_gear_detail.dto";
+import { UpdateGearDetailDto } from "./dto/update_gear_detail.dto";
 import { GearService } from "../gear/gear.service";
 import { EffortTodayService } from "../effort_today/effort_today.service";
 export declare class GearDetailService {

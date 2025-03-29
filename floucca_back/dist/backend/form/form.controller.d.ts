@@ -5,8 +5,8 @@ import { GetTopFormsInterface } from "./interface/index";
 export declare class FormController {
     private readonly formService;
     constructor(formService: FormService);
-    getAllForms(): Promise<import("./interface/GetAllForm.interface").GetAllFormInterface[]>;
-    getFormById(form_id: idDTO): Promise<import("./interface/GetAllForm.interface").GetAllFormInterface>;
+    getAllForms(): Promise<import("./interface/get_all_form.interface").GetAllFormInterface[]>;
+    getFormById(form_id: idDTO): Promise<import("./interface/get_all_form.interface").GetAllFormInterface>;
     getTopFormsByUser(id: number): Promise<GetTopFormsInterface[]>;
     createForm(newForm: CreateFormDto): Promise<import("../../shared/interface/response.interface").ResponseMessage<any>>;
     deleteForm(form_id: idDTO): Promise<import("../../shared/interface/response.interface").ResponseMessage<any>>;

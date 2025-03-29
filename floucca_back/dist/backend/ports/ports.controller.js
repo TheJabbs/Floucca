@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PortsController = void 0;
 const common_1 = require("@nestjs/common");
 const ports_service_1 = require("./ports.service");
-const CreatePort_dto_1 = require("./dto/CreatePort.dto");
+const create_port_dto_1 = require("./dto/create_port.dto");
 const id_dto_1 = require("../../shared/dto/id.dto");
 let PortsController = class PortsController {
     constructor(portsService) {
@@ -43,7 +43,7 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [CreatePort_dto_1.CreatePortDto]),
+    __metadata("design:paramtypes", [create_port_dto_1.CreatePortDto]),
     __metadata("design:returntype", Promise)
 ], PortsController.prototype, "create", null);
 __decorate([
@@ -64,7 +64,7 @@ __decorate([
     __param(0, (0, common_1.Param)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [id_dto_1.idDTO, CreatePort_dto_1.CreatePortDto]),
+    __metadata("design:paramtypes", [id_dto_1.idDTO, create_port_dto_1.CreatePortDto]),
     __metadata("design:returntype", Promise)
 ], PortsController.prototype, "update", null);
 __decorate([

@@ -18,4 +18,4 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], BoatDetails_FleetOwner_Dto.prototype, "fleet_owner", void 0);
-//# sourceMappingURL=boat_details_ID.dto.js.map
+//# sourceMappingURL=boat_details_id.dto.js.map

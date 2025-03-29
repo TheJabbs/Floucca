@@ -15,12 +15,12 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const fish_service_1 = require("../backend/fish/fish.service");
 const landings_service_1 = require("../backend/landings/landings.service");
 const sense_lastw_service_1 = require("../backend/sense_lastw/sense_lastw.service");
-const getDaysInAMonth_1 = require("../utils/date/getDaysInAMonth");
+const get_days_in_a_month_1 = require("../utils/date/get_days_in_a_month");
 const gear_service_1 = require("../backend/gear/gear.service");
-const mapLandingsAndEffort_mapper_1 = require("./utils/mapLandingsAndEffort.mapper");
-const mapEffortMap_mapper_1 = require("./utils/mapEffortMap.mapper");
-const mapLandingsMapForSpeciePrice_mapper_1 = require("./utils/mapLandingsMapForSpeciePrice.mapper");
-const mapLandingsBySpecie_mapper_1 = require("./utils/mapLandingsBySpecie.mapper");
+const map_landings_and_effort_mapper_1 = require("./utils/map_landings_and_effort.mapper");
+const map_effort_map_mapper_1 = require("./utils/map_effort_map.mapper");
+const map_landings_map_for_specie_price_mapper_1 = require("./utils/map_landings_map_for_specie_price.mapper");
+const map_landings_by_specie_mapper_1 = require("./utils/map_landings_by_specie.mapper");
 const mapSpecies_mapper_1 = require("./utils/mapSpecies.mapper");
 let FormulasService = class FormulasService {
     constructor(prisma, fishService, landingsService, senseLastWService, gearService) {
@@ -118,7 +118,7 @@ let FormulasService = class FormulasService {
         return fishWeight / landingData.length;
     }
     async getEffortBySpecies(data, cpue) {
-        const map = (0, mapLandingsBySpecie_mapper_1.mapLandingsBySpecieMapper)(data);
+        const map = (0, map_landings_by_specie_mapper_1.mapLandingsBySpecieMapper)(data);
         let sum = 0;
         let count = 0;
         for (const [specie, specieCount] of map.entries()) {
@@ -128,8 +128,8 @@ let FormulasService = class FormulasService {
         return count > 0 ? sum / count : 0;
     }
     async getPba(data) {
-        let map = (0, mapLandingsAndEffort_mapper_1.mapLandingsAndEffortMapper)(data);
-        let speciesMap = (0, mapEffortMap_mapper_1.mapEffortMapMapper)(map);
+        let map = (0, map_landings_and_effort_mapper_1.mapLandingsAndEffortMapper)(data);
+        let speciesMap = (0, map_effort_map_mapper_1.mapEffortMapMapper)(map);
         let sumPba = 0;
         let count = 0;
         for (const efforts of speciesMap.values()) {
@@ -145,7 +145,7 @@ let FormulasService = class FormulasService {
     async getTotalEffort(filter, data, pba) {
         delete filter.gear_code;
         const periodDate = new Date(filter.period);
-        const days = (0, getDaysInAMonth_1.getDaysInMonthByDate)(periodDate.toDateString());
+        const days = (0, get_days_in_a_month_1.getDaysInMonthByDate)(periodDate.toDateString());
         const numberGear = data.length;
         return days * numberGear * pba;
     }
@@ -164,8 +164,8 @@ let FormulasService = class FormulasService {
         return estEffort * await this.getCpue(landingData);
     }
     async getAvgFishPrice(data) {
-        const map = (0, mapLandingsAndEffort_mapper_1.mapLandingsAndEffortMapper)(data);
-        const fishMap = (0, mapLandingsMapForSpeciePrice_mapper_1.mapLandingsMapForSpeciePriceMapper)(map);
+        const map = (0, map_landings_and_effort_mapper_1.mapLandingsAndEffortMapper)(data);
+        const fishMap = (0, map_landings_map_for_specie_price_mapper_1.mapLandingsMapForSpeciePriceMapper)(map);
         let sumPrice = 0;
         let count = 0;
         for (const speciesMap of fishMap.values()) {

@@ -1,7 +1,7 @@
 import { EffortTodayService } from "./effort_today.service";
 import { CreateEffortTodayDto } from "./dto/effort_today.dto";
 import { idDTO } from "../../shared/dto/id.dto";
-import { UpdateEffortDto } from "./dto/updateEffort.dto";
+import { UpdateEffortDto } from "./dto/update_effort.dto";
 export declare class EffortTodayController {
     private readonly effortTodayService;
     constructor(effortTodayService: EffortTodayService);

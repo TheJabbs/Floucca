@@ -1,5 +1,5 @@
-import { GetAllGearInterface } from "./interface/GetAllGear.interface";
-import { CreateGearDto } from "./dto/CreateGear.dto";
+import { GetAllGearInterface } from "./interface/get_all_gear.interface";
+import { CreateGearDto } from "./dto/create_gear.dto";
 import Any = jasmine.Any;
 import { PrismaService } from "../../prisma/prisma.service";
 import { ResponseMessage } from "../../shared/interface/response.interface";

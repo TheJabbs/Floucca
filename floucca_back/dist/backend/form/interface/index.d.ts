@@ -1,3 +1,3 @@
-export { FormResInterface } from './FormRes.interface';
-export { GetAllFormInterface } from './GetAllForm.interface';
-export { GetTopFormsInterface } from './GetTopForms.interface';
+export { FormResInterface } from './form_res.interface';
+export { GetAllFormInterface } from './get_all_form.interface';
+export { GetTopFormsInterface } from './get_top_forms.interface';

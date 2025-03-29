@@ -3,23 +3,12 @@ import {PrismaService} from "../prisma/prisma.service";
 import {FishService} from "../backend/fish/fish.service";
 import {LandingsService} from "../backend/landings/landings.service";
 import {SenseLastwService} from "../backend/sense_lastw/sense_lastw.service";
+import {GearService} from "../backend/gear/gear.service";
+import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/getFilteredLastW.interface";
+import {GetFilteredInterface} from "../backend/landings/interface/getFiltered.interface";
 import {GeneralFilterDto} from "../shared/dto/GeneralFilter.dto";
 import {getDaysInMonthByDate} from "../utils/date/getDaysInAMonth";
-import {GearService} from "../backend/gear/gear.service";
-import {GetFilteredInterface} from "../backend/landings/interface/getFiltered.interface";
-import {mapLandingsAndEffortMapper} from "./utils/mapLandingsAndEffort.mapper";
-import {mapLandingsMapForSpecieCountMapper} from "./utils/mapLandingsMapForSpecieCount.mapper";
-import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/getFilteredLastW.interface";
-import {mapEffortMapMapper} from "./utils/mapEffortMap.mapper";
-import {mapLandingsMapForSpeciePriceMapper} from "./utils/mapLandingsMapForSpeciePrice.mapper";
-import _ from "lodash";
-import {GetEffortAndLandingInterface} from "./interface/getEffortAndLanding.interface";
-import {GetAllGearInterface} from "../backend/gear/interface/GetAllGear.interface";
-import {GetAllLandingsInterface} from "../backend/landings/interface/getAllLandings.interface";
-import {FishDataInterface} from "./interface/fishData.interface";
-import {mapLandingsBySpecieMapper} from "./utils/mapLandingsBySpecie.mapper";
-import {mapSpeciesMapper} from "./utils/mapSpecies.mapper"; //
-
+import {specieMapMapper} from "./utils/specieMap.mapper";
 
 @Injectable()
 export class FormulasService {
@@ -29,356 +18,231 @@ export class FormulasService {
         private readonly landingsService: LandingsService,
         private readonly senseLastWService: SenseLastwService,
         private readonly gearService: GearService
-    ) {
-    }
+    ) {}
 
-    //Services for the controller
+    async getReportData(filter: GeneralFilterDto){
+        let filter2 = JSON.parse(JSON.stringify(filter));
+        filter2.gear_code= undefined;
 
+        filter.specie_code = await this.fishService.getFishSpecieByGear(filter2);
 
-    /**
-     * This subsection is to get all the data for the form reports
-     * */
+        console.log("Filter 1:", filter, "Filter 2:", filter2);
 
-    //This function returns the entire page
-    async getReport(filter: GeneralFilterDto): Promise<any> {
-
-        filter.specie_code = await this.fishService.getFishSpecieByGear(filter.period, filter.gear_code);
-
-        const [effortData, landingData] = await Promise.all([
+        const [effortData, landingData, allEffort] = await Promise.all([
             this.senseLastWService.getEffortsByFilter(filter),
-            this.landingsService.getLandingsByFilter(filter)
+            this.landingsService.getLandingsByFilter(filter),
+            this.senseLastWService.getEffortsByFilter(filter2)
         ]);
 
-        const uperTable = await this.getEffortAndLanding(effortData, landingData, JSON.parse(JSON.stringify(filter)));
-        const lowerTable = await this.getSingularFishData(landingData, uperTable.landings.estCatch, uperTable.effort.estEffort);
-        return {
-            uperTable: uperTable,
-            lowerTable: lowerTable
-        }
-    }
+        const pba = this.getPba(effortData);
+        const cpue = this.getCpue(effortData.length, landingData);
 
-    async getEffortAndLanding(effortData: GetFilteredLastWInterface[], landingData: GetFilteredInterface[], filter: GeneralFilterDto): Promise<GetEffortAndLandingInterface> {
-        delete filter.gear_code
-        const [pba, allGears, totalGears] = await Promise.all([
-            this.getPba(JSON.parse(JSON.stringify(effortData))),
-            this.gearService.getAllGear(),
-            this.landingsService.getLandingsByFilter(filter)
-        ]);
+        const daysOfTheMonth = getDaysInMonthByDate(filter.period);
+        const sampleEffort = this.getTotalEffort(pba, daysOfTheMonth, allEffort.length);
 
-        
+        const activeDays = this.getActiveDays(allEffort, allEffort.length);
+        const estEffort = this.getEstimateEffort(allEffort.length, activeDays, pba);
 
-        const estEffort = await this.getEstimateEffort(pba, effortData, allGears);
-        console.log(estEffort);
-        const estCatch = await this.getEstimateCatchForAllSpecies(landingData, estEffort);
+        const estCatch = this.getEstimateTotalCatch(cpue, estEffort);
+        const effortRecords = effortData.length;
+        const totalRecords = allEffort.length;
 
+        const landingRecords = this.countLandingForm(landingData);
+        const sampleCatch = this.countCatchBySpecie(landingData);
 
-        const [avgPrice, estValue, cpue, estCatch2, activeDays] = await Promise.all([
-            this.getAvgFishPrice(landingData),
-            this.getEstimatedSpeciesValue(landingData, estCatch),
-            this.getSpeciesCpue(estCatch, estEffort),
-            this.getEstimateSpeciesCatch(landingData, estCatch),
-            this.getActiveDays(effortData, allGears),
-        ]);
+        const avgPrice = this.getAvgPrice(landingData);
 
-        const sampleEffort = await this.getEffortBySpecies(landingData, cpue)
-
-        return {
+        let upperTables = {
             effort: {
-                records: effortData.length,
-                gears: totalGears.length,
+                records: effortRecords,
+                gears: totalRecords,
                 activeDays: activeDays,
                 pba: pba,
                 estEffort: estEffort
             },
             landings: {
-                records: landingData.length,
+                records: landingRecords,
                 avgPrice: avgPrice,
-                estValue: estValue,
+                estValue: 0,
                 cpue: cpue,
-                estCatch: estCatch2,
-                sampleEffort: sampleEffort
-            }
-        }
-    }
-
-    async getSingularFishData(landingData: GetFilteredInterface[], estTotalCatch: number, totalEffort: number): Promise<FishDataInterface[]> {
-        const map = mapSpeciesMapper(landingData);
-        let fishData: FishDataInterface[] = [];
-
-        for (const [specie, count] of map.entries()) {
-            const [ estCatch, avgPrice, avgFishWeight, avgFishQuantity, avgFishLength, avgFishWeightByKilo, totalCatch] = await Promise.all([
-                this.getEstimateSpeciesCatch(count, estTotalCatch),
-                this.getAvgFishPrice(count),
-                this.getAvgFishWeight(count),
-                this.getAvgFishQuantity(count),
-                this.getAvgFishLength(count),
-                this.getAvgFishWeightByKilo(count, 1),
-                this.getTotalCatch(count)
-            ]);
-
-            const cpue = await this.getSpeciesCpue(estCatch, totalEffort);
-
-            fishData.push({
-                specie_code: specie,
-                specie_name: count[0].fish[0].specieName,
-                all_fished: totalCatch,
-                avg_fish_weight: avgFishWeight,
-                avg_fish_quantity: avgFishQuantity,
-                avg_fish_length: avgFishLength,
-                avg_price: avgPrice,
-                fish_value: avgPrice * avgFishQuantity,
-                cpue: cpue,
-                est_catch: estCatch,
-            });
-        }
-
-        return fishData;
-    }
-
-
-    //Operational Formulas
-
-
-    /**
-     * Calculates Catch Per Unit Effort (CPUE) by dividing the total fish weight
-     * by the number of landings that match the given filter criteria.
-     */
-    async getCpue(landingData: GetFilteredInterface[]) {
-        let fishWeight = 0;
-
-        // Summing up the weight of all fish from all landings
-        landingData.forEach(landing => {
-            landing.fish.forEach(fish => {
-                fishWeight += fish.fish_weight;
-            });
-        });
-
-        return fishWeight / landingData.length;
-    }
-
-    /**
-     * catche by specie/ cpue
-     * NOT APPLICABLE FOR MULTI DATA
-     **/
-    async getEffortBySpecies(data: GetFilteredInterface[], cpue: number) {
-        const map = mapLandingsBySpecieMapper(data);
-
-        //calculate the cpu of each specie then devide by the count
-        let sum = 0;
-        let count = 0;
-        for (const [specie, specieCount] of map.entries()) {
-            sum += specie * cpue;
-            count += specieCount;
-        }
-
-        return count > 0 ? sum / count : 0;
-    }
-
-
-    /**
-     * Calculates the Proportion of Boats Active (PBA), which is the ratio of
-     * days fished to the total number of examined days.
-     */
-    //TODO: Check if this is the correct implementation
-    async getPba(data: GetFilteredLastWInterface[]) {
-
-        let map: Map<number, GetFilteredLastWInterface[]> = mapLandingsAndEffortMapper(data);
-        let speciesMap = mapEffortMapMapper(map);
-
-        let sumPba = 0;
-        let count = 0;
-
-        for (const efforts of speciesMap.values()) {
-            efforts.forEach(({sumDaysFished, numberOfForms}) => {
-                if (numberOfForms > 0) {
-                    count++;
-                    sumPba += sumDaysFished / numberOfForms;
-                }
-            });
-        }
-
-        return count > 0 ? sumPba / count : 0;
-    }
-
-
-    /**
-     * Computes the total fishing effort based on the number of active gears,
-     * the number of days in the period, and the Proportion of Boats Active (PBA).
-     */
-    //ToDo: Check if this is the correct implementation I made it take pba as a parameter to prevent redundancy
-    async getTotalEffort(filter: GeneralFilterDto, data: GetFilteredLastWInterface[], pba: number) {
-        delete filter.gear_code; // Remove specific gear filtering to get total effort
-        const periodDate = new Date(filter.period);
-        const days = getDaysInMonthByDate(periodDate.toDateString());
-        const numberGear = data.length;
-
-        return days * numberGear * pba;
-    }
-
-    /**
-     * Calculates the number of active fishing days by considering the number of gears
-     * and the total days fished across all efforts.
-     */
-    async getActiveDays(data: GetFilteredLastWInterface[], allGears: GetAllGearInterface[]) {
-
-        let activeDays = 0;
-        data.forEach(effort => {
-            activeDays += effort.days_fished;
-        });
-
-        return (activeDays * data.length) / allGears.length;
-    }
-
-    /**
-     * Estimates fishing effort by multiplying active days, the total number of gears,
-     * and the Proportion of Boats Active (PBA).
-     */
-    async getEstimateEffort(
-        pba: number, 
-        data: GetFilteredLastWInterface[], 
-        allGears: GetAllGearInterface[]
-    ): Promise<number> {
-        const activeDays = await this.getActiveDays(data, allGears);
-        return activeDays * allGears.length * pba;
-    }
-    
-
-    /**
-     * Computes the estimated catch by multiplying the estimated fishing effort
-     * with the Catch Per Unit Effort (CPUE).
-     */
-    async getEstimateCatchForAllSpecies(landingData: GetFilteredInterface[], estEffort: number) {
-        return estEffort * await this.getCpue(landingData);
-    }
-
-    /**
-     * Computes the average fish price by dividing the total price of all fish
-     * by the total number of fish caught in the given filter criteria.
-     */
-    async getAvgFishPrice(data: GetFilteredInterface[]) {
-
-        const map: Map<number, GetFilteredInterface[]> = mapLandingsAndEffortMapper(data);
-        const fishMap = mapLandingsMapForSpeciePriceMapper(map);
-
-        let sumPrice = 0;
-        let count = 0;
-
-        for (const speciesMap of fishMap.values()) {
-            for (const {fishTotalPrice, count: speciesCount} of speciesMap.values()) {
-                sumPrice += fishTotalPrice;
-                count += speciesCount;
+                estCatch: estCatch,
+                sampleEffort: sampleEffort,
+                sampleCatch: sampleCatch
             }
         }
 
-        return count > 0 ? sumPrice / count : 0;
-    }
+        let mappedSpecies = specieMapMapper(landingData);
+        let lowerTable = []
 
-    async getAvgFishWeight(dataLanding:  GetFilteredInterface[]) {
+        mappedSpecies.forEach((fish, specie) => {
+            let avgWeight = this.getAvgWeight(fish);
+            let numbOdCatch = this.getNumberOfCatch(fish);
+            let avgPrice = this.getAvgPrice(fish);
+            let value = 0;
+            let specieCpue = this.getCpue(fish.length, fish);
+            let estCatch = this.getEstimateCatch(estEffort, specieCpue);
+            let effort = this.getEffortBySpecie(numbOdCatch, specieCpue);
+            let avgLength = this.getAvgLength(fish);
+            let avgQuantity = this.getAvgQuantity(fish);
 
-
-        let sumWeight = 0;
-        let count = 0;
-
-        dataLanding.forEach(landing => {
-            landing.fish.forEach(fish => {
-                sumWeight += fish.fish_weight;
-                count++;
-            });
+            lowerTable.push({
+                numbOdCatch: numbOdCatch,
+                avgPrice: avgPrice,
+                avgWeight: avgWeight,
+                avgLength: avgLength,
+                avgQuantity: avgQuantity,
+                value: value,
+                cpue: specieCpue,
+                estCatch: estCatch,
+                effort: effort
+            })
         });
 
-        return count > 0 ? sumWeight / count : 0;
+        return {
+            upperTables: upperTables,
+            lowerTable: lowerTable
+        }
     }
 
-    async getAvgFishLength (data: GetFilteredInterface[]) {
 
-        let sumLength = 0;
-        let count = 0;
 
-        data.forEach(landing => {
-            landing.fish.forEach(fish => {
-                sumLength += fish.fish_length;
-                count++;
-            });
+
+
+
+
+
+    //=========================================================================================================
+
+    //Is it filtered by gear or all gears from that period?
+    getPba(effortData : GetFilteredLastWInterface[]){
+        let sumDaysWorkedLastW = 0;
+
+        effortData.forEach((element) => {
+            sumDaysWorkedLastW += element.days_fished;
         });
 
-        return count > 0 ? sumLength / count : 0;
+        return sumDaysWorkedLastW / (effortData.length * 7);
     }
 
-    async getAvgFishQuantity(data: GetFilteredInterface[]) {
+    //This is effort not number of effort form?
+    getCpue(nbOfEffortData: number, landingsData: GetFilteredInterface[]){
+        let sumLandings = 0;
 
-        let sumQuantity = 0;
-        let count = 0;
-
-        data.forEach(landing => {
-            landing.fish.forEach(fish => {
-                sumQuantity += fish.fish_quantity;
-                count++;
-            });
+        landingsData.forEach((element) => {
+            sumLandings += element.fish.fish_weight;
         });
 
-        return count > 0 ? sumQuantity / count : 0;
+        return sumLandings / nbOfEffortData;
     }
 
-    async getAvgFishWeightByKilo(data: GetFilteredInterface[], kg: number) {
+    //Is total number of gear the sum of gears in effort?
+    getTotalEffort(pba: number, daysOfTheMonth: number, totalNumberOfGears: number){
+        return pba * daysOfTheMonth * totalNumberOfGears;
+    }
 
-        let sumWeight = 0;
-        let count = 0;
+    //what is catchBySpecie is it the number of fishes or howmany records with this fish??
+    getEffortBySpecie(catchBySpecie: number, cpueOfSpecie: number){
+        return catchBySpecie / cpueOfSpecie;
+    }
 
-        data.forEach(landing => {
-            landing.fish.forEach(fish => {
-                sumWeight += fish.fish_weight;
-                count++;
-            });
+    getEstimateTotalCatch(cpue: number, effortEstimate: number){
+        return cpue * effortEstimate;
+    }
+
+    getEstimateEffort(boatGears: number,  activeDays: number, pba: number){
+        return boatGears * activeDays * pba;
+    }
+
+    // not sure of this formula please check it
+    getActiveDays(effortData: GetFilteredLastWInterface[], allGears: number){
+        let sumDaysWorkedLastW = 0;
+
+        effortData.forEach((element) => {
+            sumDaysWorkedLastW += element.days_fished;
         });
 
-        return count > 0 ? sumWeight / count / kg : 0;
+        return sumDaysWorkedLastW * effortData.length / allGears;
     }
 
-    async getEstimateSpeciesCatch(data: GetFilteredInterface[], estimatedTotalCatch: number) {
+    getEstimateCatch(estimateEffort: number, cpue: number){
+        return estimateEffort * cpue;
+    }
 
-        let sampleSpeciesCatch = 0;
-        let sampleTotalCatch = 0;
+    getAvgWeight(landingsData: GetFilteredInterface[]){
+        let sumLandings = 0;
 
-        data.forEach(landing => {
-            landing.fish.forEach(fish => {
-                sampleTotalCatch += fish.fish_quantity;
-                sampleSpeciesCatch += fish.fish_quantity;
-            });
+        landingsData.forEach((element) => {
+            sumLandings += element.fish.fish_weight;
         });
 
-        // Prevent division by zero
-        if (sampleTotalCatch === 0) return 0;
-
-        // Calculate estimated species catch
-        return estimatedTotalCatch * (sampleSpeciesCatch / sampleTotalCatch);
+        return sumLandings / landingsData.length;
     }
 
-    async getSpeciesCpue(estimatedSpeciesCatch: number, estimatedTotalEffort: number) {
+    getAvgLength(landingsData: GetFilteredInterface[]){
+        let sumLandings = 0;
 
-        if (estimatedTotalEffort === 0) return 0;
-
-        return estimatedSpeciesCatch / estimatedTotalEffort;
-    }
-
-    async getEstimatedSpeciesValue(dataLanding: GetFilteredInterface[], estimatedSpeciesCatch: number) {
-        const [estimatedPrice,] = await Promise.all([
-            this.getAvgFishPrice(dataLanding),
-        ]);
-
-        return estimatedPrice * estimatedSpeciesCatch;
-    }
-
-    async getTotalCatch(landings: GetFilteredInterface[]) {
-
-        let totalCatch = 0;
-        landings.forEach(landing => {
-            landing.fish.forEach(fish => {
-                totalCatch += fish.fish_quantity;
-            });
+        landingsData.forEach((element) => {
+            sumLandings += element.fish.fish_length;
         });
 
-        return totalCatch;
+        return sumLandings / landingsData.length;
     }
 
+    getAvgPrice(landingsData: GetFilteredInterface[]){
+        let sumLandings = 0;
+
+        landingsData.forEach((element) => {
+            sumLandings += element.fish.price;
+        });
+
+        return sumLandings / landingsData.length;
+    }
+
+    getAvgQuantity(landingsData: GetFilteredInterface[]){
+        let sumLandings = 0;
+
+        landingsData.forEach((element) => {
+            sumLandings += element.fish.fish_quantity;
+        });
+
+        return sumLandings / landingsData.length;
+    }
+
+    getNumberOfCatch(landingsData: GetFilteredInterface[]){
+        let numberOfCatch = 0
+
+        landingsData.forEach((element) => {
+            numberOfCatch += element.fish.fish_quantity;
+        });
+
+        return numberOfCatch;
+    }
+
+    //=============================================================
+
+    countLandingForm(landingData: GetFilteredInterface[]){
+        const mapUsingFormId: Map<number, GetFilteredInterface[]> = new Map();
+
+        landingData.forEach((element) => {
+            if(mapUsingFormId.has(element.form.form_id)){
+                mapUsingFormId.get(element.form.form_id).push(element);
+            }else{
+                mapUsingFormId.set(element.form.form_id, [element]);
+            }
+        });
+
+        return mapUsingFormId.size;
+
+    }
+
+    countCatchBySpecie(landingData: GetFilteredInterface[]){
+        let count = 0
+
+        landingData.forEach((element) => {
+            count += element.fish.fish_quantity;
+        });
+
+        return count;
+    }
 
 }

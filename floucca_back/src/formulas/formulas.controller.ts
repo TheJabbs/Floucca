@@ -1,6 +1,6 @@
 import {Body, Controller, Post,} from '@nestjs/common';
-import {FormulasService} from "./formulas.service";
 import {GeneralFilterDto} from "../shared/dto/GeneralFilter.dto";
+import {FormulasService} from "./formulas.service";
 
 @Controller('api/dev/formulas')
 export class FormulasController {
@@ -44,9 +44,7 @@ export class FormulasController {
 
     @Post('report/effort&landing')
     async getEffortAndLanding(@Body() filter: GeneralFilterDto) {
-        console.log("Received filters:", filter);
-
-        return this.service.getReport(filter);
+        return this.service.getReportData(filter);
     }
 
 

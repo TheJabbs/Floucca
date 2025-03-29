@@ -105,7 +105,7 @@ model gear_details {
   effort_today_id Int?
   detail_name     String        @db.VarChar(50)
   detail_value    String        @db.VarChar(200)
-  effort_today    effort_today? @relation(fields: [effort_today_id], references: [effort_today_id], onDelete: NoAction, onUpdate: NoAction, map: "effort_today_ibfk_1")
+  effort_today    effort_today? @relation(fields: [effort_today_id], references: [effort_today_id], onDelete: Cascade, map: "effort_today_ibfk_1")
   gear            gear          @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "gear_details_ibfk_1")
 
   @@index([gear_code], map: "gear_details_ibfk_1")

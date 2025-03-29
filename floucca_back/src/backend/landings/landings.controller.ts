@@ -38,6 +38,8 @@ export class LandingsController {
 
     @Post("/create/form")
     createFormLanding(@Body() formLanding: CreateFormLandingDto) {
+       formLanding.boat_details = {}
+        console.log(JSON.stringify(formLanding));
         return this.service.createLandingForm(formLanding);
     }
 }

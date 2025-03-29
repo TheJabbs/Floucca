@@ -1,9 +1,9 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {FleetService} from "./fleet.service";
-import {FleetIdDto} from "./DTO/FleetId.dto";
-import {CreateFleetDto, DateRangeDto} from "./DTO";
+import {FleetIdDto} from "./dto/FleetId.dto";
+import {CreateFleetDto, DateRangeDto} from "./dto";
 import {idDTO} from "../../shared/dto/id.dto";
-import {CreateFleetFormDto} from "./DTO/CreateFleetForm.dto";
+import {CreateFleetFormDto} from "./dto/CreateFleetForm.dto";
 import {transformFormGearUsageToGearUsage} from "../../utils/transformation/formGearUsageToGearUsage.mapper";
 import {SenseFormContentInterface} from "./Interface/senseFormContent.interface";
 

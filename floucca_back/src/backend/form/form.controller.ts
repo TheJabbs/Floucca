@@ -1,6 +1,6 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {FormService} from "./form.service";
-import {CreateFormDto, FormIdDto, UpdateFormDto,} from "./DTO/index";
+import {CreateFormDto, FormIdDto, UpdateFormDto,} from "./dto/index";
 import {idDTO} from "../../shared/dto/id.dto";
 import { GetTopFormsInterface } from "./interface/index";
 

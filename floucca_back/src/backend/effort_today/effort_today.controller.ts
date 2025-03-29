@@ -1,6 +1,6 @@
 import {EffortTodayService} from "./effort_today.service";
 import {Body, Controller, Delete, Get, Param, Post, Put} from "@nestjs/common";
-import {CreateEffortTodayDto} from "./dto/effort_today.Dto";
+import {CreateEffortTodayDto} from "./dto/effort_today.dto";
 import {idDTO} from "../../shared/dto/id.dto";
 import {UpdateEffortDto} from "./dto/updateEffort.dto";
 

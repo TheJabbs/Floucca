@@ -1,6 +1,6 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import { GetAllGearUsageInterface} from "./interface"
-import {CreateGearUsageDto, UpdateGearUsageDto} from "./DTO"
+import {CreateGearUsageDto, UpdateGearUsageDto} from "./dto"
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 

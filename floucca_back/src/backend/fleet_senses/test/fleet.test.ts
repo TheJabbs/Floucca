@@ -1,6 +1,6 @@
 import {Body, Controller, Post} from "@nestjs/common";
 import {FleetService} from "../fleet.service";
-import {FormGearUsageDto} from "../../gear_usage/DTO/FormGearUsage.dto";
+import {FormGearUsageDto} from "../../gear_usage/dto/FormGearUsage.dto";
 import {transformFormGearUsageToGearUsage} from "../../../utils/transformation/formGearUsageToGearUsage.mapper";
 
 @Controller('api/dev/test/fleet_senses')

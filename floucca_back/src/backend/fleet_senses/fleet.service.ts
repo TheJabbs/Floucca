@@ -1,6 +1,6 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import {GetAllFleetInterface} from "./Interface/GetAllFleetInterface";
-import {CreateFleetDto} from "./DTO";
+import {CreateFleetDto} from "./dto";
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 import {SenseFormContentInterface} from "./Interface/senseFormContent.interface";

@@ -1,6 +1,6 @@
-import {CreateFormDto} from "../../form/DTO";
+import {CreateFormDto} from "../../form/dto";
 import {CreateBoatDetailsDto} from "../../boat_details/dto";
-import {CreateGearUsageDto} from "../../gear_usage/DTO";
+import {CreateGearUsageDto} from "../../gear_usage/dto";
 
 export interface SenseFormContentInterface{
     form: CreateFormDto;

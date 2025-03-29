@@ -1,4 +1,4 @@
-import {CreateGearUsageDto, UpdateGearUsageDto, GearUsageIdDto} from "./DTO/index"
+import {CreateGearUsageDto, UpdateGearUsageDto, GearUsageIdDto} from "./dto/index"
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {GearUsageService} from "./gear_usage.service";
 import {idDTO} from "../../shared/dto/id.dto";

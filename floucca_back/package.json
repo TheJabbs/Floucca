@@ -7,7 +7,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "postbuild": "find dist/ -type f -name '*.js' | while read file; do mv \"$file\" \"$(echo $file | tr '[:upper:]' '[:lower:]')\"; done",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

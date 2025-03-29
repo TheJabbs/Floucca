@@ -1,4 +1,4 @@
-import {GetFilteredInterface} from "../../backend/landings/interface/getFiltered.interface";
+import {GetFilteredInterface} from "../../backend/landings/interface/get_filtered.interface";
 // return map with specie code and howmany time it was landed
 export function mapLandingsBySpecieMapper(landings: GetFilteredInterface[]):Map<number,number>{
     const landingsBySpecie = new Map<number,number>();

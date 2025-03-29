@@ -3,21 +3,21 @@ import {PrismaService} from "../prisma/prisma.service";
 import {FishService} from "../backend/fish/fish.service";
 import {LandingsService} from "../backend/landings/landings.service";
 import {SenseLastwService} from "../backend/sense_lastw/sense_lastw.service";
-import {GeneralFilterDto} from "../shared/dto/GeneralFilter.dto";
-import {getDaysInMonthByDate} from "../utils/date/getDaysInAMonth";
+import {GeneralFilterDto} from "../shared/dto/general_filter.dto";
+import {getDaysInMonthByDate} from "../utils/date/get_days_in_a_month";
 import {GearService} from "../backend/gear/gear.service";
-import {GetFilteredInterface} from "../backend/landings/interface/getFiltered.interface";
-import {mapLandingsAndEffortMapper} from "./utils/mapLandingsAndEffort.mapper";
-import {mapLandingsMapForSpecieCountMapper} from "./utils/mapLandingsMapForSpecieCount.mapper";
-import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/getFilteredLastW.interface";
-import {mapEffortMapMapper} from "./utils/mapEffortMap.mapper";
-import {mapLandingsMapForSpeciePriceMapper} from "./utils/mapLandingsMapForSpeciePrice.mapper";
+import {GetFilteredInterface} from "../backend/landings/interface/get_filtered.interface";
+import {mapLandingsAndEffortMapper} from "./utils/map_landings_and_effort.mapper";
+import {mapLandingsMapForSpecieCountMapper} from "./utils/map_landings_map_for_specie_count.mapper";
+import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/get_filtered_lastw.interface";
+import {mapEffortMapMapper} from "./utils/map_effort_map.mapper";
+import {mapLandingsMapForSpeciePriceMapper} from "./utils/map_landings_map_for_specie_price.mapper";
 import _ from "lodash";
-import {GetEffortAndLandingInterface} from "./interface/getEffortAndLanding.interface";
-import {GetAllGearInterface} from "../backend/gear/interface/GetAllGear.interface";
-import {GetAllLandingsInterface} from "../backend/landings/interface/getAllLandings.interface";
-import {FishDataInterface} from "./interface/fishData.interface";
-import {mapLandingsBySpecieMapper} from "./utils/mapLandingsBySpecie.mapper";
+import {GetEffortAndLandingInterface} from "./interface/get_effort_and_landing.interface";
+import {GetAllGearInterface} from "../backend/gear/interface/get_all_gear.interface";
+import {GetAllLandingsInterface} from "../backend/landings/interface/get_all_landings.interface";
+import {FishDataInterface} from "./interface/fish_data.interface";
+import {mapLandingsBySpecieMapper} from "./utils/map_landings_by_specie.mapper";
 import {mapSpeciesMapper} from "./utils/mapSpecies.mapper"; //
 
 

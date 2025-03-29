@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreatePortDto } from './dto/CreatePort.dto';
+import { CreatePortDto } from './dto/create_port.dto';
 import { Port } from './interfaces/port.interface';
 
 @Injectable()

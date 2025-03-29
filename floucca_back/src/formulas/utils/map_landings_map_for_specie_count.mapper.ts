@@ -1,4 +1,4 @@
-import { GetFilteredInterface } from "../../backend/landings/interface/getFiltered.interface";
+import { GetFilteredInterface } from "../../backend/landings/interface/get_filtered.interface";
 
 export function mapLandingsMapForSpecieCountMapper(landingsMap: Map<number, GetFilteredInterface[]>): Map<number, Map<number, number>> {
     const mapper = new Map<number, Map<number, number>>();

@@ -1,9 +1,9 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {LandingsService} from "./landings.service";
 import {idDTO} from "../../shared/dto/id.dto";
-import {CreateLandingDto} from "./dto/createLandings.dto";
-import {UpdateLandingsDto} from "./dto/updateLandings.dto";
-import {CreateFormLandingDto} from "./dto/CreateFormLanding.dto";
+import {CreateLandingDto} from "./dto/create_landings.dto";
+import {UpdateLandingsDto} from "./dto/update_landings.dto";
+import {CreateFormLandingDto} from "./dto/create_form_landing.dto";
 
 
 @Controller("api/dev/landings")

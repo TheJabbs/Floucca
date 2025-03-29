@@ -4,7 +4,7 @@ import {CreateFishDto} from "./dto/create_fish.dto";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 import {UpdateFishDto} from "./dto/update_fish.dto";
 import {FishInterface} from "./interface/fish.interface";
-import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
+import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {idDTO} from "../../shared/dto/id.dto";
 
 @Injectable()

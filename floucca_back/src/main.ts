@@ -1,6 +1,6 @@
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
-import {TypeTransformPipe} from './pipes/TypeTransformPipe';
+import {TypeTransformPipe} from './pipes/type_transform_pipe';
 import {ValidationPipe} from "@nestjs/common";
 
 async function bootstrap() {

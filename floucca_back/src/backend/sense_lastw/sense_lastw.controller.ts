@@ -3,8 +3,8 @@ import {SenseLastwService} from './sense_lastw.service';
 import {CreateSenseLastwDto} from './dto/create-sense_lastw.dto';
 import {UpdateSenseLastwDto} from './dto/update-sense_lastw.dto';
 import {idDTO} from '../../shared/dto/id.dto';
-import {GeneralFilterDto} from "../../shared/dto/GeneralFilter.dto";
-import {getDaysInMonthByDate} from "../../utils/date/getDaysInAMonth";
+import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
+import {getDaysInMonthByDate} from "../../utils/date/get_days_in_a_month";
 import {GearService} from "../gear/gear.service";
 
 @Controller('api/dev/sense_lastw')

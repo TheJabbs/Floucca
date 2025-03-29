@@ -1,6 +1,6 @@
 import {Body, Controller, Post,} from '@nestjs/common';
 import {FormulasService} from "./formulas.service";
-import {GeneralFilterDto} from "../shared/dto/GeneralFilter.dto";
+import {GeneralFilterDto} from "../shared/dto/general_filter.dto";
 
 @Controller('api/dev/formulas')
 export class FormulasController {

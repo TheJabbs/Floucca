@@ -1,4 +1,4 @@
-import {GetFilteredLastWInterface} from "../../backend/sense_lastw/interface/getFilteredLastW.interface";
+import {GetFilteredLastWInterface} from "../../backend/sense_lastw/interface/get_filtered_lastw.interface";
 
 export function mapEffortMapMapper(
     effortMap: Map<number, GetFilteredLastWInterface[]>

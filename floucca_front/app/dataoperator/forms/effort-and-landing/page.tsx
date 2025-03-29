@@ -172,9 +172,9 @@ function EffortAndLandingPage() {
 
   const isFormValid = () => {
     // Boat info must be filled
-    if (!formValidation.boatInfo) {
-      return false;
-    }
+    // if (!formValidation.boatInfo) {
+    //   return false;
+    // }
   
     // Allow submission if only Boat Details are filled
     if (
@@ -463,7 +463,7 @@ function EffortAndLandingPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <BoatInfo
-          required={true}
+          required={false}
           onChange={handleBoatInfoChange}
           key={`boat-info-${resetCounter}`}
         />

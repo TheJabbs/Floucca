@@ -119,7 +119,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
     return matchingGears.map((gear) => ({
       equipment_id: gear.equipment_id,
       equipment_name: gear.equipment_name,
-      type: "number", // Default type, can be customized if needed
+      type: "number", 
     }));
   };
 

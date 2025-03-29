@@ -10,7 +10,8 @@ import EffortBarPlot from "@/components/stats/charts/effortBarPlot";
 
 const StatsPage: React.FC = () => {
   // Get data from context
-  const { gears, ports, formattedPeriods, species, isLoading, error } = useStatsData();
+  const { gears, ports, formattedPeriods, species, isLoading, error } =
+    useStatsData();
 
   // Filter states - initialized with empty/default values
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
@@ -36,7 +37,7 @@ const StatsPage: React.FC = () => {
   });
 
   const [statsData, setStatsData] = useState<any[]>([]);
-  
+
   // Loading states
   const [isEffortLoading, setIsEffortLoading] = useState(false);
   const [isLandingsLoading, setIsLandingsLoading] = useState(false);
@@ -45,7 +46,7 @@ const StatsPage: React.FC = () => {
 
   // Create a species map for lookup
   const speciesMap: Record<number, string> = {};
-  species?.forEach(s => {
+  species?.forEach((s) => {
     speciesMap[s.specie_code] = s.specie_name;
   });
 
@@ -56,7 +57,7 @@ const StatsPage: React.FC = () => {
   const handleGearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedGear(Number(e.target.value));
   };
-  
+
   const handlePortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPort(Number(e.target.value));
   };
@@ -77,18 +78,20 @@ const StatsPage: React.FC = () => {
       const filter = {
         period: selectedPeriod,
         gear_code: [selectedGear],
-        port_id: [selectedPort]
+        port_id: [selectedPort],
       };
 
       const data = await fetchStatisticsData(filter);
-      
+
       // Update state with the fetched data
       setEffortData(data.uperTable.effort);
       setLandingsData(data.uperTable.landings);
       setStatsData(mapSpeciesData(data.lowerTable, speciesMap));
     } catch (error) {
       console.error("Error fetching statistics:", error);
-      setFetchError(typeof error === 'string' ? error : 'Failed to fetch statistics data');
+      setFetchError(
+        typeof error === "string" ? error : "Failed to fetch statistics data"
+      );
     } finally {
       setIsEffortLoading(false);
       setIsLandingsLoading(false);
@@ -136,8 +139,8 @@ const StatsPage: React.FC = () => {
             onClick={fetchData}
             disabled={!areFiltersSelected()}
             className={`px-3 py-1.5 rounded-lg flex items-center gap-1 text-sm ${
-              areFiltersSelected() 
-                ? "bg-blue-100 text-blue-800 hover:bg-blue-200" 
+              areFiltersSelected()
+                ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
@@ -164,11 +167,13 @@ const StatsPage: React.FC = () => {
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="">Select a period</option>
-                {formattedPeriods.map((period) => (
-                  <option key={period.value} value={period.value}>
-                    {period.label}
-                  </option>
-                ))}
+                {[...formattedPeriods]
+                  .sort((a, b) => b.value.localeCompare(a.value))
+                  .map((period) => (
+                    <option key={period.value} value={period.value}>
+                      {period.label}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -193,7 +198,7 @@ const StatsPage: React.FC = () => {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label
                 htmlFor="port"
@@ -227,10 +232,16 @@ const StatsPage: React.FC = () => {
         {areFiltersSelected() ? (
           <>
             <div className="bg-white p-4 rounded-lg border shadow-sm overflow-x-auto">
-              <EffortTable isLoading={isEffortLoading} effortData={effortData} />
+              <EffortTable
+                isLoading={isEffortLoading}
+                effortData={effortData}
+              />
               {/* <EffortBarPlot isLoading={isEffortLoading} data={effortData ? [effortData] : []} /> */}
               <div className="border-t border-gray-300 my-4"></div>
-              <LandingsTable isLoading={isLandingsLoading} landingsData={landingsData} />
+              <LandingsTable
+                isLoading={isLandingsLoading}
+                landingsData={landingsData}
+              />
             </div>
             <div className="bg-white p-4 rounded-lg border shadow-sm overflow-x-auto">
               <SpeciesTable isLoading={isStatsLoading} statsData={statsData} />

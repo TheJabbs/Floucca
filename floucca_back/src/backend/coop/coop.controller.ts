@@ -1,6 +1,6 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from "@nestjs/common";
 import {CoopService} from "./coop.service";
-import {CoopDto} from "./dto/coop.Dto";
+import {CoopDto} from "./dto/coop.dto";
 import {mapCoopToReturnCoopInterface} from "./mapper/coop.mapper";
 import {idDTO} from "../../shared/dto/id.dto";
 

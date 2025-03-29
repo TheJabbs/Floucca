@@ -1,6 +1,6 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import {GetAllGearInterface} from "./interface/GetAllGear.interface";
-import {CreateGearDto} from "./DTO/CreateGear.dto";
+import {CreateGearDto} from "./dto/CreateGear.dto";
 import Any = jasmine.Any;
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";

@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FleetController = void 0;
 const common_1 = require("@nestjs/common");
 const fleet_service_1 = require("./fleet.service");
-const DTO_1 = require("./DTO");
+const dto_1 = require("./dto");
 const id_dto_1 = require("../../shared/dto/id.dto");
-const CreateFleetForm_dto_1 = require("./DTO/CreateFleetForm.dto");
+const CreateFleetForm_dto_1 = require("./dto/CreateFleetForm.dto");
 const formGearUsageToGearUsage_mapper_1 = require("../../utils/transformation/formGearUsageToGearUsage.mapper");
 let FleetController = class FleetController {
     constructor(fleetService) {
@@ -82,7 +82,7 @@ __decorate([
     (0, common_1.Post)('/create/fleet_senses'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [DTO_1.CreateFleetDto]),
+    __metadata("design:paramtypes", [dto_1.CreateFleetDto]),
     __metadata("design:returntype", void 0)
 ], FleetController.prototype, "createFleetSenses", null);
 __decorate([
@@ -97,7 +97,7 @@ __decorate([
     __param(0, (0, common_1.Param)('fleet_senses_id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [id_dto_1.idDTO, DTO_1.CreateFleetDto]),
+    __metadata("design:paramtypes", [id_dto_1.idDTO, dto_1.CreateFleetDto]),
     __metadata("design:returntype", void 0)
 ], FleetController.prototype, "updateFleetSenses", null);
 __decorate([

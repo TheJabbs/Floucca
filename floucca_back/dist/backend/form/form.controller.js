@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FormController = void 0;
 const common_1 = require("@nestjs/common");
 const form_service_1 = require("./form.service");
-const index_1 = require("./DTO/index");
+const index_1 = require("./dto/index");
 const id_dto_1 = require("../../shared/dto/id.dto");
 let FormController = class FormController {
     constructor(formService) {

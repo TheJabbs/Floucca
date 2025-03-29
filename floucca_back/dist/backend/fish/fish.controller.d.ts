@@ -1,6 +1,6 @@
 import { FishService } from "./fish.service";
 import { idDTO } from "../../shared/dto/id.dto";
-import { CreateFishDto } from "./dto/create_fish.Dto";
+import { CreateFishDto } from "./dto/create_fish.dto";
 import { UpdateFishDto } from "./dto/update_fish.dto";
 export declare class FishController {
     private fishService;

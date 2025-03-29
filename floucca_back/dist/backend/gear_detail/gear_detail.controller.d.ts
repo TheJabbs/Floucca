@@ -1,4 +1,4 @@
-import { CreateGearDetailDto } from "./DTO/CreateGearDetail.dto";
+import { CreateGearDetailDto } from "./dto/CreateGearDetail.dto";
 import { GearDetailService } from "./gear_detail.service";
 import { idDTO } from "../../shared/dto/id.dto";
 import { UpdateGearDetailDto } from "./dto/UpdateGearDetail.dto";

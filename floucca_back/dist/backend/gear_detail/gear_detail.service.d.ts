@@ -1,7 +1,7 @@
 import { PrismaService } from "../../prisma/prisma.service";
 import { ResponseMessage } from "../../shared/interface/response.interface";
 import { GetAllGearDetail } from "./interface/GetAllGearDetail.Interface";
-import { CreateGearDetailDto } from "./DTO/CreateGearDetail.dto";
+import { CreateGearDetailDto } from "./dto/CreateGearDetail.dto";
 import { UpdateGearDetailDto } from "./dto/UpdateGearDetail.dto";
 import { GearService } from "../gear/gear.service";
 import { EffortTodayService } from "../effort_today/effort_today.service";

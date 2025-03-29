@@ -15,8 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GearController = void 0;
 const common_1 = require("@nestjs/common");
 const gear_service_1 = require("./gear.service");
-const GearId_dto_1 = require("./DTO/GearId.dto");
-const CreateGear_dto_1 = require("./DTO/CreateGear.dto");
+const GearId_dto_1 = require("./dto/GearId.dto");
+const CreateGear_dto_1 = require("./dto/CreateGear.dto");
 let GearController = class GearController {
     constructor(service) {
         this.service = service;

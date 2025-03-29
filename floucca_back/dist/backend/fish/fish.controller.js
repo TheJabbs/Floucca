@@ -16,7 +16,7 @@ exports.FishController = void 0;
 const common_1 = require("@nestjs/common");
 const fish_service_1 = require("./fish.service");
 const id_dto_1 = require("../../shared/dto/id.dto");
-const create_fish_Dto_1 = require("./dto/create_fish.Dto");
+const create_fish_dto_1 = require("./dto/create_fish.dto");
 const update_fish_dto_1 = require("./dto/update_fish.dto");
 let FishController = class FishController {
     constructor(fishService) {
@@ -56,7 +56,7 @@ __decorate([
     (0, common_1.Post)('/create'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_fish_Dto_1.CreateFishDto]),
+    __metadata("design:paramtypes", [create_fish_dto_1.CreateFishDto]),
     __metadata("design:returntype", void 0)
 ], FishController.prototype, "createFish", null);
 __decorate([

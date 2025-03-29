@@ -10,9 +10,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateFleetFormDto = void 0;
-const DTO_1 = require("../../form/DTO");
-const dto_1 = require("../../boat_details/dto");
-const FormGearUsage_dto_1 = require("../../gear_usage/DTO/FormGearUsage.dto");
+const dto_1 = require("../../form/dto");
+const dto_2 = require("../../boat_details/dto");
+const FormGearUsage_dto_1 = require("../../gear_usage/dto/FormGearUsage.dto");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class CreateFleetFormDto {
@@ -20,13 +20,13 @@ class CreateFleetFormDto {
 exports.CreateFleetFormDto = CreateFleetFormDto;
 __decorate([
     (0, class_validator_1.ValidateNested)(),
-    (0, class_transformer_1.Type)(() => DTO_1.CreateFormDto),
-    __metadata("design:type", DTO_1.CreateFormDto)
+    (0, class_transformer_1.Type)(() => dto_1.CreateFormDto),
+    __metadata("design:type", dto_1.CreateFormDto)
 ], CreateFleetFormDto.prototype, "formDto", void 0);
 __decorate([
     (0, class_validator_1.ValidateNested)(),
-    (0, class_transformer_1.Type)(() => dto_1.CreateBoatDetailsDto),
-    __metadata("design:type", dto_1.CreateBoatDetailsDto)
+    (0, class_transformer_1.Type)(() => dto_2.CreateBoatDetailsDto),
+    __metadata("design:type", dto_2.CreateBoatDetailsDto)
 ], CreateFleetFormDto.prototype, "boatDetailDto", void 0);
 __decorate([
     (0, class_validator_1.IsArray)(),

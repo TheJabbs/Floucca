@@ -13,7 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GearUsageController = void 0;
-const index_1 = require("./DTO/index");
+const index_1 = require("./dto/index");
 const common_1 = require("@nestjs/common");
 const gear_usage_service_1 = require("./gear_usage.service");
 const id_dto_1 = require("../../shared/dto/id.dto");

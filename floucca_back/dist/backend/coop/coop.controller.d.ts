@@ -1,5 +1,5 @@
 import { CoopService } from "./coop.service";
-import { CoopDto } from "./dto/coop.Dto";
+import { CoopDto } from "./dto/coop.dto";
 import { idDTO } from "../../shared/dto/id.dto";
 export declare class CoopController {
     private coopService;

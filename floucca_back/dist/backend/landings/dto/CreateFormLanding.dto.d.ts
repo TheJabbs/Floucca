@@ -1,4 +1,4 @@
-import { CreateFormDto } from '../../form/DTO';
+import { CreateFormDto } from '../../form/dto';
 import { CreateBoatDetailsDto } from '../../boat_details/dto';
 import { CreateLandingDto } from './createLandings.dto';
 import { CreateFishDto } from '../../fish/dto/create_fish.Dto';

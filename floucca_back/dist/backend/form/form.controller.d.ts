@@ -1,5 +1,5 @@
 import { FormService } from "./form.service";
-import { CreateFormDto, UpdateFormDto } from "./DTO/index";
+import { CreateFormDto, UpdateFormDto } from "./dto/index";
 import { idDTO } from "../../shared/dto/id.dto";
 import { GetTopFormsInterface } from "./interface/index";
 export declare class FormController {

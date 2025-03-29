@@ -1,7 +1,7 @@
 import { FleetService } from "./fleet.service";
-import { CreateFleetDto } from "./DTO";
+import { CreateFleetDto } from "./dto";
 import { idDTO } from "../../shared/dto/id.dto";
-import { CreateFleetFormDto } from "./DTO/CreateFleetForm.dto";
+import { CreateFleetFormDto } from "./dto/CreateFleetForm.dto";
 export declare class FleetController {
     private readonly fleetService;
     constructor(fleetService: FleetService);

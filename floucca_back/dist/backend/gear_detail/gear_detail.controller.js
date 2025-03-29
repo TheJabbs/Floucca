@@ -14,7 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GearDetailController = void 0;
 const common_1 = require("@nestjs/common");
-const CreateGearDetail_dto_1 = require("./DTO/CreateGearDetail.dto");
+const CreateGearDetail_dto_1 = require("./dto/CreateGearDetail.dto");
 const gear_detail_service_1 = require("./gear_detail.service");
 const id_dto_1 = require("../../shared/dto/id.dto");
 const UpdateGearDetail_dto_1 = require("./dto/UpdateGearDetail.dto");

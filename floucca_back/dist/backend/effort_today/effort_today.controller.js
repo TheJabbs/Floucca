@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EffortTodayController = void 0;
 const effort_today_service_1 = require("./effort_today.service");
 const common_1 = require("@nestjs/common");
-const effort_today_Dto_1 = require("./dto/effort_today.Dto");
+const effort_today_dto_1 = require("./dto/effort_today.dto");
 const id_dto_1 = require("../../shared/dto/id.dto");
 const updateEffort_dto_1 = require("./dto/updateEffort.dto");
 let EffortTodayController = class EffortTodayController {
@@ -64,7 +64,7 @@ __decorate([
     (0, common_1.Post)('/create'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [effort_today_Dto_1.CreateEffortTodayDto]),
+    __metadata("design:paramtypes", [effort_today_dto_1.CreateEffortTodayDto]),
     __metadata("design:returntype", void 0)
 ], EffortTodayController.prototype, "createEffortToday", null);
 __decorate([

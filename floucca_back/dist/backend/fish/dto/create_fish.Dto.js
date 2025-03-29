@@ -49,4 +49,4 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateFishDto.prototype, "price", void 0);
-//# sourceMappingURL=create_fish.Dto.js.map
+//# sourceMappingURL=create_fish.dto.js.map

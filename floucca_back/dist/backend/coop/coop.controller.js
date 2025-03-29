@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoopController = void 0;
 const common_1 = require("@nestjs/common");
 const coop_service_1 = require("./coop.service");
-const coop_Dto_1 = require("./dto/coop.Dto");
+const coop_dto_1 = require("./dto/coop.dto");
 const coop_mapper_1 = require("./mapper/coop.mapper");
 const id_dto_1 = require("../../shared/dto/id.dto");
 let CoopController = class CoopController {
@@ -68,7 +68,7 @@ __decorate([
     (0, common_1.Post)('/create'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [coop_Dto_1.CoopDto]),
+    __metadata("design:paramtypes", [coop_dto_1.CoopDto]),
     __metadata("design:returntype", void 0)
 ], CoopController.prototype, "createCoop", null);
 __decorate([
@@ -76,7 +76,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [coop_Dto_1.CoopDto, id_dto_1.idDTO]),
+    __metadata("design:paramtypes", [coop_dto_1.CoopDto, id_dto_1.idDTO]),
     __metadata("design:returntype", void 0)
 ], CoopController.prototype, "updateCoop", null);
 __decorate([

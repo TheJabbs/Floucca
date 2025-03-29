@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateFormLandingDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
-const DTO_1 = require("../../form/DTO");
-const dto_1 = require("../../boat_details/dto");
+const dto_1 = require("../../form/dto");
+const dto_2 = require("../../boat_details/dto");
 const createLandings_dto_1 = require("./createLandings.dto");
 const create_fish_Dto_1 = require("../../fish/dto/create_fish.Dto");
 const effort_today_Dto_1 = require("../../effort_today/dto/effort_today.Dto");
@@ -24,13 +24,13 @@ class CreateFormLandingDto {
 exports.CreateFormLandingDto = CreateFormLandingDto;
 __decorate([
     (0, class_validator_1.ValidateNested)(),
-    (0, class_transformer_1.Type)(() => DTO_1.CreateFormDto),
-    __metadata("design:type", DTO_1.CreateFormDto)
+    (0, class_transformer_1.Type)(() => dto_1.CreateFormDto),
+    __metadata("design:type", dto_1.CreateFormDto)
 ], CreateFormLandingDto.prototype, "form", void 0);
 __decorate([
     (0, class_validator_1.ValidateNested)(),
-    (0, class_transformer_1.Type)(() => dto_1.CreateBoatDetailsDto),
-    __metadata("design:type", dto_1.CreateBoatDetailsDto)
+    (0, class_transformer_1.Type)(() => dto_2.CreateBoatDetailsDto),
+    __metadata("design:type", dto_2.CreateBoatDetailsDto)
 ], CreateFormLandingDto.prototype, "boat_details", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),

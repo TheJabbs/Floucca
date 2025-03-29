@@ -1,0 +1,1 @@
+{"version":3,"file":"coop.module.js","sourceRoot":"","sources":["../../../src/backend/coop/coop.module.ts"],"names":[],"mappings":";;;;;;;;;AAAA,2CAAsC;AACtC,uDAAiD;AACjD,iDAA2C;AAOpC,IAAM,UAAU,GAAhB,MAAM,UAAU;CAAE,CAAA;AAAZ,gCAAU;qBAAV,UAAU;IALtB,IAAA,eAAM,EAAC;QACJ,OAAO,EAAE,EAAE;QACX,WAAW,EAAE,CAAC,gCAAc,CAAC;QAC7B,SAAS,EAAE,CAAC,0BAAW,CAAC;KAC3B,CAAC;GACW,UAAU,CAAE"}

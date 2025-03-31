@@ -1,1 +1,0 @@
-{"version":3,"file":"coop.mapper.js","sourceRoot":"","sources":["../../../../src/backend/coop/mapper/coop.mapper.ts"],"names":[],"mappings":";;AAGA,oEAMC;AAND,SAAgB,4BAA4B,CAAC,IAAc;IACvD,OAAO;QACH,SAAS,EAAE,IAAI,CAAC,SAAS;QACzB,WAAW,EAAE,IAAI,CAAC,WAAW;QAC7B,SAAS,EAAE,IAAI,CAAC,SAAS;KAC5B,CAAA;AACL,CAAC"}

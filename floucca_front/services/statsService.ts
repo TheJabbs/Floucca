@@ -21,13 +21,14 @@ export interface EffortAndLandingData {
   };
   lowerTable: Array<{
     specie_code: number;
-    avg_fish_weight: number;
-    avg_fish_quantity: number;
-    avg_fish_length: number;
-    avg_price: number;
-    fish_value: number;
+    avgWeight: number;
+    avgQuantity: number;
+    avgLength: number;
+    avgPrice: number;
+    value: number;
     cpue: number;
-    est_catch: number;
+    estCatch: number;
+    effort: number;
   }>;
 }
 
@@ -61,21 +62,24 @@ export const fetchStatisticsData = async (filter: StatsFilter): Promise<EffortAn
 
 export const mapSpeciesData = (speciesData: Array<{
   specie_code: number;
-  avg_fish_weight: number;
-  avg_fish_quantity: number;
-  avg_fish_length: number;
-  avg_price: number;
-  fish_value: number;
+  avgWeight: number;
+  avgQuantity: number;
+  avgLength: number;
+  avgPrice: number;
+  value: number;
   cpue: number;
-  est_catch: number;
+  estCatch: number;
+  effort: number;
 }>, speciesMap: Record<number, string> = {}): any[] => {
   return speciesData.map(species => ({
-    species: speciesMap[species.specie_code] || `Species ${species.specie_code}`,
-    averageWeight: species.avg_fish_weight,
-    fishCount: species.avg_fish_quantity,
-    price: species.avg_price,
-    value: species.fish_value,
+    species: speciesMap[species.specie_code] || [`Species ${species.specie_code}`],
+    avgWeight: species.avgWeight,
+    avgQuantity: species.avgQuantity,
+    avgLength: species.avgLength,
+    avgPrice: species.avgPrice,
+    value: species.value,
     cpue: species.cpue,
-    estCatch: species.est_catch
+    estCatch: species.estCatch,
+    effort: species.effort,
   }));
 };

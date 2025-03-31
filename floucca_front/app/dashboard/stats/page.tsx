@@ -1,12 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Filter } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useStatsData } from "@/contexts/StatsDataContext";
 import EffortTable from "@/components/stats/tables/effort-table";
 import LandingsTable from "@/components/stats/tables/landings-table";
 import SpeciesTable from "@/components/stats/tables/species-table";
 import { fetchStatisticsData, mapSpeciesData } from "@/services/statsService";
-import EffortBarPlot from "@/components/stats/charts/effortBarPlot";
 
 const StatsPage: React.FC = () => {
   // Get data from context
@@ -145,7 +144,7 @@ const StatsPage: React.FC = () => {
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
-            <Filter className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">Refresh Data</span>
           </button>
         </div>

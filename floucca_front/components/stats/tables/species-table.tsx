@@ -5,12 +5,14 @@ import { BarChart2 } from "lucide-react";
 
 interface SpeciesData {
   species: string;
-  averageWeight: number;
-  fishCount: number;
-  price: number;
+  avgPrice: number;
+  avgWeight: number;
+  avgLength: number;
+  avgQuantity: number
   value: number;
   cpue: number;
   estCatch: number;
+  effort: number;
 }
 
 interface SpeciesTableProps {
@@ -24,12 +26,14 @@ const SpeciesTable: React.FC<SpeciesTableProps> = ({ isLoading, statsData }) => 
   // Define columns for the table
   const columns = [
     { key: "species", header: "Species" },
-    { key: "averageWeight", header: "Aver.Weight (kg)" },
-    { key: "fishCount", header: "N.fish in catch" },
-    { key: "price", header: "Price" },
+    { key: "avgPrice", header: "Avg. Price" },
+    { key: "avgWeight", header: "Avg.Weight (kg)" },
+    { key: "avgLength", header: "Avg.Length (cm)" },
+    { key: "avgQuantity", header: "Avg. Quantity" },
     { key: "value", header: "Value" },
     { key: "cpue", header: "CPUE" },
     { key: "estCatch", header: "Est. catch" },
+    { key: "effort", header: "Effort" },
   ];
 
   const toggleChart = () => {

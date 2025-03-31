@@ -44,9 +44,7 @@ export class FormulasController {
 
     @Post('report/effort&landing')
     async getEffortAndLanding(@Body() filter: GeneralFilterDto) {
-        console.log("Received filters:", filter);
-
-        return this.service.getReport(filter);
+        return this.service.getReportData(filter);
     }
 
 

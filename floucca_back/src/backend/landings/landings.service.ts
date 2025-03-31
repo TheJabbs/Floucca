@@ -186,7 +186,6 @@ export class LandingsService {
         }
 
         const landings = await this.prisma.landing.findMany({
-            distinct: ['form_id'],
             where: {
                 form: {
                     period_date: period,
@@ -220,6 +219,7 @@ export class LandingsService {
                         fish_weight: true,
                         fish_quantity: true,
                         fish_length: true,
+                        gear_code: true,
                         price: true,
                         specie:{
                             select:{

@@ -1,4 +1,4 @@
-import {Body, Controller, Post,} from '@nestjs/common';
+import {Body, Controller, Get, Post,} from '@nestjs/common';
 import {GeneralFilterDto} from "../shared/dto/GeneralFilter.dto";
 import {FormulasService} from "./formulas.service";
 
@@ -45,6 +45,11 @@ export class FormulasController {
     @Post('report/effort&landing')
     async getEffortAndLanding(@Body() filter: GeneralFilterDto) {
         return this.service.getReportData(filter);
+    }
+
+    @Get()
+    async getHello() {
+        return this.service.getSampledPortsCount();
     }
 
 

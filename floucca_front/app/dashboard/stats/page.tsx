@@ -34,6 +34,7 @@ const StatsPage: React.FC = () => {
     cpue: 0,
     estCatch: 0,
     sampleEffort: 0,
+    sampleCatch: 0,
   });
 
   const [statsData, setStatsData] = useState<any[]>([]);
@@ -84,8 +85,8 @@ const StatsPage: React.FC = () => {
       const data = await fetchStatisticsData(filter);
 
       // Update state with the fetched data
-      setEffortData(data.uperTable.effort);
-      setLandingsData(data.uperTable.landings);
+      setEffortData(data.upperTables.effort);
+      setLandingsData(data.upperTables.landings);
       setStatsData(mapSpeciesData(data.lowerTable, speciesMap));
     } catch (error) {
       console.error("Error fetching statistics:", error);

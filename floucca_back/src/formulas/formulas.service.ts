@@ -76,17 +76,17 @@ export class FormulasService {
 
         mappedSpecies.forEach((fish, specie) => {
             let avgWeight = this.getAvgWeight(fish);
-            let numbOdCatch = this.getNumberOfCatch(fish);
+            let numbOfCatch = this.getNumberOfCatch(fish);
             let avgPrice = this.getAvgPrice(fish);
             let value = 0;
             let specieCpue = this.getCpue(fish.length, fish);
             let estCatch = this.getEstimateCatch(estEffort, specieCpue);
-            let effort = this.getEffortBySpecie(numbOdCatch, specieCpue);
+            let effort = this.getEffortBySpecie(numbOfCatch, specieCpue);
             let avgLength = this.getAvgLength(fish);
             let avgQuantity = this.getAvgQuantity(fish);
 
             lowerTable.push({
-                numbOdCatch: numbOdCatch,
+                numbOfCatch: numbOfCatch,
                 avgPrice: avgPrice,
                 avgWeight: avgWeight,
                 avgLength: avgLength,

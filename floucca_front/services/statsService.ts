@@ -1,7 +1,7 @@
 import { apiClient, handleApiError } from "./apiClient";
 
 export interface EffortAndLandingData {
-  uperTable: {
+  upperTables: {
     effort: {
       records: number;
       gears: number;
@@ -16,6 +16,7 @@ export interface EffortAndLandingData {
       cpue: number;
       estCatch: number;
       sampleEffort: number;
+      sampleCatch: number;
     };
   };
   lowerTable: Array<{

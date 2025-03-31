@@ -8,7 +8,7 @@ import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/get_fi
 import {GetFilteredInterface} from "../backend/landings/interface/get_filtered.interface";
 import {GeneralFilterDto} from "../shared/dto/general_filter.dto";
 import {getDaysInMonthByDate} from "../utils/date/get_days_in_a_month";
-import {specieMapMapper} from "./utils/specieMap.mapper";
+import {specieMapMapper} from "./utils/specie_map.mapper";
 
 @Injectable()
 export class FormulasService {

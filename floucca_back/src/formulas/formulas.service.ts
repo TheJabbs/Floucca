@@ -216,12 +216,41 @@ export class FormulasService {
     }
 
     //=============================================================
+    async getLeftPanelInfo() {
+        const [portsCount, uniqueSpecies, effortRecord, landingRecord] = await Promise.all([
+            this.getSampledPortsCount(),
+            this.getUniqueSpeciesFishedByPeriod(),
+            this.getRecordsEffortInPeriod(),
+            this.getLandingRecordsByPeriod()
+        ]);
+
+        // Collect all unique periods from all datasets
+        const allPeriods = new Set([
+            ...Object.keys(portsCount),
+            ...Object.keys(uniqueSpecies),
+            ...Object.keys(effortRecord),
+            ...Object.keys(landingRecord)
+        ]);
+
+        const dataCombine: Record<string, any> = {};
+
+        allPeriods.forEach(period => {
+            dataCombine[period] = {
+                strata: portsCount[period] || { port: 0, coop: 0, region: 0 },
+                speciesKind: uniqueSpecies[period] || 0,
+                effortRecord: effortRecord[period] || 0,
+                landingRecord: landingRecord[period] || 0
+            };
+        });
+
+        return dataCombine;
+    }
 
     async getSampledPortsCount() {
         const forms = await this.prisma.form.findMany({
             select: {
                 period_date: true,
-                ports: { // Singular object
+                ports: {
                     select: {
                         port_id: true,
                         coop: {
@@ -280,7 +309,108 @@ export class FormulasService {
         return result;
     }
 
+    async getUniqueSpeciesFishedByPeriod() {
+        const forms = await this.prisma.form.findMany({
+            select: {
+                period_date: true,
+                landing: {
+                    select: {
+                        fish: {
+                            select: {
+                                specie_code: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
+        const result: Record<string, number> = {};
+
+        const uniqueSpeciesMap = new Map<string, Set<number>>();
+
+        forms.forEach(form => {
+            const period = form.period_date.toDateString(); // Ensure consistent date format
+
+            if (!uniqueSpeciesMap.has(period)) {
+                uniqueSpeciesMap.set(period, new Set());
+            }
+
+            const uniqueSpecies = uniqueSpeciesMap.get(period)!; // Get the Set for this period
+
+            if (form.landing && Array.isArray(form.landing)) {
+                form.landing.forEach(landing => {
+                    if (landing.fish && Array.isArray(landing.fish)) {
+                        landing.fish.forEach(fish => {
+                            uniqueSpecies.add(fish.specie_code);
+                        });
+                    }
+                });
+            }
+        });
+
+        uniqueSpeciesMap.forEach((speciesSet, period) => {
+            result[period] = speciesSet.size;
+        });
+
+        return result;
+    }
+
+    async getRecordsEffortInPeriod(){
+        const form = await this.prisma.sense_lastw.findMany({
+            distinct: ['form_id'],
+            select:{
+                form: {
+                    select: {
+                        period_date: true
+                    }
+                },
+            },
+        })
+
+
+        const mapUsingPeriodDate: Record<string, number> = {};
+
+        form.forEach((element) => {
+            const periodKey = element.form.period_date.toDateString(); // Convert Date to string
+
+            if (mapUsingPeriodDate.hasOwnProperty(periodKey)) {
+                mapUsingPeriodDate[periodKey] += 1;
+            } else {
+                mapUsingPeriodDate[periodKey] = 1;
+            }
+        });
+
+        return mapUsingPeriodDate;
+    }
+
+    async getLandingRecordsByPeriod(){
+        const form = await this.prisma.landing.findMany({
+            distinct: ['form_id'],
+            select:{
+                landing_id: true,
+                form:{
+                    select:{
+                        period_date: true
+                    }
+                }
+            }
+        })
+
+        const mapUsingPeriodDate: Record<string, number> = {};
+
+        form.forEach((element) => {
+            const periodKey = element.form.period_date.toDateString(); // Convert Date to string
+
+            if (mapUsingPeriodDate.hasOwnProperty(periodKey)) {
+                mapUsingPeriodDate[periodKey] += 1;
+            } else {
+                mapUsingPeriodDate[periodKey] = 1;
+            }
+        });
+
+        return mapUsingPeriodDate;
+    }
 
     //=============================================================
 

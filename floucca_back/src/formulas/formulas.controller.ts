@@ -47,7 +47,7 @@ export class FormulasController {
         return this.service.getReportData(filter);
     }
 
-    @Get()
+    @Get('report/leftPanel')
     async getLeftPanelInfo() {
         return this.service.getLeftPanelInfo();
     }

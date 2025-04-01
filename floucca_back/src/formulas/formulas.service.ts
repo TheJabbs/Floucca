@@ -217,11 +217,12 @@ export class FormulasService {
 
     //=============================================================
     async getLeftPanelInfo() {
-        const [portsCount, uniqueSpecies, effortRecord, landingRecord] = await Promise.all([
+        const [portsCount, uniqueSpecies, effortRecord, landingRecord, uniqueGears] = await Promise.all([
             this.getSampledPortsCount(),
             this.getUniqueSpeciesFishedByPeriod(),
             this.getRecordsEffortInPeriod(),
-            this.getLandingRecordsByPeriod()
+            this.getLandingRecordsByPeriod(),
+            this.GetUniqueFishingGears()
         ]);
 
         // Collect all unique periods from all datasets
@@ -229,7 +230,8 @@ export class FormulasService {
             ...Object.keys(portsCount),
             ...Object.keys(uniqueSpecies),
             ...Object.keys(effortRecord),
-            ...Object.keys(landingRecord)
+            ...Object.keys(landingRecord),
+            ...Object.keys(uniqueGears)
         ]);
 
         const dataCombine: Record<string, any> = {};
@@ -239,7 +241,8 @@ export class FormulasService {
                 strata: portsCount[period] || { port: 0, coop: 0, region: 0 },
                 speciesKind: uniqueSpecies[period] || 0,
                 effortRecord: effortRecord[period] || 0,
-                landingRecord: landingRecord[period] || 0
+                landingRecord: landingRecord[period] || 0,
+                uniqueGears: uniqueGears[period] || 0
             };
         });
 
@@ -407,6 +410,37 @@ export class FormulasService {
             } else {
                 mapUsingPeriodDate[periodKey] = 1;
             }
+        });
+
+        return mapUsingPeriodDate;
+    }
+
+    async GetUniqueFishingGears(){
+        const form = await this.prisma.form.findMany({
+            select:{
+                period_date: true,
+                sense_lastw:{
+                    select:{
+                        gear_code: true
+                    }
+                }
+            }
+        })
+
+        const mapUsingPeriodDate: Record<string, number> = {};
+
+        form.forEach((element) => {
+            const periodKey = element.period_date.toDateString();
+            const counter : Set<number> = new Set();
+
+
+            if (element.sense_lastw) {
+                element.sense_lastw.forEach((gear) => {
+                    counter.add(gear.gear_code);
+                });
+            }
+
+            mapUsingPeriodDate[periodKey] = counter.size;
         });
 
         return mapUsingPeriodDate;

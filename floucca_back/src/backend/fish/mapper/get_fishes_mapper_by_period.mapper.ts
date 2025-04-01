@@ -1,5 +1,5 @@
-import { GetFishesMappedByPeriodInterface } from "../interface/getFishesMappedByPeriod.interface";
-import {FishV2Interface} from "../interface/fishV2.interface";
+import { GetFishesMappedByPeriodInterface } from "../interface/get_fishes_mapped_by_period.interface";
+import {FishV2Interface} from "../interface/fish_v2.interface";
 
 export function getFishesMapperByPeriodMapper(data: GetFishesMappedByPeriodInterface[]): Map<string, FishV2Interface[]> {
     const mapUsingPeriodDate: Map<string, FishV2Interface[]> = new Map();

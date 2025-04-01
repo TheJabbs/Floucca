@@ -6,8 +6,8 @@ import {UpdateFishDto} from "./dto/update_fish.dto";
 import {FishInterface} from "./interface/fish.interface";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {idDTO} from "../../shared/dto/id.dto";
-import {getFishesMapperByPeriodMapper} from "./mapper/getFishesMapperByPeriod.mapper";
-import {fishStatsMapper} from "./mapper/fishStats.mapper";
+import {getFishesMapperByPeriodMapper} from "./mapper/get_fishes_mapper_by_period.mapper";
+import {fishStatsMapper} from "./mapper/fish_stats.mapper";
 
 @Injectable()
 export class FishService {

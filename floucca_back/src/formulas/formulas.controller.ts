@@ -49,7 +49,7 @@ export class FormulasController {
 
     @Get()
     async getHello() {
-        return this.service.getSampledPortsCount();
+        return this.service.getRecordsEffortInPeriod();
     }
 
 

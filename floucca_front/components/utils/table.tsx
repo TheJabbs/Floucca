@@ -54,7 +54,7 @@ const ReusableTable: React.FC<ReusableTableProps> = ({
     // Apply general formatting based on value type and column name
     if (typeof value === 'number') {
       // Apply currency formatting for price or value columns
-      if (column.key.toLowerCase().includes('price') || column.key.toLowerCase().includes('value')) {
+      if (column.key.toLowerCase().includes('avgprice')) {
         return formatCurrency(value);
       }
       

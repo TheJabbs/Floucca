@@ -20,11 +20,12 @@ export interface EffortAndLandingData {
     };
   };
   lowerTable: Array<{
-    specie_code: number;
-    avgWeight: number;
-    avgQuantity: number;
-    avgLength: number;
+    specie_name: number;
+    numbOfCatch: number;
     avgPrice: number;
+    avgWeight: number;
+    avgLength: number;
+    avgQuantity: number;
     value: number;
     cpue: number;
     estCatch: number;
@@ -58,28 +59,4 @@ export const fetchStatisticsData = async (filter: StatsFilter): Promise<EffortAn
   } catch (error) {
     return handleApiError(error, 'fetching statistics data');
   }
-};
-
-export const mapSpeciesData = (speciesData: Array<{
-  specie_code: number;
-  avgWeight: number;
-  avgQuantity: number;
-  avgLength: number;
-  avgPrice: number;
-  value: number;
-  cpue: number;
-  estCatch: number;
-  effort: number;
-}>, speciesMap: Record<number, string> = {}): any[] => {
-  return speciesData.map(species => ({
-    species: speciesMap[species.specie_code] || [`Species ${species.specie_code}`],
-    avgWeight: species.avgWeight,
-    avgQuantity: species.avgQuantity,
-    avgLength: species.avgLength,
-    avgPrice: species.avgPrice,
-    value: species.value,
-    cpue: species.cpue,
-    estCatch: species.estCatch,
-    effort: species.effort,
-  }));
 };

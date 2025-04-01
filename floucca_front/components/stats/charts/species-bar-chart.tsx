@@ -7,10 +7,10 @@ interface SpeciesBarChartProps {
   isLoading: boolean;
 }
 
-type MetricType = 'estCatch' | 'price' | 'cpue' | 'avgWeight' | 'avgQuantity' | 'avgLength' | 'avgPrice' | 'value' | 'effort';
+type MetricType = 'numbOfCatch' |'estCatch' | 'price' | 'cpue' | 'avgWeight' | 'avgQuantity' | 'avgLength' | 'avgPrice' | 'value' | 'effort';
 
 const SpeciesBarChart: React.FC<SpeciesBarChartProps> = ({ data, isLoading }) => {
-  const [selectedMetric, setSelectedMetric] = useState<MetricType>('estCatch');
+  const [selectedMetric, setSelectedMetric] = useState<MetricType>('numbOfCatch');
   
   // Format values for tooltips
   const valueFormatter = (value: number | null): string => {
@@ -20,9 +20,24 @@ const SpeciesBarChart: React.FC<SpeciesBarChartProps> = ({ data, isLoading }) =>
   const currencyFormatter = (value: number | null): string => {
     return value !== null ? `${new Intl.NumberFormat('en-US').format(value)} LBP` : 'N/A';
   };
+
+  const weightFormatter = (value: number | null): string => {
+    return value !== null ? `${value.toFixed(2)} kg` : 'N/A';
+  }
+
+  const lengthFormatter = (value: number | null): string => {
+    return value !== null ? `${value.toFixed(2)} cm` : 'N/A';
+  }
   
   // Define metric configurations
   const metricConfig = {
+    numbOfCatch: { 
+      label: 'N. Catch', 
+      color: '#4f46e5', // indigo-600
+      formatter: valueFormatter,
+      bgColor: 'bg-indigo-100',
+      textColor: 'text-indigo-800'
+    },
     estCatch: { 
       label: 'Est. Catch', 
       color: '#a855f7', // purple-500
@@ -47,7 +62,7 @@ const SpeciesBarChart: React.FC<SpeciesBarChartProps> = ({ data, isLoading }) =>
     avgWeight: { 
       label: 'Avg Weight', 
       color: '#3b82f6', // blue-500
-      formatter: valueFormatter,
+      formatter: weightFormatter,
       bgColor: 'bg-blue-100',
       textColor: 'text-blue-800'
     },
@@ -61,7 +76,7 @@ const SpeciesBarChart: React.FC<SpeciesBarChartProps> = ({ data, isLoading }) =>
     avgLength: { 
       label: 'Avg Length', 
       color: '#14b8a6', // teal-500
-      formatter: valueFormatter,
+      formatter: lengthFormatter,
       bgColor: 'bg-teal-100',
       textColor: 'text-teal-800'
     },
@@ -106,7 +121,8 @@ const SpeciesBarChart: React.FC<SpeciesBarChartProps> = ({ data, isLoading }) =>
     if (!data || data.length === 0) return { dataset: [], series: [] };
     
     const dataset = data.map(item => ({
-      species: item.species,
+      specie_name: item.specie_name,
+      numbOfCatch: item.numbOfCatch,
       estCatch: item.estCatch,
       price: item.price,
       cpue: item.cpue,
@@ -132,7 +148,7 @@ const SpeciesBarChart: React.FC<SpeciesBarChartProps> = ({ data, isLoading }) =>
   };
 
   const metricGroups = [
-    { title: 'Catch Metrics', metrics: ['estCatch', 'cpue', 'effort', 'value'] },
+    { title: 'Catch Metrics', metrics: ['numbOfCatch' ,'estCatch', 'cpue', 'effort', 'value'] },
     { title: 'Average Metrics', metrics: ['avgWeight', 'avgLength', 'avgQuantity', 'avgPrice'] },
   ];
 
@@ -156,6 +172,7 @@ const SpeciesBarChart: React.FC<SpeciesBarChartProps> = ({ data, isLoading }) =>
   
   return (
     <div className="mt-6">
+      <h3 className="text-lg font-semibold mb-3 text-center">Species Data Bar Chart</h3>
       <div className="mb-4">
         {metricGroups.map((group, groupIndex) => (
           <div key={group.title} className={`${groupIndex > 0 ? 'mt-2' : ''}`}>
@@ -184,7 +201,7 @@ const SpeciesBarChart: React.FC<SpeciesBarChartProps> = ({ data, isLoading }) =>
           dataset={dataset}
           xAxis={[{ 
             scaleType: 'band', 
-            dataKey: 'species',
+            dataKey: 'specie_name',
             tickLabelStyle: {
               angle: dataset.length > 10 ? 45 : 0,
               textAnchor: dataset.length > 10 ? 'start' : 'middle',

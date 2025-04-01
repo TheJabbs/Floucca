@@ -5,11 +5,11 @@ import { useStatsData } from "@/contexts/StatsDataContext";
 import EffortTable from "@/components/stats/tables/effort-table";
 import LandingsTable from "@/components/stats/tables/landings-table";
 import SpeciesTable from "@/components/stats/tables/species-table";
-import { fetchStatisticsData, mapSpeciesData } from "@/services/statsService";
+import { fetchStatisticsData } from "@/services/statsService";
 
 const StatsPage: React.FC = () => {
   // Get data from context
-  const { gears, ports, formattedPeriods, species, isLoading, error } =
+  const { gears, ports, formattedPeriods, isLoading, error } =
     useStatsData();
 
   // Filter states - initialized with empty/default values
@@ -43,12 +43,6 @@ const StatsPage: React.FC = () => {
   const [isLandingsLoading, setIsLandingsLoading] = useState(false);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-
-  // Create a species map for lookup
-  const speciesMap: Record<number, string> = {};
-  species?.forEach((s) => {
-    speciesMap[s.specie_code] = s.specie_name;
-  });
 
   const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPeriod(e.target.value);
@@ -86,7 +80,7 @@ const StatsPage: React.FC = () => {
       // Update state with the fetched data
       setEffortData(data.upperTables.effort);
       setLandingsData(data.upperTables.landings);
-      setStatsData(mapSpeciesData(data.lowerTable, speciesMap));
+      setStatsData(data.lowerTable);
     } catch (error) {
       console.error("Error fetching statistics:", error);
       setFetchError(

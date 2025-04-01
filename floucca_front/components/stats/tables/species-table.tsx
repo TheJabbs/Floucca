@@ -4,7 +4,8 @@ import SpeciesBarChart from "../charts/species-bar-chart";
 import { BarChart2 } from "lucide-react";
 
 interface SpeciesData {
-  species: string;
+  specie_name: string;
+  numbOfCatch: number;
   avgPrice: number;
   avgWeight: number;
   avgLength: number;
@@ -25,7 +26,8 @@ const SpeciesTable: React.FC<SpeciesTableProps> = ({ isLoading, statsData }) => 
 
   // Define columns for the table
   const columns = [
-    { key: "species", header: "Species" },
+    { key: "specie_name", header: "Species" },
+    { key: "numbOfCatch", header: "N. catch" },
     { key: "avgPrice", header: "Avg. Price" },
     { key: "avgWeight", header: "Avg.Weight (kg)" },
     { key: "avgLength", header: "Avg.Length (cm)" },
@@ -63,7 +65,7 @@ const SpeciesTable: React.FC<SpeciesTableProps> = ({ isLoading, statsData }) => 
         data={statsData}
         isLoading={isLoading}
         noDataMessage="No species data available."
-        keyExtractor={(item) => item.species}
+        keyExtractor={(item) => item.specie_name}
       />
 
       {showChart && <SpeciesBarChart data={statsData || []} isLoading={isLoading} />}

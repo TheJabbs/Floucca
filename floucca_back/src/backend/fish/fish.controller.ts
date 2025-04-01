@@ -34,5 +34,10 @@ export class FishController {
         return this.fishService.deleteFish(id.id);
     }
 
+    @Get('/stats/avg')
+    getFishStats() {
+        return this.fishService.getFishesMappedByPeriod();
+    }
+
 
 }

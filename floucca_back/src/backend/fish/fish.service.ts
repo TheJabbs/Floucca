@@ -6,6 +6,8 @@ import {UpdateFishDto} from "./dto/update_fish.dto";
 import {FishInterface} from "./interface/fish.interface";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {idDTO} from "../../shared/dto/id.dto";
+import {getFishesMapperByPeriodMapper} from "./mapper/getFishesMapperByPeriod.mapper";
+import {fishStatsMapper} from "./mapper/fishStats.mapper";
 
 @Injectable()
 export class FishService {
@@ -122,4 +124,41 @@ export class FishService {
 
         return true;
     }
+    //================================================
+    async getFishesMappedByPeriod() {
+        const fishes = await this.prismaService.period.findMany({
+            select: {
+                period_date: true,
+                form: {
+                    select: {
+                        landing: {
+                            select: {
+                                fish: {
+                                    select: {
+                                        specie:{
+                                          select:{
+                                              specie_name: true
+                                          }
+                                        },
+
+                                        specie_code: true,
+                                        fish_weight: true,
+                                        fish_length: true,
+                                        fish_quantity: true,
+                                        price: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            }
+        })
+
+        const data =  getFishesMapperByPeriodMapper(fishes);
+
+        return  fishStatsMapper(data);
+
+    }
+
 }

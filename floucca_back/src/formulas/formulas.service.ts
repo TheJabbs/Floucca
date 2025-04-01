@@ -9,6 +9,7 @@ import {GetFilteredInterface} from "../backend/landings/interface/get_filtered.i
 import {GeneralFilterDto} from "../shared/dto/general_filter.dto";
 import {getDaysInMonthByDate} from "../utils/date/get_days_in_a_month";
 import {specieMapMapper} from "./utils/specie_map.mapper";
+import {countUniquenessInterface} from "./interface/countUniqueness.interface";
 
 @Injectable()
 export class FormulasService {
@@ -18,11 +19,12 @@ export class FormulasService {
         private readonly landingsService: LandingsService,
         private readonly senseLastWService: SenseLastwService,
         private readonly gearService: GearService
-    ) {}
+    ) {
+    }
 
-    async getReportData(filter: GeneralFilterDto){
+    async getReportData(filter: GeneralFilterDto) {
         let filter2 = JSON.parse(JSON.stringify(filter));
-        filter2.gear_code= undefined;
+        filter2.gear_code = undefined;
 
         filter.specie_code = await this.fishService.getFishSpecieByGear(filter2);
 
@@ -94,7 +96,8 @@ export class FormulasService {
                 value: value,
                 cpue: specieCpue,
                 estCatch: estCatch,
-                effort: effort
+                effort: effort,
+                specie_name: fish[0].fish.specieName
             })
         });
 
@@ -105,16 +108,10 @@ export class FormulasService {
     }
 
 
-
-
-
-
-
-
     //=========================================================================================================
 
     //Is it filtered by gear or all gears from that period?
-    getPba(effortData : GetFilteredLastWInterface[]){
+    getPba(effortData: GetFilteredLastWInterface[]) {
         let sumDaysWorkedLastW = 0;
 
         effortData.forEach((element) => {
@@ -125,7 +122,7 @@ export class FormulasService {
     }
 
     //This is effort not number of effort form?
-    getCpue(nbOfEffortData: number, landingsData: GetFilteredInterface[]){
+    getCpue(nbOfEffortData: number, landingsData: GetFilteredInterface[]) {
         let sumLandings = 0;
 
         landingsData.forEach((element) => {
@@ -136,25 +133,25 @@ export class FormulasService {
     }
 
     //Is total number of gear the sum of gears in effort?
-    getTotalEffort(pba: number, daysOfTheMonth: number, totalNumberOfGears: number){
+    getTotalEffort(pba: number, daysOfTheMonth: number, totalNumberOfGears: number) {
         return pba * daysOfTheMonth * totalNumberOfGears;
     }
 
     //what is catchBySpecie is it the number of fishes or howmany records with this fish??
-    getEffortBySpecie(catchBySpecie: number, cpueOfSpecie: number){
+    getEffortBySpecie(catchBySpecie: number, cpueOfSpecie: number) {
         return catchBySpecie / cpueOfSpecie;
     }
 
-    getEstimateTotalCatch(cpue: number, effortEstimate: number){
+    getEstimateTotalCatch(cpue: number, effortEstimate: number) {
         return cpue * effortEstimate;
     }
 
-    getEstimateEffort(boatGears: number,  activeDays: number, pba: number){
+    getEstimateEffort(boatGears: number, activeDays: number, pba: number) {
         return boatGears * activeDays * pba;
     }
 
     // not sure of this formula please check it
-    getActiveDays(effortData: GetFilteredLastWInterface[], allGears: number){
+    getActiveDays(effortData: GetFilteredLastWInterface[], allGears: number) {
         let sumDaysWorkedLastW = 0;
 
         effortData.forEach((element) => {
@@ -164,11 +161,11 @@ export class FormulasService {
         return sumDaysWorkedLastW * effortData.length / allGears;
     }
 
-    getEstimateCatch(estimateEffort: number, cpue: number){
+    getEstimateCatch(estimateEffort: number, cpue: number) {
         return estimateEffort * cpue;
     }
 
-    getAvgWeight(landingsData: GetFilteredInterface[]){
+    getAvgWeight(landingsData: GetFilteredInterface[]) {
         let sumLandings = 0;
 
         landingsData.forEach((element) => {
@@ -178,7 +175,7 @@ export class FormulasService {
         return sumLandings / landingsData.length;
     }
 
-    getAvgLength(landingsData: GetFilteredInterface[]){
+    getAvgLength(landingsData: GetFilteredInterface[]) {
         let sumLandings = 0;
 
         landingsData.forEach((element) => {
@@ -188,7 +185,7 @@ export class FormulasService {
         return sumLandings / landingsData.length;
     }
 
-    getAvgPrice(landingsData: GetFilteredInterface[]){
+    getAvgPrice(landingsData: GetFilteredInterface[]) {
         let sumLandings = 0;
 
         landingsData.forEach((element) => {
@@ -198,7 +195,7 @@ export class FormulasService {
         return sumLandings / landingsData.length;
     }
 
-    getAvgQuantity(landingsData: GetFilteredInterface[]){
+    getAvgQuantity(landingsData: GetFilteredInterface[]) {
         let sumLandings = 0;
 
         landingsData.forEach((element) => {
@@ -208,7 +205,7 @@ export class FormulasService {
         return sumLandings / landingsData.length;
     }
 
-    getNumberOfCatch(landingsData: GetFilteredInterface[]){
+    getNumberOfCatch(landingsData: GetFilteredInterface[]) {
         let numberOfCatch = 0
 
         landingsData.forEach((element) => {
@@ -220,13 +217,80 @@ export class FormulasService {
 
     //=============================================================
 
-    countLandingForm(landingData: GetFilteredInterface[]){
+    async getSampledPortsCount() {
+        const forms = await this.prisma.form.findMany({
+            select: {
+                period_date: true,
+                ports: { // Singular object
+                    select: {
+                        port_id: true,
+                        coop: {
+                            select: {
+                                coop_code: true,
+                                region: {
+                                    select: {
+                                        region_code: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const result: Record<string, countUniquenessInterface> = {};
+
+        const uniquePortsMap = new Map<string, Set<number>>();
+        const uniqueCoopsMap = new Map<string, Set<number>>();
+        const uniqueRegionsMap = new Map<string, Set<number>>();
+
+        forms.forEach(form => {
+            const period = form.period_date.toDateString();
+
+            if (!uniquePortsMap.has(period)) {
+                uniquePortsMap.set(period, new Set());
+                uniqueCoopsMap.set(period, new Set());
+                uniqueRegionsMap.set(period, new Set());
+            }
+
+            const uniquePorts = uniquePortsMap.get(period)!;
+            const uniqueCoops = uniqueCoopsMap.get(period)!;
+            const uniqueRegions = uniqueRegionsMap.get(period)!;
+
+            if (form.ports) {
+                uniquePorts.add(form.ports.port_id);
+                if (form.ports.coop) {
+                    uniqueCoops.add(form.ports.coop.coop_code);
+                    if (form.ports.coop.region) {
+                        uniqueRegions.add(form.ports.coop.region.region_code);
+                    }
+                }
+            }
+        });
+
+        uniquePortsMap.forEach((ports, period) => {
+            result[period] = {
+                port: ports.size,
+                coop: uniqueCoopsMap.get(period)!.size,
+                region: uniqueRegionsMap.get(period)!.size
+            };
+        });
+
+        return result;
+    }
+
+
+
+    //=============================================================
+
+    countLandingForm(landingData: GetFilteredInterface[]) {
         const mapUsingFormId: Map<number, GetFilteredInterface[]> = new Map();
 
         landingData.forEach((element) => {
-            if(mapUsingFormId.has(element.form.form_id)){
+            if (mapUsingFormId.has(element.form.form_id)) {
                 mapUsingFormId.get(element.form.form_id).push(element);
-            }else{
+            } else {
                 mapUsingFormId.set(element.form.form_id, [element]);
             }
         });
@@ -235,7 +299,7 @@ export class FormulasService {
 
     }
 
-    countCatchBySpecie(landingData: GetFilteredInterface[]){
+    countCatchBySpecie(landingData: GetFilteredInterface[]) {
         let count = 0
 
         landingData.forEach((element) => {

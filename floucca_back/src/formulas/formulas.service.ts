@@ -216,6 +216,35 @@ export class FormulasService {
     }
 
     //=============================================================
+    async getLeftPanelInfo() {
+        const [portsCount, uniqueSpecies, effortRecord, landingRecord] = await Promise.all([
+            this.getSampledPortsCount(),
+            this.getUniqueSpeciesFishedByPeriod(),
+            this.getRecordsEffortInPeriod(),
+            this.getLandingRecordsByPeriod()
+        ]);
+
+        // Collect all unique periods from all datasets
+        const allPeriods = new Set([
+            ...Object.keys(portsCount),
+            ...Object.keys(uniqueSpecies),
+            ...Object.keys(effortRecord),
+            ...Object.keys(landingRecord)
+        ]);
+
+        const dataCombine: Record<string, any> = {};
+
+        allPeriods.forEach(period => {
+            dataCombine[period] = {
+                strata: portsCount[period] || { port: 0, coop: 0, region: 0 },
+                speciesKind: uniqueSpecies[period] || 0,
+                effortRecord: effortRecord[period] || 0,
+                landingRecord: landingRecord[period] || 0
+            };
+        });
+
+        return dataCombine;
+    }
 
     async getSampledPortsCount() {
         const forms = await this.prisma.form.findMany({
@@ -379,6 +408,8 @@ export class FormulasService {
                 mapUsingPeriodDate[periodKey] = 1;
             }
         });
+
+        return mapUsingPeriodDate;
     }
 
     //=============================================================

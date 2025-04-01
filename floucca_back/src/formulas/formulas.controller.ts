@@ -48,8 +48,8 @@ export class FormulasController {
     }
 
     @Get()
-    async getHello() {
-        return this.service.getRecordsEffortInPeriod();
+    async getLeftPanelInfo() {
+        return this.service.getLeftPanelInfo();
     }
 
 

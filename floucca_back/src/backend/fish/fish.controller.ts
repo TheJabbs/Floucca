@@ -1,7 +1,7 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from "@nestjs/common";
 import {FishService} from "./fish.service";
 import {idDTO} from "../../shared/dto/id.dto";
-import {CreateFishDto} from "./dto/create_fish.Dto";
+import {CreateFishDto} from "./dto/create_fish.dto";
 import {UpdateFishDto} from "./dto/update_fish.dto";
 
 @Controller('/api/fish')

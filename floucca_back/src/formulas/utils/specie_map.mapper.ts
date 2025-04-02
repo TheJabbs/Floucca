@@ -1,4 +1,4 @@
-import {GetFilteredInterface} from "../../backend/landings/interface/getFiltered.interface";
+import {GetFilteredInterface} from "../../backend/landings/interface/get_filtered.interface";
 
 export function specieMapMapper(data: GetFilteredInterface[]): Map<number, GetFilteredInterface[]>{
     const mapUsingSpecieId: Map<number, GetFilteredInterface[]> = new Map();

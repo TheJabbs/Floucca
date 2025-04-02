@@ -8,6 +8,7 @@ interface LandingsData {
   cpue: number;
   estCatch: number;
   sampleEffort: number;
+  sampleCatch: number;
 }
 
 interface LandingsTableProps {

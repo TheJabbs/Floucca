@@ -6,8 +6,7 @@ import {
   getPorts, 
   getRegions, 
   getCoops, 
-  getPeriods,
-  getSpecies 
+  getPeriods
 } from "@/services";
 import { useDataContext, formatPeriodDate } from "@/hooks/useDataContext";
 
@@ -17,7 +16,6 @@ export interface StatsDataType {
   regions: any[];
   coops: any[];
   periods: any[];
-  species: any[];
   formattedPeriods: { value: string, label: string }[];
   isLoading: boolean;
   error: string | null;
@@ -31,7 +29,6 @@ const CACHE_KEYS = {
   STATS_REGIONS: "flouca_stats_regions",
   STATS_COOPS: "flouca_stats_coops",
   STATS_PERIODS: "flouca_stats_periods",
-  STATS_SPECIES: "flouca_stats_species",
 };
 
 const StatsDataContext = createContext<StatsDataType | undefined>(undefined);
@@ -52,7 +49,6 @@ export function StatsDataProvider({ children }: { children: ReactNode }) {
   const regionContext = useDataContext(getRegions, CACHE_KEYS.STATS_REGIONS);
   const coopContext = useDataContext(getCoops, CACHE_KEYS.STATS_COOPS);
   const periodContext = useDataContext(getPeriods, CACHE_KEYS.STATS_PERIODS);
-  const speciesContext = useDataContext(getSpecies, CACHE_KEYS.STATS_SPECIES);
 
   const formattedPeriods = periodContext.data.map(period => ({
     value: period.period_date,
@@ -65,8 +61,7 @@ export function StatsDataProvider({ children }: { children: ReactNode }) {
       portContext.refetch(),
       regionContext.refetch(),
       coopContext.refetch(),
-      periodContext.refetch(),
-      speciesContext.refetch()
+      periodContext.refetch()
     ]);
   };
 
@@ -75,16 +70,14 @@ export function StatsDataProvider({ children }: { children: ReactNode }) {
     portContext.isLoading || 
     regionContext.isLoading ||
     coopContext.isLoading ||
-    periodContext.isLoading ||
-    speciesContext.isLoading;
+    periodContext.isLoading;
   
   const error = 
     gearContext.error || 
     portContext.error || 
     regionContext.error ||
     coopContext.error ||
-    periodContext.error ||
-    speciesContext.error;
+    periodContext.error;
 
   const lastFetchedTimes = [
     gearContext.lastFetched,
@@ -92,7 +85,6 @@ export function StatsDataProvider({ children }: { children: ReactNode }) {
     regionContext.lastFetched,
     coopContext.lastFetched,
     periodContext.lastFetched,
-    speciesContext.lastFetched
   ].filter(Boolean) as number[];
   
   const lastFetched = lastFetchedTimes.length > 0 
@@ -106,7 +98,6 @@ export function StatsDataProvider({ children }: { children: ReactNode }) {
     regions: regionContext.data,
     coops: coopContext.data,
     periods: periodContext.data,
-    species: speciesContext.data,
     formattedPeriods,
     isLoading,
     error,

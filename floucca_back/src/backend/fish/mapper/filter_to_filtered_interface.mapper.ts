@@ -1,5 +1,5 @@
-import { fishLandingsByFilterInterface } from "../interface/fishLandingsByFilter.interface";
-import { GetFilteredInterface } from "../../landings/interface/getFiltered.interface";
+import {fishLandingsByFilterInterface} from "../interface/fish_landings_by_filter.interface";
+import {GetFilteredInterface} from "../../landings/interface/get_filtered.interface";
 
 export function filterToFilteredInterfaceMapper(
     data: fishLandingsByFilterInterface[]

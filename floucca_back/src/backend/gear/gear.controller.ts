@@ -1,7 +1,7 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {GearService} from "./gear.service";
-import {GearIdDto} from "./DTO/GearId.dto";
-import {CreateGearDto} from "./DTO/CreateGear.dto";
+import {GearIdDto} from "./dto/gear_id.dto";
+import {CreateGearDto} from "./dto/create_gear.dto";
 
 @Controller("api/dev/gear")
 export class GearController {

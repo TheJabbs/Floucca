@@ -1,6 +1,6 @@
-import { CreateFleetDto } from './CreateFleet.dto';
-import { FleetResponse } from '../Interface/FleetResponse.interface';
-import {DateRangeDto} from "./DaterangeDto.dto";
+import { CreateFleetDto } from './create_fleet.dto';
+import { FleetResponse } from '../interface/fleet_response.interface';
+import {DateRangeDto} from "./daterangedto.dto";
 
 export {
     CreateFleetDto,

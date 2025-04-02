@@ -1,6 +1,6 @@
 import { FishInterface } from "../interface/fish.interface";
-import { FishStatInterface } from "../interface/fishStat.interface";
-import {FishV2Interface} from "../interface/fishV2.interface";
+import { FishStatInterface } from "../interface/fish_stat.interface";
+import {FishV2Interface} from "../interface/fish_v2.interface";
 
 export function fishStatsMapper(map: Map<string, FishV2Interface[]>): Record<string, Record<number, FishStatInterface>> {
     const fishStatsMap: Map<string, Map<number, FishStatInterface>> = new Map();

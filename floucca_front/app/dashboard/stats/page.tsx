@@ -1,16 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Filter } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useStatsData } from "@/contexts/StatsDataContext";
 import EffortTable from "@/components/stats/tables/effort-table";
 import LandingsTable from "@/components/stats/tables/landings-table";
 import SpeciesTable from "@/components/stats/tables/species-table";
-import { fetchStatisticsData, mapSpeciesData } from "@/services/statsService";
-import EffortBarPlot from "@/components/stats/charts/effortBarPlot";
+import { fetchStatisticsData } from "@/services/statsService";
 
 const StatsPage: React.FC = () => {
   // Get data from context
-  const { gears, ports, formattedPeriods, species, isLoading, error } =
+  const { gears, ports, formattedPeriods, isLoading, error } =
     useStatsData();
 
   // Filter states - initialized with empty/default values
@@ -34,6 +33,7 @@ const StatsPage: React.FC = () => {
     cpue: 0,
     estCatch: 0,
     sampleEffort: 0,
+    sampleCatch: 0,
   });
 
   const [statsData, setStatsData] = useState<any[]>([]);
@@ -43,12 +43,6 @@ const StatsPage: React.FC = () => {
   const [isLandingsLoading, setIsLandingsLoading] = useState(false);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-
-  // Create a species map for lookup
-  const speciesMap: Record<number, string> = {};
-  species?.forEach((s) => {
-    speciesMap[s.specie_code] = s.specie_name;
-  });
 
   const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPeriod(e.target.value);
@@ -84,9 +78,9 @@ const StatsPage: React.FC = () => {
       const data = await fetchStatisticsData(filter);
 
       // Update state with the fetched data
-      setEffortData(data.uperTable.effort);
-      setLandingsData(data.uperTable.landings);
-      setStatsData(mapSpeciesData(data.lowerTable, speciesMap));
+      setEffortData(data.upperTables.effort);
+      setLandingsData(data.upperTables.landings);
+      setStatsData(data.lowerTable);
     } catch (error) {
       console.error("Error fetching statistics:", error);
       setFetchError(
@@ -144,7 +138,7 @@ const StatsPage: React.FC = () => {
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
-            <Filter className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">Refresh Data</span>
           </button>
         </div>

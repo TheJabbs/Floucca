@@ -1,7 +1,7 @@
 import { apiClient, handleApiError } from "./apiClient";
 
 export interface EffortAndLandingData {
-  uperTable: {
+  upperTables: {
     effort: {
       records: number;
       gears: number;
@@ -16,17 +16,20 @@ export interface EffortAndLandingData {
       cpue: number;
       estCatch: number;
       sampleEffort: number;
+      sampleCatch: number;
     };
   };
   lowerTable: Array<{
-    specie_code: number;
-    avg_fish_weight: number;
-    avg_fish_quantity: number;
-    avg_fish_length: number;
-    avg_price: number;
-    fish_value: number;
+    specie_name: number;
+    numbOfCatch: number;
+    avgPrice: number;
+    avgWeight: number;
+    avgLength: number;
+    avgQuantity: number;
+    value: number;
     cpue: number;
-    est_catch: number;
+    estCatch: number;
+    effort: number;
   }>;
 }
 
@@ -56,25 +59,4 @@ export const fetchStatisticsData = async (filter: StatsFilter): Promise<EffortAn
   } catch (error) {
     return handleApiError(error, 'fetching statistics data');
   }
-};
-
-export const mapSpeciesData = (speciesData: Array<{
-  specie_code: number;
-  avg_fish_weight: number;
-  avg_fish_quantity: number;
-  avg_fish_length: number;
-  avg_price: number;
-  fish_value: number;
-  cpue: number;
-  est_catch: number;
-}>, speciesMap: Record<number, string> = {}): any[] => {
-  return speciesData.map(species => ({
-    species: speciesMap[species.specie_code] || `Species ${species.specie_code}`,
-    averageWeight: species.avg_fish_weight,
-    fishCount: species.avg_fish_quantity,
-    price: species.avg_price,
-    value: species.fish_value,
-    cpue: species.cpue,
-    estCatch: species.est_catch
-  }));
 };

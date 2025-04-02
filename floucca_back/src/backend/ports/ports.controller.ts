@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { PortsService } from './ports.service';
-import { CreatePortDto } from './dto/CreatePort.dto';
+import { CreatePortDto } from './dto/create_port.dto';
 import { idDTO } from '../../shared/dto/id.dto';
 import { Port } from './interfaces/port.interface';
 

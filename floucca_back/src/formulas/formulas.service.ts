@@ -4,11 +4,11 @@ import {FishService} from "../backend/fish/fish.service";
 import {LandingsService} from "../backend/landings/landings.service";
 import {SenseLastwService} from "../backend/sense_lastw/sense_lastw.service";
 import {GearService} from "../backend/gear/gear.service";
-import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/getFilteredLastW.interface";
-import {GetFilteredInterface} from "../backend/landings/interface/getFiltered.interface";
-import {GeneralFilterDto} from "../shared/dto/GeneralFilter.dto";
-import {getDaysInMonthByDate} from "../utils/date/getDaysInAMonth";
-import {specieMapMapper} from "./utils/specieMap.mapper";
+import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/get_filtered_lastw.interface";
+import {GetFilteredInterface} from "../backend/landings/interface/get_filtered.interface";
+import {GeneralFilterDto} from "../shared/dto/general_filter.dto";
+import {getDaysInMonthByDate} from "../utils/date/get_days_in_a_month";
+import {specieMapMapper} from "./utils/specie_map.mapper";
 import {countUniquenessInterface} from "./interface/countUniqueness.interface";
 
 @Injectable()
@@ -78,17 +78,17 @@ export class FormulasService {
 
         mappedSpecies.forEach((fish, specie) => {
             let avgWeight = this.getAvgWeight(fish);
-            let numbOdCatch = this.getNumberOfCatch(fish);
+            let numbOfCatch = this.getNumberOfCatch(fish);
             let avgPrice = this.getAvgPrice(fish);
             let value = 0;
             let specieCpue = this.getCpue(fish.length, fish);
             let estCatch = this.getEstimateCatch(estEffort, specieCpue);
-            let effort = this.getEffortBySpecie(numbOdCatch, specieCpue);
+            let effort = this.getEffortBySpecie(numbOfCatch, specieCpue);
             let avgLength = this.getAvgLength(fish);
             let avgQuantity = this.getAvgQuantity(fish);
 
             lowerTable.push({
-                numbOdCatch: numbOdCatch,
+                numbOfCatch: numbOfCatch,
                 avgPrice: avgPrice,
                 avgWeight: avgWeight,
                 avgLength: avgLength,

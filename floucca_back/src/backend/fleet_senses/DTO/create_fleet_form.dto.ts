@@ -1,6 +1,6 @@
-import {CreateFormDto} from "../../form/DTO";
+import {CreateFormDto} from "../../form/dto";
 import {CreateBoatDetailsDto} from "../../boat_details/dto";
-import {FormGearUsageDto} from "../../gear_usage/DTO/FormGearUsage.dto";
+import {FormGearUsageDto} from "../../gear_usage/dto/form_gear_usage.dto";
 import {Type} from "class-transformer";
 import {IsArray, ValidateNested} from "class-validator";
 

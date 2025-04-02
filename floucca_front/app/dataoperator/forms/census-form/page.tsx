@@ -36,10 +36,14 @@ function FleetSensesPage() {
   const { selectedPort } = usePort();
   // Use cached data from our context
   const { ports, gears, isLoading, error } = useFormsData();
-  
-  const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const [notification, setNotification] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
-  
+  const [resetCounter, setResetCounter] = useState(0);
+
   const {
     handleSubmit,
     setValue,
@@ -62,8 +66,12 @@ function FleetSensesPage() {
   });
 
   useEffect(() => {
-    setValue('port', selectedPort);
-    checkFormValidity(getValues('boatData'), getValues('gearData'), selectedPort);
+    setValue("port", selectedPort);
+    checkFormValidity(
+      getValues("boatData"),
+      getValues("gearData"),
+      selectedPort
+    );
   }, [selectedPort, setValue, getValues]);
 
   const [isValid, setIsValid] = useState(false);
@@ -87,18 +95,19 @@ function FleetSensesPage() {
     const currentGearData = gearData || getValues("gearData");
     const currentPort = port !== undefined ? port : getValues("port");
 
-    const isBoatValid = currentBoatData && 
-      !!currentBoatData.fleet_owner && 
+    const isBoatValid =
+      currentBoatData &&
+      !!currentBoatData.fleet_owner &&
       currentBoatData.fleet_registration > 0 &&
       currentBoatData.fleet_hp > 0 &&
       currentBoatData.fleet_crew > 0 &&
       currentBoatData.fleet_max_weight > 0 &&
       currentBoatData.fleet_length > 0;
-      
+
     const isGearValid =
       currentGearData?.length > 0 &&
       currentGearData.every((gear) => gear.gear_code && gear.months.length > 0);
-      
+
     const isPortValid = !!currentPort;
 
     setIsValid(isBoatValid && isGearValid && isPortValid);
@@ -121,6 +130,7 @@ function FleetSensesPage() {
       gearData: [],
       port: selectedPort,
     });
+    setResetCounter((prev) => prev + 1);
   };
 
   const onSubmit = async (formData: FleetSensesForm) => {
@@ -128,7 +138,7 @@ function FleetSensesPage() {
       if (!formData.port) {
         throw new Error("Please select a port");
       }
-      
+
       const apiPayload = {
         formDto: {
           port_id: formData.port,
@@ -136,40 +146,39 @@ function FleetSensesPage() {
           fisher_name: formData.boatData.fleet_owner,
         },
         boatDetailDto: formData.boatData,
-        gearUsageDto: formData.gearData.map(gear => ({
+        gearUsageDto: formData.gearData.map((gear) => ({
           gear_code: gear.gear_code,
-          months: gear.months
-        }))
+          months: gear.months,
+        })),
       };
-      
+
       console.log("Submitting fleet senses data:", apiPayload);
-      
+
       const response = await submitFleetSensesForm(apiPayload);
-      
+
       // Clear submission history cache to reflect the new submission
-      removeFromCache('flouca_submissions');
-      removeFromCache('flouca_submissions_timestamp');
-      
+      removeFromCache("flouca_submissions");
+      removeFromCache("flouca_submissions_timestamp");
+
       setNotification({
         type: "success",
-        message: "Fleet senses data submitted successfully!"
+        message: "Fleet senses data submitted successfully!",
       });
       setIsNotificationVisible(true);
-      
+
       // Reset form after successful submission
       resetFormState();
-      
     } catch (error) {
       console.error("Error submitting form:", error);
-      
+
       let errorMessage = "Failed to submit form. Please try again.";
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       setNotification({
-        type: "error", 
-        message: errorMessage
+        type: "error",
+        message: errorMessage,
       });
       setIsNotificationVisible(true);
     }
@@ -190,7 +199,7 @@ function FleetSensesPage() {
       <div className="container mx-auto p-6">
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
           <p>{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
           >
@@ -200,7 +209,7 @@ function FleetSensesPage() {
       </div>
     );
   }
-  
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -209,18 +218,23 @@ function FleetSensesPage() {
           <PortDropdown ports={ports} />
         </div>
       </div>
-      
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <BoatInfo required={true} onChange={handleBoatChange} />
-        <GearUsageForm 
-          gears={gears} 
-          onChange={handleGearChange} 
-          required={true} 
+        <BoatInfo
+          required={true}
+          onChange={handleBoatChange}
+          key={`boat-info-${resetCounter}`}
         />
-        <SubmitButton 
-          isSubmitting={isSubmitting} 
-          disabled={!isValid} 
-          label="Submit" 
+        <GearUsageForm
+          gears={gears}
+          onChange={handleGearChange}
+          required={true}
+          key={`gear-usage-${resetCounter}`}
+        />
+        <SubmitButton
+          isSubmitting={isSubmitting}
+          disabled={!isValid}
+          label="Submit"
         />
       </form>
 

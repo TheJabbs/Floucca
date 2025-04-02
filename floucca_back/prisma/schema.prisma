@@ -137,17 +137,19 @@ model landing {
 }
 
 model period {
-  period_date   DateTime @id @default(dbgenerated("(now())")) @db.Date
-  period_status String   @default("B") @db.Char(1)
+  period_date   DateTime      @id @default(dbgenerated("(now())")) @db.Date
+  period_status String        @default("B") @db.Char(1)
+  active_days   active_days[]
   form          form[]
 }
 
 model ports {
-  port_id   Int    @id @default(autoincrement())
-  port_name String @db.VarChar(50)
-  coop_code Int
-  form      form[]
-  coop      coop   @relation(fields: [coop_code], references: [coop_code], onDelete: NoAction, onUpdate: NoAction, map: "ports_ibfk_1")
+  port_id     Int           @id @default(autoincrement())
+  port_name   String        @db.VarChar(50)
+  coop_code   Int
+  active_days active_days[]
+  form        form[]
+  coop        coop          @relation(fields: [coop_code], references: [coop_code], onDelete: NoAction, onUpdate: NoAction, map: "ports_ibfk_1")
 
   @@index([coop_code], map: "coop_code")
 }
@@ -221,4 +223,16 @@ model users {
   form          form[]
   user_coop     user_coop[]
   user_role     user_role[]
+}
+
+model active_days {
+  active_id   Int      @id @default(autoincrement())
+  period_date DateTime @db.Date
+  port_id     Int
+  active_days Int      @default(31)
+  period      period   @relation(fields: [period_date], references: [period_date], onDelete: Cascade, map: "active_days_ibfk_1")
+  ports       ports    @relation(fields: [port_id], references: [port_id], onDelete: Cascade, map: "active_days_ibfk_2")
+
+  @@index([period_date], map: "active_days_ibfk_1")
+  @@index([port_id], map: "active_days_ibfk_2")
 }

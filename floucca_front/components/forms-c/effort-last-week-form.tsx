@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import React, { useState } from "react";
+import { useFieldArray, Control } from "react-hook-form";
 import { Plus, AlertCircle, Trash2 } from "lucide-react";
 
 interface Gear {
@@ -11,47 +11,31 @@ interface Gear {
 
 interface EffortLastWeekProps {
   required?: boolean;
-  gears: Gear[]; 
-  onChange: (effortData: EffortLastWeekData) => void;
+  gears: Gear[];
+  control: Control<any>;
 }
 
-interface GearEntry {
-  gear_code: number;
-  days_used: number;
-}
-
-interface EffortLastWeekData {
-  gear_entries: GearEntry[];
-}
-
-const EffortLastWeek: React.FC<EffortLastWeekProps> = ({ 
-  required = false, 
+const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
+  required = false,
   gears,
-  onChange 
+  control,
 }) => {
-  const [currentGear, setCurrentGear] = useState<GearEntry>({
+  const [currentGear, setCurrentGear] = useState<{
+    gear_code: number;
+    days_used: number;
+  }>({
     gear_code: 0,
-    days_used: 1, 
+    days_used: 1,
   });
 
-  const { control } = useForm<EffortLastWeekData>({
-    defaultValues: {
-      gear_entries: [],
-    },
-  });
-
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray<{
+    effortLastWeek: {
+      gear_entries: { gear_code: number; days_used: number }[];
+    };
+  }>({
     control,
-    name: "gear_entries",
+    name: "effortLastWeek.gear_entries",
   });
-
-  useEffect(() => {
-    onChange({ gear_entries: fields });
-  }, [fields, onChange]);
-
-  const remainingGears = gears.filter(
-    (gear) => !fields.some((entry) => entry.gear_code === gear.gear_code)
-  );
 
   const handleGearChange = (gearCode: number) => {
     setCurrentGear((prev) => ({
@@ -85,11 +69,15 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
     });
   };
 
+  const remainingGears = gears.filter(
+    (gear) => !fields.some((entry) => entry.gear_code === gear.gear_code)
+  );
+
   const getGearName = (gear_code: number) => {
     return gears.find((g) => g.gear_code === gear_code)?.gear_name || "";
   };
 
-  const isAddDisabled = 
+  const isAddDisabled =
     currentGear.gear_code === 0 ||
     currentGear.days_used < 1 ||
     currentGear.days_used > 7;
@@ -173,7 +161,8 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
                         {getGearName(entry.gear_code)}
                       </h4>
                       <p className="text-sm text-gray-600">
-                        Used for {entry.days_used} day{entry.days_used > 1 ? "s" : ""} last week
+                        Used for {entry.days_used} day
+                        {entry.days_used > 1 ? "s" : ""} last week
                       </p>
                     </div>
                     <button

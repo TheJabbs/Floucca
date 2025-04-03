@@ -1,7 +1,8 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useFormsData } from "@/contexts/FormDataContext";
 import BoatInfo from "@/components/forms-c/boat-form";
 import EffortToday from "@/components/forms-c/effort-today-form";
@@ -13,12 +14,14 @@ import Notification from "@/components/utils/notification";
 import { submitLandingForm, LandingFormDTO } from "@/services";
 import { removeFromCache } from "@/components/utils/cache-utils";
 
+// Dynamic import for the map component since it uses browser APIs
 const MapWithMarkers = dynamic(
   () => import("@/components/forms-c/map-with-markers"),
   { ssr: false }
 );
 import FishingDetails from "@/components/forms-c/fishing-details-form";
 
+// Interfaces for form data structure
 interface BoatData {
   fleet_owner: string;
   fleet_registration: number;
@@ -28,25 +31,6 @@ interface BoatData {
   fleet_length: number;
 }
 
-interface EffortTodayData {
-  hours_fished: number;
-  gear_entries: {
-    gear_code: number;
-    gear_details: {
-      detail_name: string;
-      detail_value: string;
-      equipment_id: string;
-    }[];
-  }[];
-}
-
-interface EffortLastWeekData {
-  gear_entries: {
-    gear_code: number;
-    days_used: number;
-  }[];
-}
-
 interface MapLocation {
   id: number;
   name: string;
@@ -54,51 +38,64 @@ interface MapLocation {
   lng: number;
 }
 
-interface FishingDetailsData {
-  fish_entries: {
-    location_id: number;
-    gear_code: number;
-    specie_code: number;
-    fish_weight: number;
-    fish_length: number;
-    fish_quantity: number;
-    price: number;
-  }[];
-}
-
-interface LandingsForm {
-  LandingFormDTO: {
-    port: number | null;
-    boatData: BoatData;
-    effortTodayData: EffortTodayData;
-    effortLastWeekData: EffortLastWeekData;
-    location: MapLocation | null;
-    fishingDetails: FishingDetailsData;
+interface LandingFormValues {
+  boatData: BoatData;
+  effortToday: {
+    hours_fished: number;
+    gear_entries: {
+      id?: string;
+      gear_code: number;
+      gear_details: {
+        detail_name: string;
+        detail_value: string;
+        equipment_id: string;
+      }[];
+    }[];
   };
-}
-
-interface FormValidation {
-  port: boolean;
-  boatInfo: boolean;
-  effortToday: boolean | null;
-  effortLastWeek: boolean | null;
-  location: boolean | null;
-  fishingDetails: boolean | null;
-}
-
-interface FormNotification {
-  type: "success" | "error";
-  message: string;
+  effortLastWeek: {
+    gear_entries: {
+      id?: string;
+      gear_code: number;
+      days_used: number;
+    }[];
+  };
+  location: MapLocation | null;
+  fishingDetails: {
+    fish_entries: {
+      id?: string;
+      location_id: number;
+      gear_code: number;
+      specie_code: number;
+      fish_weight: number;
+      fish_length: number;
+      fish_quantity: number;
+      price: number;
+    }[];
+  };
+  port: number | null;
 }
 
 function EffortAndLandingPage() {
   const { selectedPort } = usePort();
-
-  // Get the cached form data from our FormsDataContext
   const { gears, species, ports, isLoading, error: dataError, refetch } = useFormsData();
+  
+  // Notification state
+  const [notification, setNotification] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
-  const defaultValues = {
-    LandingFormDTO: {
+  // Initialize form
+  const {
+    handleSubmit,
+    setValue,
+    control,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<LandingFormValues>({
+    mode: "onChange",
+    defaultValues: {
       port: selectedPort,
       boatData: {
         fleet_owner: "",
@@ -108,11 +105,11 @@ function EffortAndLandingPage() {
         fleet_max_weight: 0,
         fleet_length: 0,
       },
-      effortTodayData: {
+      effortToday: {
         hours_fished: 0,
         gear_entries: [],
       },
-      effortLastWeekData: {
+      effortLastWeek: {
         gear_entries: [],
       },
       location: null,
@@ -120,231 +117,101 @@ function EffortAndLandingPage() {
         fish_entries: [],
       },
     },
-  };
-
-  const {
-    handleSubmit,
-    setValue,
-    reset,
-    formState: { isSubmitting },
-  } = useForm<LandingsForm>({
-    defaultValues,
   });
 
-  // Shared state for components
-  const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
-  const [selectedGears, setSelectedGears] = useState<
-    {
-      gear_code: number;
-      gear_details: { detail_name: string; detail_value: string; equipment_id: string }[];
-    }[]
-  >([]);
+  // Watch form values to determine conditional rendering
+  const formValues = useWatch({ control });
+  const hasEffortToday = !!formValues?.effortToday?.hours_fished && ((formValues?.effortToday?.gear_entries ?? []).length > 0);
 
-  // Track if effort sections are actively being completed
-  const [hasEffortToday, setHasEffortToday] = useState<boolean>(false);
-  const [hasEffortLastWeek, setHasEffortLastWeek] = useState<boolean>(false);
+  // Update port when selected from dropdown
+  useEffect(() => {
+    setValue("port", selectedPort);
+  }, [selectedPort, setValue]);
 
-  // Form reset flag to trigger reset in child components
-  const [resetCounter, setResetCounter] = useState(0);
-
-  // Notification state
-  const [notification, setNotification] = useState<FormNotification | null>(null);
-  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
-
-  const [formValidation, setFormValidation] = useState<FormValidation>({
-    port: false,
-    boatInfo: false,
-    effortToday: null,
-    effortLastWeek: null,
-    location: null,
-    fishingDetails: null,
-  });
-
-  const updateValidation = (
-    section: keyof FormValidation,
-    isValid: boolean | null
-  ) => {
-    setFormValidation((prev) => ({
-      ...prev,
-      [section]: isValid,
-    }));
+  const handleCloseNotification = () => {
+    setIsNotificationVisible(false);
   };
 
+  const resetFormState = () => {
+    reset({
+      port: selectedPort,
+      boatData: {
+        fleet_owner: "",
+        fleet_registration: 0,
+        fleet_hp: 0,
+        fleet_crew: 0,
+        fleet_max_weight: 0,
+        fleet_length: 0,
+      },
+      effortToday: {
+        hours_fished: 0,
+        gear_entries: [],
+      },
+      effortLastWeek: {
+        gear_entries: [],
+      },
+      location: null,
+      fishingDetails: {
+        fish_entries: [],
+      },
+    });
+  };
+
+  // Form validation logic
   const isFormValid = () => {
-    // Boat info must be filled
-    // if (!formValidation.boatInfo) {
-    //   return false;
-    // }
-  
-    // Allow submission if only Boat Details are filled
-    if (
-      !hasEffortToday &&
-      !hasEffortLastWeek
-    ) {
-      return true;
+    // Basic validation - port is required
+    if (!formValues?.port) {
+      return false;
     }
-  
-    // If Effort Today is filled, location and fishing details are required
+    
+    // If effort today data exists, location and fishing details are required
     if (hasEffortToday) {
-      if (!formValidation.location || !formValidation.fishingDetails) {
-        return false;
-      }
+      return !!formValues?.location && (formValues?.fishingDetails?.fish_entries ?? []).length > 0;
     }
-  
+    
+    // Otherwise just require some basic boat info
     return true;
   };
-  
-  const resetFormState = () => {
-    reset(defaultValues);
 
-    setSelectedLocation(null);
-    setSelectedGears([]);
-    setHasEffortToday(false);
-    setHasEffortLastWeek(false);
-
-    setFormValidation({
-      port: !!selectedPort,
-      boatInfo: false,
-      effortToday: null,
-      effortLastWeek: null,
-      location: null,
-      fishingDetails: null,
-    });
-
-    setResetCounter((prev) => prev + 1);
-  };
-
-  const handleCloseNotification = useCallback(() => {
-    setIsNotificationVisible(false);
-  }, []);
-
-  const handleBoatInfoChange = useCallback(
-    (data: BoatData) => {
-      setValue("LandingFormDTO.boatData", data);
-      const isValid =
-        !!data.fleet_owner &&
-        data.fleet_registration > 0 &&
-        data.fleet_hp > 0 &&
-        data.fleet_crew > 0 &&
-        data.fleet_max_weight > 0 &&
-        data.fleet_length > 0;
-      updateValidation("boatInfo", isValid);
-    },
-    [setValue]
-  );
-
-  const handleEffortTodayChange = useCallback(
-    (data: EffortTodayData) => {
-      setValue("LandingFormDTO.effortTodayData", data);
-
-      const hasData = data.hours_fished > 0 || data.gear_entries.length > 0;
-      setHasEffortToday(hasData);
-
-      const isValid = hasData
-        ? data.hours_fished > 0 && data.gear_entries.length > 0
-        : null;
-      updateValidation("effortToday", isValid);
-
-      if (hasData) {
-        setSelectedGears(data.gear_entries);
-      } else {
-        setSelectedGears([]);
-      }
-
-      if (!hasData) {
-        updateValidation("location", null);
-        updateValidation("fishingDetails", null);
-      }
-    },
-    [setValue]
-  );
-
-  const handleEffortLastWeekChange = useCallback(
-    (data: EffortLastWeekData) => {
-      setValue("LandingFormDTO.effortLastWeekData", data);
-      const hasData = data.gear_entries.length > 0;
-      setHasEffortLastWeek(hasData);
-      const isValid = hasData ? true : null;
-      updateValidation("effortLastWeek", isValid);
-    },
-    [setValue]
-  );
-
-  const handleLocationsChange = useCallback(
-    (data: MapLocation | null) => {
-      setValue("LandingFormDTO.location", data);
-      setSelectedLocation(data);
-
-      // Only validate if effort today is being filled
-      if (hasEffortToday) {
-        updateValidation("location", !!data);
-      }
-    },
-    [setValue, hasEffortToday]
-  );
-
-  const handleFishingDetailsChange = useCallback(
-    (data: FishingDetailsData) => {
-      setValue("LandingFormDTO.fishingDetails", data);
-
-      // Only validate if effort today is being filled
-      if (hasEffortToday) {
-        const isValid = data.fish_entries.length > 0;
-        updateValidation("fishingDetails", isValid);
-      }
-    },
-    [setValue, hasEffortToday]
-  );
-
-  const onSubmit = async (formData: LandingsForm) => {
+  const onSubmit = async (formData: LandingFormValues) => {
     try {
       setNotification(null);
       setIsNotificationVisible(false);
 
-      // Extract data from the form
-      const {
-        port,
-        boatData,
-        effortTodayData,
-        effortLastWeekData,
-        location,
-        fishingDetails,
-      } = formData.LandingFormDTO;
-
-      if (!port) {
+      if (!formData.port) {
         throw new Error("Port must be selected");
       }
 
-      // Structure data according to the CreateFormLandingDto expected by the backend
+      // Structure data according to the API expectations
       const apiPayload: LandingFormDTO = {
         form: {
-          port_id: port,
+          port_id: formData.port,
           user_id: 1,
-          fisher_name: boatData.fleet_owner,
+          fisher_name: formData.boatData.fleet_owner,
         },
         boat_details: {
-          fleet_owner: boatData.fleet_owner || "Unknown",
-          fleet_registration: boatData.fleet_registration || 0,
-          fleet_hp: boatData.fleet_hp || 0,
-          fleet_crew: boatData.fleet_crew || 0,
-          fleet_max_weight: boatData.fleet_max_weight || 0,
-          fleet_length: boatData.fleet_length || 0,
+          fleet_owner: formData.boatData.fleet_owner || "Unknown",
+          fleet_registration: formData.boatData.fleet_registration || 0,
+          fleet_hp: formData.boatData.fleet_hp || 0,
+          fleet_crew: formData.boatData.fleet_crew || 0,
+          fleet_max_weight: formData.boatData.fleet_max_weight || 0,
+          fleet_length: formData.boatData.fleet_length || 0,
         }
       };
 
       // Only add landing if location is provided
-      if (location && location.lat && location.lng) {
+      if (formData.location) {
         apiPayload.landing = {
-          latitude: location.lat,
-          longitude: location.lng,
+          latitude: formData.location.lat,
+          longitude: formData.location.lng,
         };
       }
 
       // Only include landing data if effort today is filled
       if (hasEffortToday) {
         // Only add fish entries if there are any
-        if (fishingDetails.fish_entries && fishingDetails.fish_entries.length > 0) {
-          apiPayload.fish = fishingDetails.fish_entries.map((entry) => ({
+        if (formData.fishingDetails.fish_entries.length > 0) {
+          apiPayload.fish = formData.fishingDetails.fish_entries.map(entry => ({
             specie_code: entry.specie_code,
             gear_code: entry.gear_code,
             fish_weight: entry.fish_weight,
@@ -355,16 +222,16 @@ function EffortAndLandingPage() {
         }
 
         // Only add effort if hours_fished is provided
-        if (effortTodayData.hours_fished > 0) {
+        if (formData.effortToday.hours_fished > 0 && formData.effortToday.hours_fished <= 24) {
           apiPayload.effort = {
-            hours_fished: effortTodayData.hours_fished,
+            hours_fished: formData.effortToday.hours_fished,
           };
         }
 
         // Only add gear details if there are any
-        if (effortTodayData.gear_entries && effortTodayData.gear_entries.length > 0) {
-          apiPayload.gearDetail = effortTodayData.gear_entries.flatMap((gear) =>
-            gear.gear_details.map((detail) => ({
+        if (formData.effortToday.gear_entries.length > 0) {
+          apiPayload.gearDetail = formData.effortToday.gear_entries.flatMap(gear =>
+            gear.gear_details.map(detail => ({
               gear_code: gear.gear_code,
               detail_name: detail.detail_name,
               detail_value: detail.detail_value,
@@ -374,8 +241,8 @@ function EffortAndLandingPage() {
       }
 
       // Only add last week data if there are entries
-      if (hasEffortLastWeek && effortLastWeekData.gear_entries.length > 0) {
-        apiPayload.lastw = effortLastWeekData.gear_entries.map((gear) => ({
+      if (formData.effortLastWeek.gear_entries.length > 0) {
+        apiPayload.lastw = formData.effortLastWeek.gear_entries.map(gear => ({
           gear_code: gear.gear_code,
           days_fished: gear.days_used,
         }));
@@ -385,8 +252,6 @@ function EffortAndLandingPage() {
 
       // Send data to the API endpoint
       const response = await submitLandingForm(apiPayload);
-
-      // Handle successful response
       console.log("API Response:", response);
 
       // Clear the submission history cache to force a refresh on the next visit
@@ -396,8 +261,7 @@ function EffortAndLandingPage() {
       // Show success message
       setNotification({
         type: "success",
-        message:
-          "Form submitted successfully! Your data has been recorded.",
+        message: "Form submitted successfully! Your data has been recorded.",
       });
       setIsNotificationVisible(true);
 
@@ -406,13 +270,10 @@ function EffortAndLandingPage() {
     } catch (error) {
       console.error("Error submitting form:", error);
 
-      // Show more detailed error message if available
+      // Show error message
       let errorMessage = "There was an error submitting the form. Please try again.";
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null) {
-        // Try to extract error message from response
-        errorMessage = JSON.stringify(error);
       }
 
       setNotification({
@@ -423,11 +284,7 @@ function EffortAndLandingPage() {
     }
   };
 
-  useEffect(() => {
-    setValue("LandingFormDTO.port", selectedPort);
-    updateValidation("port", !!selectedPort);
-  }, [selectedPort, setValue]);
-
+  // Show loading state
   if (isLoading) {
     return (
       <div className="flex justify-center py-10">
@@ -462,47 +319,47 @@ function EffortAndLandingPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Boat Information*/}
         <BoatInfo
           required={false}
-          onChange={handleBoatInfoChange}
-          key={`boat-info-${resetCounter}`}
+          control={control}
         />
 
+        {/* Effort Last Week */}
         <EffortLastWeek
           required={false}
-          onChange={handleEffortLastWeekChange}
-          gears={gears}  // Pass gears data
-          key={`effort-last-week-${resetCounter}`}
+          control={control}
+          gears={gears}
         />
 
+        {/* Effort Today */}
         <EffortToday
           required={false}
-          onChange={handleEffortTodayChange}
-          gears={gears}  // Pass gears data
-          key={`effort-today-${resetCounter}`}
+          control={control}
+          gears={gears}
         />
 
-        {/* Conditionally show these sections only if Effort Today has data */}
+        {/* Only show these sections if Effort Today has data */}
         {hasEffortToday && (
           <>
+            {/* Map for Location Selection */}
             <MapWithMarkers
               required={true}
-              onChange={handleLocationsChange}
-              key={`map-markers-${resetCounter}`}
+              control={control}
+              setValue ={setValue}
             />
 
+            {/* Fishing Details */}
             <FishingDetails
               required={true}
-              selectedLocation={selectedLocation}
-              todaysGears={selectedGears}
-              gears={gears}         // Pass gears data
-              species={species}     // Pass species data
-              onChange={handleFishingDetailsChange}
-              key={`fishing-details-${resetCounter}`}
+              control={control}
+              gears={gears}
+              species={species}
             />
           </>
         )}
 
+        {/* Submit Button */}
         <SubmitButton
           isSubmitting={isSubmitting}
           disabled={!isFormValid()}
@@ -510,6 +367,7 @@ function EffortAndLandingPage() {
         />
       </form>
 
+      {/* Notification component */}
       {notification && (
         <Notification
           type={notification.type}

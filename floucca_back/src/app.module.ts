@@ -22,6 +22,7 @@ import {FormulasModule} from "./formulas/formulas.module";
 import { UserModule } from './backend/users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import {PeriodModule} from "./backend/period/period.module";
+import {ActiveDaysModule} from "./backend/active_days/activeDays.module";
 
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,
@@ -29,7 +30,7 @@ import {PeriodModule} from "./backend/period/period.module";
     FormModule, GearModule, GearUsageModule, GearDetailModule,
   ScheduleModule, SenseLastwModule, LandingsModule, PortsModule,
   RegionModule, RoleModule, SpecieModule, UserRoleModule, 
-  UserCoopModule,PeriodModule, FormulasModule, UserModule, ConfigModule.forRoot()],
+  UserCoopModule,PeriodModule, FormulasModule, UserModule, ActiveDaysModule, ConfigModule.forRoot()],
   providers: [],
 })
 export class AppModule {}

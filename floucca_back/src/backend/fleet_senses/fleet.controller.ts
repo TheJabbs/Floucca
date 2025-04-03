@@ -7,6 +7,7 @@ import {CreateFleetFormDto} from "./dto/create_fleet_form.dto";
 import {transformFormGearUsageToGearUsage} from "../../utils/transformation/form_gear_usage_to_gear_usage.mapper";
 import {SenseFormContentInterface} from "./interface/sense_form_content.interface";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
+import {IsOptional} from "class-validator";
 
 @Controller('api/dev/fleet_senses')
 export class FleetController {
@@ -65,7 +66,7 @@ export class FleetController {
     }
 
     @Get('/report/:id')
-    getFleetSenses(@Body() filter: GeneralFilterDto, @Param('id') id: number) {
+    getFleetSenses(@Body() filter: GeneralFilterDto, @Param('id')  id?: number) {
         return this.fleetService.generateFleetReport(filter,id);
     }
 

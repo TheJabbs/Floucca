@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   LineChart,
   Line,
@@ -17,48 +17,62 @@ interface MultiLineBarChartFishProps {
 interface ChartData {
   period: string;
   specie_code: number;
-  avg_quantity: number;
+  value: number; // Ensuring it's always a number
 }
 
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; 
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
+const METRICS: { key: keyof FishStatInterface; label: string }[] = [
+  { key: "avg_quantity", label: "Quantity" },
+  { key: "avg_weight", label: "Weight" },
+  { key: "avg_length", label: "Length" },
+  { key: "avg_price", label: "Price" },
+];
+
 const MultiLineBarChartFish: React.FC<MultiLineBarChartFishProps> = ({ fishStats }) => {
-  const processedData: ChartData[] = [];
+  const [selectedMetric, setSelectedMetric] = useState<keyof FishStatInterface>("avg_quantity");
 
-  Object.entries(fishStats).forEach(([period, species]) => {
-    Object.entries(species).forEach(([specieCode, stats]) => {
-      processedData.push({
-        period: formatDate(period), // Format period as Month Day, Year
-        specie_code: Number(specieCode),
-        avg_quantity: stats.avg_quantity,
-      });
-    });
-  });
+  const processedData: ChartData[] = Object.entries(fishStats).flatMap(([period, species]) =>
+    Object.entries(species).map(([specieCode, stats]) => ({
+      period: formatDate(period),
+      specie_code: Number(specieCode),
+      value: stats[selectedMetric] as number, 
+    }))
+  );
 
-  // Get all unique species codes
   const uniqueSpecies = Array.from(new Set(processedData.map((data) => data.specie_code)));
 
   return (
     <div>
-      <h2>Fish Quantity Over Time by Species</h2>
+      <h2>Fish Statistics Over Time</h2>
+      
+      <select onChange={(e) => setSelectedMetric(e.target.value as keyof FishStatInterface)}>
+        {METRICS.map((metric) => (
+          <option key={metric.key} value={metric.key}>
+            {metric.label}
+          </option>
+        ))}
+      </select>
+
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={processedData}>
           <XAxis dataKey="period" />
-          <YAxis label={{ value: "Quantity", angle: -90, position: "insideLeft" }} />
+          <YAxis label={{ value: selectedMetric.replace("avg_", ""), angle: -90, position: "insideLeft" }} />
           <Tooltip />
           <Legend />
+
           {uniqueSpecies.map((specie, index) => (
             <Line
               key={specie}
               type="monotone"
-              dataKey="avg_quantity"
-              stroke={COLORS[index % COLORS.length]} 
-              name={`Species ${specie}`} 
+              dataKey="value"
+              stroke={COLORS[index % COLORS.length]}
+              name={`Species ${specie}`}
             />
           ))}
         </LineChart>

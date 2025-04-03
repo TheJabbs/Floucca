@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { Control, useWatch } from "react-hook-form";
 import {
   MapContainer,
   TileLayer,
@@ -30,7 +31,8 @@ interface MapLocation {
 
 interface MapSelectionProps {
   required?: boolean;
-  onChange: (location: MapLocation | null) => void;
+  control: Control<any>;
+  setValue: (name: "location", value: MapLocation | null) => void;
 }
 
 function MapEvents({
@@ -46,14 +48,19 @@ function MapEvents({
   return null;
 }
 
-const MapSelection: React.FC<MapSelectionProps> = ({ 
+const MapWithMarkers: React.FC<MapSelectionProps> = ({ 
   required = false, 
-  onChange 
+  control,
+  setValue
 }) => {
-  const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
-
+  // Set up default center and zoom
   const defaultCenter: [number, number] = [34.1, 35.9];
   const defaultZoom = 8;
+  
+  const location = useWatch({
+    control,
+    name: "location"
+  });
 
   const handleMapClick = (lat: number, lng: number) => {
     const newLocation: MapLocation = {
@@ -63,13 +70,13 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       lng,
     };
     
-    setSelectedLocation(newLocation);
-    onChange(newLocation);
+    // Update form state
+    setValue("location", newLocation);
   };
 
   const removeMarker = () => {
-    setSelectedLocation(null);
-    onChange(null);
+    // Clear location in form state
+    setValue("location", null);
   };
 
   return (
@@ -77,6 +84,7 @@ const MapSelection: React.FC<MapSelectionProps> = ({
       <div className="flex items-center gap-3 text-gray-600">
         <h2 className="text-xl font-semibold">
           Select Fishing Location
+          {required && <span className="text-red-500">*</span>}
         </h2>
       </div>
 
@@ -99,36 +107,36 @@ const MapSelection: React.FC<MapSelectionProps> = ({
         </div>
 
         {/* Map Container */}
-          <div className="relative h-96 w-full border rounded-lg overflow-hidden shadow-inner">
-            <MapContainer
-              center={defaultCenter}
-              zoom={defaultZoom}
-              className="h-full w-full"
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <MapEvents onMapClick={handleMapClick} />
+        <div className="relative h-96 w-full border rounded-lg overflow-hidden shadow-inner">
+          <MapContainer
+            center={defaultCenter}
+            zoom={defaultZoom}
+            className="h-full w-full"
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <MapEvents onMapClick={handleMapClick} />
 
-              {selectedLocation && (
-                <Marker
-                  position={[selectedLocation.lat, selectedLocation.lng]}
-                  icon={icon}
-                  eventHandlers={{
-                    click: removeMarker,
-                  }}
-                >
-                  <Tooltip permanent direction="top" offset={[0, -20]}>
-                    {selectedLocation.name}
-                  </Tooltip>
-                </Marker>
-              )}
-            </MapContainer>
-          </div>
+            {location && (
+              <Marker
+                position={[location.lat, location.lng]}
+                icon={icon}
+                eventHandlers={{
+                  click: removeMarker,
+                }}
+              >
+                <Tooltip permanent direction="top" offset={[0, -20]}>
+                  {location.name}
+                </Tooltip>
+              </Marker>
+            )}
+          </MapContainer>
+        </div>
       </div>
     </div>
   );
 };
 
-export default MapSelection;
+export default MapWithMarkers;

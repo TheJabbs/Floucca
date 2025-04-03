@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AlertCircle, Trash2, Plus } from 'lucide-react';
+import { Control, useFieldArray, useWatch } from "react-hook-form";
 
 interface Gear {
   gear_code: number;
@@ -8,69 +9,65 @@ interface Gear {
   equipment_name: string;
 }
 
+interface GearFormData {
+  gear_code: number;
+  months: number[];
+}
+
 interface GearUsageProps {
   gears: Gear[];
-  onChange: (data: { gear_code: number; months: number[] }[]) => void;
   required?: boolean;
+  control: Control<any>;
 }
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
-const GearUsageForm: React.FC<GearUsageProps> = ({ gears, onChange, required = false }) => {
-  const [selectedGears, setSelectedGears] = useState<Array<{ 
-    gear_code: number; 
-    gear_name: string; 
-    months: number[] 
-  }>>([]);
-  
-  const [currentSelection, setCurrentSelection] = useState({
-    gear_code: 0,
-    months: [] as number[]
+const GearUsageForm: React.FC<GearUsageProps> = ({ gears, required = false, control }) => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "gearData"
   });
+  
+  const [currentGearCode, setCurrentGearCode] = useState<number>(0);
+  const [selectedMonths, setSelectedMonths] = useState<number[]>([]);
+
+  const currentGearData = useWatch({
+    control,
+    name: "gearData",
+    defaultValue: []
+  }) as GearFormData[];
 
   const availableGears = gears.filter(gear => 
-    !selectedGears.some(selected => selected.gear_code === gear.gear_code)
+    !currentGearData.some((selected: GearFormData) => selected.gear_code === gear.gear_code)
   );
 
   const handleGearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCurrentSelection(prev => ({
-      ...prev,
-      gear_code: Number(e.target.value)
-    }));
+    setCurrentGearCode(Number(e.target.value));
   };
 
   const handleMonthToggle = (month: number) => {
-    setCurrentSelection(prev => {
-      const months = prev.months.includes(month)
-        ? prev.months.filter(m => m !== month)
-        : [...prev.months, month].sort((a, b) => a - b);
-      return { ...prev, months };
-    });
+    setSelectedMonths(prev => 
+      prev.includes(month)
+        ? prev.filter(m => m !== month)
+        : [...prev, month].sort((a, b) => a - b)
+    );
   };
 
   const handleAddGear = () => {
-    if (currentSelection.gear_code === 0 || currentSelection.months.length === 0) return;
+    if (currentGearCode === 0 || selectedMonths.length === 0) return;
 
-    const selectedGear = gears.find(g => g.gear_code === currentSelection.gear_code);
-    if (selectedGear) {
-      const newGear = {
-        gear_code: selectedGear.gear_code,
-        gear_name: selectedGear.gear_name,
-        months: currentSelection.months
-      };
-      
-      const updatedGears = [...selectedGears, newGear];
-      setSelectedGears(updatedGears);
-      onChange(updatedGears);
-      
-      setCurrentSelection({ gear_code: 0, months: [] });
-    }
+    append({
+      gear_code: currentGearCode,
+      months: selectedMonths
+    });
+
+    setCurrentGearCode(0);
+    setSelectedMonths([]);
   };
 
-  const handleRemoveGear = (index: number) => {
-    const updatedGears = selectedGears.filter((_, i) => i !== index);
-    setSelectedGears(updatedGears);
-    onChange(updatedGears);
+  const getGearName = (gearCode: number) => {
+    const gear = gears.find(g => g.gear_code === gearCode);
+    return gear ? gear.gear_name : `Gear ${gearCode}`;
   };
 
   return (
@@ -83,7 +80,7 @@ const GearUsageForm: React.FC<GearUsageProps> = ({ gears, onChange, required = f
             Select Gear {required && <span className="text-red-500">*</span>}
           </label>
           <select
-            value={currentSelection.gear_code}
+            value={currentGearCode}
             onChange={handleGearChange}
             className="w-48 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             disabled={availableGears.length === 0}
@@ -108,7 +105,7 @@ const GearUsageForm: React.FC<GearUsageProps> = ({ gears, onChange, required = f
                 type="button"
                 onClick={() => handleMonthToggle(month)}
                 className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors
-                  ${currentSelection.months.includes(month)
+                  ${selectedMonths.includes(month)
                     ? 'bg-blue-500 border-blue-500 text-white'
                     : 'border-gray-300 text-gray-600 hover:border-blue-400'
                   }`}
@@ -123,7 +120,7 @@ const GearUsageForm: React.FC<GearUsageProps> = ({ gears, onChange, required = f
           <button
             type="button"
             onClick={handleAddGear}
-            disabled={currentSelection.gear_code === 0 || currentSelection.months.length === 0}
+            disabled={currentGearCode === 0 || selectedMonths.length === 0}
             className="inline-flex items-center px-2 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -131,36 +128,39 @@ const GearUsageForm: React.FC<GearUsageProps> = ({ gears, onChange, required = f
         </div>
       </div>
 
-      {selectedGears.length > 0 ? (
+      {fields.length > 0 ? (
         <div className="space-y-2 mt-4">
           <h3 className="font-medium text-gray-700 flex items-center gap-2">
             Added Gear Usage
           </h3>
           <div className="divide-y divide-gray-100">
-            {selectedGears.map((gear, index) => (
-              <div
-                key={index}
-                className="p-4 bg-gray-50 rounded-lg transition-colors my-2"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <h4 className="font-medium text-gray-900">
-                      {gear.gear_name}
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Used in months: {gear.months.join(', ')}
-                    </p>
+            {fields.map((field, index) => {
+              const fieldData = field as unknown as GearFormData & { id: string };
+              return (
+                <div
+                  key={field.id}
+                  className="p-4 bg-gray-50 rounded-lg transition-colors my-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <h4 className="font-medium text-gray-900">
+                        {getGearName(fieldData.gear_code)}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Used in months: {fieldData.months.join(', ')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => remove(index)}
+                      className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
+                      type="button"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleRemoveGear(index)}
-                    className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
-                    type="button"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ) : (

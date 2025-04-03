@@ -4,6 +4,7 @@ import {CreateFleetDto} from "./dto";
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 import {SenseFormContentInterface} from "./interface/sense_form_content.interface";
+import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 
 @Injectable()
 export class FleetService {
@@ -146,8 +147,10 @@ export class FleetService {
     }
 
     async createFleetSensesForm(content: SenseFormContentInterface): Promise<ResponseMessage<any>> {
+        const boatDetails = await this.prisma.boat_details.create({ data: content.boatDetails });
+        content.form.boat_detail = boatDetails.boat_id;
+
         return await this.prisma.$transaction(async (prisma) => {
-            // Get the latest period or create one if it doesn't exist
             let newestPeriod = await prisma.period.findFirst({
                 orderBy: { period_date: 'desc' }
             });
@@ -160,18 +163,11 @@ export class FleetService {
 
             content.form.period_date = newestPeriod.period_date;
 
-            // Create boat details
-            const boatDetails = await prisma.boat_details.create({ data: content.boatDetails });
-            content.form.boat_detail = boatDetails.boat_id;
-
-            // Create form
             const form = await prisma.form.create({ data: content.form });
             if (!form) throw new Error("Failed to create form");
 
-            // Create fleet senses entry
             const sense = await prisma.fleet_senses.create({ data: { form_id: form.form_id } });
 
-            // Create gear usage entries in parallel
             if (sense && content.gearUsage.length > 0) {
                 await Promise.all(
                     content.gearUsage.map(gear =>
@@ -188,11 +184,77 @@ export class FleetService {
 
             return { message: 'Fleet senses form created successfully' };
         }).catch(async (error) => {
+            await this.prisma.boat_details.delete({ where: { boat_id: boatDetails.boat_id} });
             console.error("Transaction failed:", error);
             return { message: `Failed to create fleet senses form: ${error.message}` };
         });
     }
 
+    async generateFleetReport(filter: GeneralFilterDto, month?: number): Promise<ResponseMessage<any>> {
+        const time = new Date (filter.period);
+        const start = new Date(time.getFullYear(), 0, 1);
+        const end = new Date(time.getFullYear(), 11, 31);
 
+        const fleet = await this.prisma.fleet_senses.findMany({
+            where: {
+                form: {
+                    creation_time: {
+                        gte: start,
+                        lte: end
+                    },
+                    port_id: filter.port_id ? {in: filter.port_id} : undefined,
+                },
+                gear_usage: {
+                    some: {
+                        months: month ? month : undefined,
+                        gear_code: filter.gear_code ? {in: filter.gear_code} : undefined,
+                    }
+                }
+            },
+            include: {
+                form:{
+                    select:{
+                        period_date: true
+                    }
+                },
+                gear_usage: {
+                    select: {
+                        gear_code: true,
+                        months: true
+                    }
+                }
+            }
+        });
+
+        if (!fleet || fleet.length === 0) {
+            throw new NotFoundException('No fleet senses found');
+        }
+
+        const record: Record<string, number[]> = {}
+
+        fleet.forEach((item) => {
+            item.gear_usage.forEach((gear) => {
+                if (!record[gear.gear_code]) {
+                    record[gear.gear_code] = [];
+                }
+                record[gear.gear_code].push(gear.months);
+            });
+        });
+
+        const result = Object.entries(record).map(([gear_code, months]) => {
+            return {
+                gear_code,
+                months: months.reduce((acc, month) => {
+                    acc[month] = (acc[month] || 0) + 1;
+                    return acc;
+                }, {})
+            };
+        });
+
+        return {
+            message: "Fleet report generated",
+            data: result
+        }
+    }
 
 }

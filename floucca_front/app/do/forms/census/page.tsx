@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useFormsData } from "@/contexts/FormDataContext";
 import { usePort } from "@/contexts/PortContext";
 import PortDropdown from "@/components/forms-c/port-dropdown";
@@ -34,23 +34,22 @@ interface FleetSensesForm {
 
 function FleetSensesPage() {
   const { selectedPort } = usePort();
-  // Use cached data from our context
   const { ports, gears, isLoading, error } = useFormsData();
-
   const [notification, setNotification] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
-  const [resetCounter, setResetCounter] = useState(0);
 
   const {
     handleSubmit,
     setValue,
     getValues,
     reset,
-    formState: { isSubmitting },
+    control,
+    formState: { isSubmitting, isValid },
   } = useForm<FleetSensesForm>({
+    mode: "onChange",
     defaultValues: {
       boatData: {
         fleet_owner: "",
@@ -65,53 +64,14 @@ function FleetSensesPage() {
     },
   });
 
+  const formValues = useWatch({ control });
+  const gearIsValid = (formValues?.gearData ?? []).length > 0;
+  const portIsValid = formValues?.port != null;
+  const isButtonEnabled = isValid && gearIsValid && portIsValid;
+
   useEffect(() => {
     setValue("port", selectedPort);
-    checkFormValidity(
-      getValues("boatData"),
-      getValues("gearData"),
-      selectedPort
-    );
   }, [selectedPort, setValue, getValues]);
-
-  const [isValid, setIsValid] = useState(false);
-
-  const handleBoatChange = (data: BoatData) => {
-    setValue("boatData", data);
-    checkFormValidity(data, getValues("gearData"), getValues("port"));
-  };
-
-  const handleGearChange = (data: GearFormValues[]) => {
-    setValue("gearData", data);
-    checkFormValidity(getValues("boatData"), data, getValues("port"));
-  };
-
-  const checkFormValidity = (
-    boatData: BoatData | null,
-    gearData: GearFormValues[] | null,
-    port: number | null
-  ) => {
-    const currentBoatData = boatData || getValues("boatData");
-    const currentGearData = gearData || getValues("gearData");
-    const currentPort = port !== undefined ? port : getValues("port");
-
-    const isBoatValid =
-      currentBoatData &&
-      !!currentBoatData.fleet_owner &&
-      currentBoatData.fleet_registration > 0 &&
-      currentBoatData.fleet_hp > 0 &&
-      currentBoatData.fleet_crew > 0 &&
-      currentBoatData.fleet_max_weight > 0 &&
-      currentBoatData.fleet_length > 0;
-
-    const isGearValid =
-      currentGearData?.length > 0 &&
-      currentGearData.every((gear) => gear.gear_code && gear.months.length > 0);
-
-    const isPortValid = !!currentPort;
-
-    setIsValid(isBoatValid && isGearValid && isPortValid);
-  };
 
   const handleCloseNotification = () => {
     setIsNotificationVisible(false);
@@ -130,7 +90,6 @@ function FleetSensesPage() {
       gearData: [],
       port: selectedPort,
     });
-    setResetCounter((prev) => prev + 1);
   };
 
   const onSubmit = async (formData: FleetSensesForm) => {
@@ -220,20 +179,11 @@ function FleetSensesPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <BoatInfo
-          required={true}
-          onChange={handleBoatChange}
-          key={`boat-info-${resetCounter}`}
-        />
-        <GearUsageForm
-          gears={gears}
-          onChange={handleGearChange}
-          required={true}
-          key={`gear-usage-${resetCounter}`}
-        />
+        <BoatInfo required={true} control={control} />
+        <GearUsageForm gears={gears} required={true} control={control} />
         <SubmitButton
           isSubmitting={isSubmitting}
-          disabled={!isValid}
+          disabled={!isButtonEnabled}
           label="Submit"
         />
       </form>

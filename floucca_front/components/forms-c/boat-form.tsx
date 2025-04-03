@@ -1,50 +1,16 @@
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import FormInput from "../utils/form-input";
+import React from "react";
+import { Control } from "react-hook-form";
 import { Anchor, Scale, FileText } from "lucide-react";
+import FormField from "../utils/form-field";
 
 interface BoatInfoProps {
   required?: boolean;
-  onChange: (boatData: BoatFormValues) => void;
+  control: Control<any>;
 }
 
-interface BoatFormValues {
-  fleet_owner: string;
-  fleet_registration: number;
-  fleet_hp: number;
-  fleet_crew: number;
-  fleet_max_weight: number;
-  fleet_length: number;
-}
-
-const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
-  const {
-    register,
-    watch,
-    formState: { errors },
-  } = useForm<BoatFormValues>({
-    defaultValues: {
-      fleet_owner: "",
-      fleet_registration: undefined,
-      fleet_hp: undefined,
-      fleet_crew: undefined,
-      fleet_max_weight: undefined,
-      fleet_length: undefined,
-    },
-  });
-
-  useEffect(() => {
-    const subscription = watch((value) => {
-      if (value.fleet_owner !== undefined) {
-        onChange(value as BoatFormValues);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [watch, onChange]);
-
+const BoatInfo: React.FC<BoatInfoProps> = ({ required, control }) => {
   return (
-    <div className="rounded-lg border border-blue-200 p-6 space-y-6 ">
+    <div className="rounded-lg border border-blue-200 p-6 space-y-6">
       <div className="flex items-center gap-3 text-gray-600">
         <h2 className="text-xl font-semibold">Boat Information</h2>
       </div>
@@ -58,24 +24,23 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
           </div>
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <FormInput
+              <FormField
+                control={control}
+                name="boatData.fleet_owner"
                 label="Boat Owner Name"
-                name="fleet_owner"
                 required={required}
                 placeholder="Enter owner's name"
-                register={register}
-                error={errors.fleet_owner?.message}
               />
             </div>
             <div className="flex items-center gap-2">
-              <FormInput
+              <FormField
+                control={control}
+                name="boatData.fleet_registration"
                 label="Boat Registration Number"
-                name="fleet_registration"
                 required={required}
                 placeholder="Enter registration number"
                 type="number"
-                register={register}
-                error={errors.fleet_registration?.message}
+                min={1}
               />
             </div>
           </div>
@@ -89,25 +54,25 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
           </div>
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <FormInput
-                label="Boat Fleet Hourse Power"
-                name="fleet_hp"
+              <FormField
+                control={control}
+                name="boatData.fleet_hp"
+                label="Boat Fleet Horse Power"
                 required={required}
-                placeholder="Enter fleet hourse power"
+                placeholder="Enter fleet horse power"
                 type="number"
-                register={register}
-                error={errors.fleet_hp?.message}
+                min={1}
               />
             </div>
             <div className="flex items-center gap-2">
-              <FormInput
+              <FormField
+                control={control}
+                name="boatData.fleet_crew"
                 label="Fleet Crew Count"
-                name="fleet_crew"
                 required={required}
                 placeholder="Enter crew count"
-                register={register}
                 type="number"
-                error={errors.fleet_crew?.message}
+                min={1}
               />
             </div>
           </div>
@@ -121,25 +86,25 @@ const BoatInfo: React.FC<BoatInfoProps> = ({ required, onChange }) => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
-              <FormInput
+              <FormField
+                control={control}
+                name="boatData.fleet_max_weight"
                 label="Boat Maximum Weight"
-                name="fleet_max_weight"
                 required={required}
                 placeholder="Enter max weight (kg)"
-                register={register}
                 type="number"
-                error={errors.fleet_max_weight?.message}
+                min={0}
               />
             </div>
             <div className="flex items-center gap-2">
-              <FormInput
+              <FormField
+                control={control}
+                name="boatData.fleet_length"
                 label="Boat Length"
-                name="fleet_length"
                 required={required}
                 placeholder="Enter length (meters)"
-                register={register}
                 type="number"
-                error={errors.fleet_length?.message}
+                min={0}
               />
             </div>
           </div>

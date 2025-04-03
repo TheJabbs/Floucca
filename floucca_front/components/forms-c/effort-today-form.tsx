@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import FormInput from "../utils/form-input";
+import React, { useState } from "react";
+import { useFieldArray, Control, Controller } from "react-hook-form";
 import { Plus, Trash2, AlertCircle } from "lucide-react";
 
-// Define interfaces for props and data structures
 interface Gear {
   gear_code: number;
   gear_name: string;
@@ -11,10 +9,29 @@ interface Gear {
   equipment_name: string;
 }
 
+interface GearDetail {
+  detail_name: string;
+  detail_value: string;
+  equipment_id: string;
+}
+
+interface GearEntry {
+  id?: string;
+  gear_code: number;
+  gear_details: GearDetail[];
+}
+
+interface LandingFormValues {
+  effortToday: {
+    hours_fished: number;
+    gear_entries: GearEntry[];
+  };
+}
+
 interface EffortTodayProps {
   required?: boolean;
-  gears: Gear[]; // Receive gears data as prop instead of fetching
-  onChange: (effortData: EffortTodayData) => void;
+  gears: Gear[];
+  control: Control<any>;
 }
 
 interface GearSpec {
@@ -24,58 +41,18 @@ interface GearSpec {
   unit?: string;
 }
 
-interface GearEntry {
-  gear_code: number;
-  gear_details: {
-    detail_name: string;
-    detail_value: string;
-    equipment_id: string;
-  }[];
-}
-
-interface EffortTodayData {
-  hours_fished: number;
-  gear_entries: GearEntry[];
-}
-
 const EffortToday: React.FC<EffortTodayProps> = ({
   required = false,
   gears,
-  onChange,
+  control,
 }) => {
-  // Local state for the currently selected gear and its specifications
   const [currentGearCode, setCurrentGearCode] = useState<number>(0);
   const [currentSpecs, setCurrentSpecs] = useState<Record<string, string>>({});
 
-  const {
-    register,
-    control,
-    getValues,
-    formState: { errors },
-  } = useForm<EffortTodayData>({
-    defaultValues: {
-      hours_fished: undefined,
-      gear_entries: [],
-    },
-  });
-
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "gear_entries",
+    name: "effortToday.gear_entries",
   });
-
-  // Update parent component with current form data
-  const updateParentForm = () => {
-    const currentData = {
-      hours_fished: getValues("hours_fished"),
-      gear_entries: fields,
-    };
-    onChange(currentData);
-  };
-
-  useEffect(() => {
-    updateParentForm();
-  }, [fields, getValues("hours_fished")]);
 
   const handleGearChange = (gearCode: number) => {
     setCurrentGearCode(Number(gearCode));
@@ -108,7 +85,6 @@ const EffortToday: React.FC<EffortTodayProps> = ({
 
     setCurrentGearCode(0);
     setCurrentSpecs({});
-    updateParentForm();
   };
 
   const getCurrentGearSpecs = (): GearSpec[] => {
@@ -119,7 +95,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
     return matchingGears.map((gear) => ({
       equipment_id: gear.equipment_id,
       equipment_name: gear.equipment_name,
-      type: "number", 
+      type: "number", // Default type, can be customized if needed
     }));
   };
 
@@ -135,7 +111,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
   };
 
   const availableGears = gears.filter(
-    (gear) => !fields.some((field) => field.gear_code === gear.gear_code)
+    (gear) => !fields.some((field) => (field as unknown as GearEntry).gear_code === gear.gear_code)
   );
 
   const uniqueGearOptions = Array.from(
@@ -157,16 +133,37 @@ const EffortToday: React.FC<EffortTodayProps> = ({
       <div className="space-y-3">
         {/* Hours fished input */}
         <div className="flex items-center gap-2">
-          <FormInput
-            label="Hours Fished Today"
-            name="hours_fished"
-            placeholder="(1-24 hours)"
-            required={required}
-            type="number"
-            min={1}
-            max={24}
-            register={register}
-            error={errors.hours_fished?.message}
+          <Controller
+            name="effortToday.hours_fished"
+            control={control}
+            rules={{
+              min: { value: 0, message: "Hours must be between 0 and 24" },
+              max: { value: 24, message: "Hours must be between 0 and 24" },
+            }}
+            render={({ field, fieldState: { error } }) => (
+              <div className="form-group mb-2 w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Hours Fished Today
+                  {required && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={24}
+                  placeholder="(1-24 hours)"
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    error
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }`}
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                />
+                {error && (
+                  <p className="text-red-500 text-sm mt-1">{error.message}</p>
+                )}
+              </div>
+            )}
           />
         </div>
 
@@ -247,46 +244,47 @@ const EffortToday: React.FC<EffortTodayProps> = ({
               Added Gear
             </h3>
             <div className="divide-y divide-gray-100 space-y-3">
-              {fields.map((entry, index) => (
-                <div
-                  key={entry.id}
-                  className="p-4 bg-gray-50 rounded-lg transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <h4 className="font-medium text-gray-900">
-                        {getGearName(entry.gear_code)}
-                      </h4>
-                      <div className="text-sm text-gray-600 flex flex-wrap gap-2">
-                        {entry.gear_details.map((detail) => (
-                          <span
-                            key={detail.detail_name}
-                            className="bg-gray-100 px-2 py-1 rounded-md flex items-center gap-1"
-                          >
-                            <span className="text-xs bg-blue-100 text-blue-700 px-1 rounded">
-                              {detail.equipment_id}
+              {fields.map((field, index) => {
+                // Cast field to GearEntry type
+                const entry = field as unknown as GearEntry;
+                return (
+                  <div
+                    key={field.id}
+                    className="p-4 bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <h4 className="font-medium text-gray-900">
+                          {getGearName(entry.gear_code)}
+                        </h4>
+                        <div className="text-sm text-gray-600 flex flex-wrap gap-2">
+                          {entry.gear_details.map((detail: GearDetail) => (
+                            <span
+                              key={detail.detail_name}
+                              className="bg-gray-100 px-2 py-1 rounded-md flex items-center gap-1"
+                            >
+                              <span className="text-xs bg-blue-100 text-blue-700 px-1 rounded">
+                                {detail.equipment_id}
+                              </span>
+                              <span className="font-medium">
+                                {detail.detail_name}:
+                              </span>
+                              {detail.detail_value}
                             </span>
-                            <span className="font-medium">
-                              {detail.detail_name}:
-                            </span>
-                            {detail.detail_value}
-                          </span>
-                        ))}
+                          ))}
+                        </div>
                       </div>
+                      <button
+                        onClick={() => remove(index)}
+                        className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
+                        type="button"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        remove(index);
-                        updateParentForm();
-                      }}
-                      className="p-2 text-red-500 hover:text-red-700 rounded-full hover:bg-red-50 transition-colors"
-                      type="button"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ) : (

@@ -190,7 +190,7 @@ export class FleetService {
         });
     }
 
-    async generateFleetReport(filter: GeneralFilterDto){
+    async generateFleetReport(filter: GeneralFilterDto, month?: number): Promise<ResponseMessage<any>> {
         const time = new Date (filter.period);
         const start = new Date(time.getFullYear(), 0, 1);
         const end = new Date(time.getFullYear(), 11, 31);
@@ -202,7 +202,13 @@ export class FleetService {
                         gte: start,
                         lte: end
                     },
-                    port_id: filter.port_id ? {in: filter.port_id} : undefined
+                    port_id: filter.port_id ? {in: filter.port_id} : undefined,
+                },
+                gear_usage: {
+                    some: {
+                        months: month ? month : undefined,
+                        gear_code: filter.gear_code ? {in: filter.gear_code} : undefined,
+                    }
                 }
             },
             include: {

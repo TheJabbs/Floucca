@@ -111,7 +111,9 @@ const ReportsLeftPanel: React.FC = () => {
   // Format date to display more readably
   const formatPeriodDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+    const month = date.toLocaleString('default', { month: 'short' });
+    const year = date.getFullYear();
+    return `${month} ${year}`;
   };
 
   // Convert API data to display format
@@ -139,7 +141,10 @@ const ReportsLeftPanel: React.FC = () => {
     );
   }
 
-  const periods = statsData ? Object.keys(statsData) : [];
+  // Sort periods from latest to oldest
+  const periods = statsData 
+    ? Object.keys(statsData).sort((a, b) => new Date(b).getTime() - new Date(a).getTime()) 
+    : [];
 
   return (
     <div

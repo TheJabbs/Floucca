@@ -10,6 +10,7 @@ import {GeneralFilterDto} from "../shared/dto/general_filter.dto";
 import {getDaysInMonthByDate} from "../utils/date/get_days_in_a_month";
 import {specieMapMapper} from "./utils/specie_map.mapper";
 import {countUniquenessInterface} from "./interface/countUniqueness.interface";
+import {FleetService} from "../backend/fleet_senses/fleet.service";
 
 @Injectable()
 export class FormulasService {
@@ -18,6 +19,7 @@ export class FormulasService {
         private readonly fishService: FishService,
         private readonly landingsService: LandingsService,
         private readonly senseLastWService: SenseLastwService,
+        private readonly fleetService: FleetService,
         private readonly gearService: GearService
     ) {
     }
@@ -30,11 +32,20 @@ export class FormulasService {
 
         console.log("Filter 1:", filter, "Filter 2:", filter2);
 
-        const [effortData, landingData, allEffort] = await Promise.all([
+        const [effortData, landingData, allEffort, fleetCensus] = await Promise.all([
             this.senseLastWService.getEffortsByFilter(filter),
             this.landingsService.getLandingsByFilter(filter),
-            this.senseLastWService.getEffortsByFilter(filter2)
+            this.senseLastWService.getEffortsByFilter(filter2),
+            this.fleetService.generateFleetReport(filter, new Date(filter.period).getMonth() + 1),
         ]);
+
+        let totalGears = 0;
+        fleetCensus.forEach((element) => {
+            const map = new Map<string, number>(Object.entries(element.months));
+            map.forEach((value, key) => {
+                totalGears += value;
+            });
+        })
 
         const pba = this.getPba(effortData);
         const cpue = this.getCpue(effortData.length, landingData);
@@ -238,7 +249,7 @@ export class FormulasService {
 
         allPeriods.forEach(period => {
             dataCombine[period] = {
-                strata: portsCount[period] || { port: 0, coop: 0, region: 0 },
+                strata: portsCount[period] || {port: 0, coop: 0, region: 0},
                 speciesKind: uniqueSpecies[period] || 0,
                 effortRecord: effortRecord[period] || 0,
                 landingRecord: landingRecord[period] || 0,
@@ -359,10 +370,10 @@ export class FormulasService {
         return result;
     }
 
-    async getRecordsEffortInPeriod(){
+    async getRecordsEffortInPeriod() {
         const form = await this.prisma.sense_lastw.findMany({
             distinct: ['form_id'],
-            select:{
+            select: {
                 form: {
                     select: {
                         period_date: true
@@ -387,13 +398,13 @@ export class FormulasService {
         return mapUsingPeriodDate;
     }
 
-    async getLandingRecordsByPeriod(){
+    async getLandingRecordsByPeriod() {
         const form = await this.prisma.landing.findMany({
             distinct: ['form_id'],
-            select:{
+            select: {
                 landing_id: true,
-                form:{
-                    select:{
+                form: {
+                    select: {
                         period_date: true
                     }
                 }
@@ -415,12 +426,12 @@ export class FormulasService {
         return mapUsingPeriodDate;
     }
 
-    async GetUniqueFishingGears(){
+    async GetUniqueFishingGears() {
         const form = await this.prisma.form.findMany({
-            select:{
+            select: {
                 period_date: true,
-                sense_lastw:{
-                    select:{
+                sense_lastw: {
+                    select: {
                         gear_code: true
                     }
                 }
@@ -431,7 +442,7 @@ export class FormulasService {
 
         form.forEach((element) => {
             const periodKey = element.period_date.toDateString();
-            const counter : Set<number> = new Set();
+            const counter: Set<number> = new Set();
 
 
             if (element.sense_lastw) {

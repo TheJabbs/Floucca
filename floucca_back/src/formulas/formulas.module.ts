@@ -5,9 +5,10 @@ import {FishModule} from "../backend/fish/fish.module";
 import {LandingsModule} from "../backend/landings/landings.module";
 import {SenseLastwModule} from "../backend/sense_lastw/sense_lastw.module";
 import {GearModule} from "../backend/gear/gear.module";
+import {FleetModule} from "../backend/fleet_senses/fleet.module";
 
 @Module({
-    imports: [FishModule, LandingsModule, SenseLastwModule, GearModule],
+    imports: [FishModule, LandingsModule, SenseLastwModule, GearModule, FleetModule],
     controllers: [FormulasController],
     providers: [FormulasService],
 })

@@ -65,7 +65,7 @@ export class FleetController {
         return this.fleetService.createFleetSensesForm(senseFormContent);
     }
 
-    @Get('/report/:id')
+    @Get('/report/:id' || '/report')
     getFleetSenses(@Body() filter: GeneralFilterDto, @Param('id')  id?: number) {
         return this.fleetService.generateFleetReport(filter,id);
     }

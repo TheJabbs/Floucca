@@ -190,7 +190,7 @@ export class FleetService {
         });
     }
 
-    async generateFleetReport(filter: GeneralFilterDto, month?: number): Promise<ResponseMessage<any>> {
+    async generateFleetReport(filter: GeneralFilterDto, month?: number) {
         const time = new Date (filter.period);
         const start = new Date(time.getFullYear(), 0, 1);
         const end = new Date(time.getFullYear(), 11, 31);
@@ -251,10 +251,8 @@ export class FleetService {
             };
         });
 
-        return {
-            message: "Fleet report generated",
-            data: result
-        }
+        return  result
+
     }
 
 }

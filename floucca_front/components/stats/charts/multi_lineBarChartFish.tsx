@@ -1,5 +1,13 @@
 import React from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from "recharts";
 import { FishStatInterface } from "../../../../floucca_back/src/backend/fish/interface/fish_stat.interface";
 
 interface MultiLineBarChartFishProps {
@@ -8,12 +16,11 @@ interface MultiLineBarChartFishProps {
 
 interface ChartData {
   period: string;
-  specie_name: string;
+  specie_code: number;
   avg_quantity: number;
-  avg_weight: number;
-  avg_length: number;
-  avg_price: number;
 }
+
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; 
 
 const MultiLineBarChartFish: React.FC<MultiLineBarChartFishProps> = ({ fishStats }) => {
   const processedData: ChartData[] = [];
@@ -22,28 +29,35 @@ const MultiLineBarChartFish: React.FC<MultiLineBarChartFishProps> = ({ fishStats
     Object.entries(species).forEach(([specieCode, stats]) => {
       processedData.push({
         period,
-        specie_name: stats.specie_name,
+        specie_code: Number(specieCode),
         avg_quantity: stats.avg_quantity,
-        avg_weight: stats.avg_weight,
-        avg_length: stats.avg_length,
-        avg_price: stats.avg_price,
       });
     });
   });
 
+  // all the unique species codes
+  const uniqueSpecies = Array.from(
+    new Set(processedData.map((data) => data.specie_code))
+  );
+
   return (
     <div>
-      <h2>Fish Statistics Over Time</h2>
+      <h2>Fish Quantity Over Time by Species</h2>
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={processedData}>
           <XAxis dataKey="period" />
-          <YAxis />
+          <YAxis label={{ value: "Quantity", angle: -90, position: "insideLeft" }} />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="avg_quantity" stroke="#8884d8" name="Avg Quantity" />
-          <Line type="monotone" dataKey="avg_weight" stroke="#82ca9d" name="Avg Weight" />
-          <Line type="monotone" dataKey="avg_length" stroke="#ffc658" name="Avg Length" />
-          <Line type="monotone" dataKey="avg_price" stroke="#ff7300" name="Avg Price" />
+          {uniqueSpecies.map((specie, index) => (
+            <Line
+              key={specie}
+              type="monotone"
+              dataKey="avg_quantity"
+              stroke={COLORS[index % COLORS.length]} 
+              name={`Species ${specie}`} 
+            />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     </div>

@@ -11,7 +11,7 @@ export default function FishStatsPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch("/api/fish/stats/avg");
+                const response = await fetch("http://localhost:4000/api/fish/stats/avg");
                 if (!response.ok) {
                     throw new Error("Failed to fetch fish stats");
                 }

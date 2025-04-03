@@ -6,5 +6,6 @@ import {FleetController} from "./fleet.controller";
     imports: [],
     controllers: [FleetController],
     providers: [FleetService],
+    exports: [FleetService],
 })
 export class FleetModule{}

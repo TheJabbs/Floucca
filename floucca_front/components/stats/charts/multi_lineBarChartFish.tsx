@@ -6,7 +6,7 @@ import {
   YAxis,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 import { FishStatInterface } from "../../../../floucca_back/src/backend/fish/interface/fish_stat.interface";
 
@@ -22,23 +22,26 @@ interface ChartData {
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; 
 
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+
 const MultiLineBarChartFish: React.FC<MultiLineBarChartFishProps> = ({ fishStats }) => {
   const processedData: ChartData[] = [];
 
   Object.entries(fishStats).forEach(([period, species]) => {
     Object.entries(species).forEach(([specieCode, stats]) => {
       processedData.push({
-        period,
+        period: formatDate(period), // Format period as Month Day, Year
         specie_code: Number(specieCode),
         avg_quantity: stats.avg_quantity,
       });
     });
   });
 
-  // all the unique species codes
-  const uniqueSpecies = Array.from(
-    new Set(processedData.map((data) => data.specie_code))
-  );
+  // Get all unique species codes
+  const uniqueSpecies = Array.from(new Set(processedData.map((data) => data.specie_code)));
 
   return (
     <div>

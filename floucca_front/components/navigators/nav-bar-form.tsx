@@ -13,25 +13,25 @@ const Navbar: React.FC = () => {
         <nav className="bg-white border-b shadow-sm">
             <div className="container mx-auto px-[5%] py-4 flex justify-between items-center">
                 <Link
-                    href="/dataoperator/forms/effort-and-landing"
+                    href="/do/forms/effort&landing"
                     className={`${
-                        pathname === '/effort-and-landing' ? 'text-blue-600 font-semibold' : 'text-gray-800'
+                        pathname === '/effort&landing' ? 'text-blue-600 font-semibold' : 'text-gray-800'
                     } font-medium hover:text-blue-600`}
                 >
                     Effort and Landing
                 </Link>
                 <Link
-                    href="/dataoperator/forms/census-form"
+                    href="/do/forms/census"
                     className={`${
-                        pathname === '/fleet-census' ? 'text-blue-600 font-semibold' : 'text-gray-800'
+                        pathname === '/census' ? 'text-blue-600 font-semibold' : 'text-gray-800'
                     } font-medium hover:text-blue-600`}
                 >
                     Fleet Census
                 </Link>
                 <Link
-                    href="/dataoperator/submission-history"
+                    href="/do/history"
                     className={`${
-                        pathname === '/submission-history' ? 'text-blue-600 font-semibold' : 'text-gray-800'
+                        pathname === '/history' ? 'text-blue-600 font-semibold' : 'text-gray-800'
                     } font-medium hover:text-blue-600`}
                 >
                     Submission History

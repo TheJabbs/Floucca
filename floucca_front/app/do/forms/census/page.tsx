@@ -179,7 +179,7 @@ function FleetSensesPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <BoatInfo required={true} control={control} />
+        <BoatInfo required={false} control={control} />
         <GearUsageForm gears={gears} required={true} control={control} />
         <SubmitButton
           isSubmitting={isSubmitting}

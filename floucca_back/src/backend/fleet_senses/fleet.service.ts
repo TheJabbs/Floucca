@@ -196,106 +196,109 @@ export class FleetService {
         const time = new Date(filter.period);
         const start = new Date(time.getFullYear(), 0, 1);
         const end = new Date(time.getFullYear(), 11, 31);
-
-        const [fleet, activeDays] = await Promise.all([
-            this.prisma.fleet_senses.findMany({
-                where: {
-                    form: {
-                        creation_time: {
-                            gte: start,
-                            lte: end
-                        },
-                        port_id: filter.port_id ? { in: filter.port_id } : undefined,
-                    },
-                    gear_usage: {
-                        some: {
-                            months: month ? month : undefined,
-                            gear_code: filter.gear_code ? { in: filter.gear_code } : undefined,
-                        }
-                    },
+      
+        const [fleet, activeDays, gearNames] = await Promise.all([
+          this.prisma.fleet_senses.findMany({
+            where: {
+              form: {
+                creation_time: {
+                  gte: start,
+                  lte: end
                 },
+                port_id: filter.port_id ? { in: filter.port_id } : undefined,
+              },
+              gear_usage: {
+                some: {
+                  months: month ? month : undefined,
+                  gear_code: filter.gear_code ? { in: filter.gear_code } : undefined,
+                }
+              },
+            },
+            select: {
+              gear_usage: {
                 select: {
-                    gear_usage: {
-                        select: {
-                            gear_code: true,
-                            months: true
-                        }
-                    }
+                  gear_code: true,
+                  months: true
                 }
-            }),
-            this.prisma.active_days.findMany({
-                where: {
-                    port_id: filter.port_id ? { in: filter.port_id } : undefined,
-                    gear_code: filter.gear_code ? { in: filter.gear_code } : undefined,
-                    period_date: {
-                        gt: start,
-                        lt: end
-                    }
-                }
-            }),
+              }
+            }
+          }),
+          this.prisma.active_days.findMany({
+            where: {
+              port_id: filter.port_id ? { in: filter.port_id } : undefined,
+              gear_code: filter.gear_code ? { in: filter.gear_code } : undefined,
+              period_date: {
+                gt: start,
+                lt: end
+              }
+            }
+          }),
+          this.prisma.gear.findMany({
+            select: {
+              gear_code: true,
+              gear_name: true,
+            }
+          })
         ]);
-
+      
         if (!fleet || fleet.length === 0) {
-            throw new NotFoundException('No fleet senses found');
+          throw new NotFoundException('No fleet senses found');
         }
-
-        // 1. Frequency of gear use per month
-        const freqMap = new Map<string, number>(); // key: gear_code_month
-
-        for (const sense of fleet) {
-            for (const usage of sense.gear_usage) {
-                const key = `${usage.gear_code}_${usage.months}`;
-                freqMap.set(key, (freqMap.get(key) || 0) + 1);
-            }
-        }
-
-        // 2. Calculate average active_days per (gear_code, month) across ports
-        const activeDayMap = new Map<string, number[]>(); // key: gear_code_month => array of values
-
-        for (const day of activeDays) {
-            if (day.gear_code === null) continue;
-            const month = day.period_date.getMonth() + 1;
-            const key = `${day.gear_code}_${month}`;
-            if (!activeDayMap.has(key)) {
-                activeDayMap.set(key, []);
-            }
-            activeDayMap.get(key)?.push(day.active_days);
-        }
-
-        const activeAverages = new Map<string, number>();
-        for (const [key, daysArr] of activeDayMap.entries()) {
-            const avg = daysArr.reduce((sum, val) => sum + val, 0) / daysArr.length;
-            activeAverages.set(key, Math.round(avg)); // rounding is optional
-        }
-
-        // 3. Merge into final report
-        const fleetReport = new Map<number, FleetReportInterface[]>();
-
-        for (const [key, freq] of freqMap.entries()) {
-            const [gear_code, monthStr] = key.split('_');
-            const m = parseInt(monthStr, 10);
-            const active = activeAverages.get(key) || 0;
-
-            const entry: FleetReportInterface = {
-                month: m,
-                freq,
-                activeDays: active
-            };
-
-            if (!fleetReport.has(m)) {
-                fleetReport.set(m, []);
-            }
-
-            fleetReport.get(m)?.push(entry);
-        }
-
-        const record: Record<number, FleetReportInterface[]> = {};
-
-        fleetReport.forEach((value, key) => {
-            record[key] = value;
+      
+        // Create a map for gear codes to gear names
+        const gearMap = new Map<number, string>();
+        gearNames.forEach(gear => {
+          gearMap.set(gear.gear_code, gear.gear_name);
         });
-
-        return record;
-    }
-
-}
+      
+        // Frequency of gear use per month
+        const freqMap = new Map<string, number>(); 
+        fleet.forEach(sense => {
+          sense.gear_usage.forEach(usage => {
+            const key = `${usage.gear_code}_${usage.months}`;
+            freqMap.set(key, (freqMap.get(key) || 0) + 1);
+          });
+        });
+      
+        const activeDayMap = new Map<string, number[]>(); 
+        activeDays.forEach(day => {
+          if (day.gear_code === null) return;
+          const month = day.period_date.getMonth() + 1;
+          const key = `${day.gear_code}_${month}`;
+          if (!activeDayMap.has(key)) {
+            activeDayMap.set(key, []);
+          }
+          activeDayMap.get(key)?.push(day.active_days);
+        });
+      
+        const activeAverages = new Map<string, number>();
+        activeDayMap.forEach((daysArr, key) => {
+          const avg = daysArr.reduce((sum, val) => sum + val, 0) / daysArr.length;
+          activeAverages.set(key, Math.round(avg)); 
+        });
+      
+        // Merge data into final report
+        const fleetReport: FleetReportInterface[] = [];
+        freqMap.forEach((freq, key) => {
+          const [gear_code, monthStr] = key.split('_');
+          const month = parseInt(monthStr, 10);
+          const active = activeAverages.get(key) || 0;
+      
+          // Fetch the gear name from the gearMap
+          const gearName = gearMap.get(parseInt(gear_code)) || 'Unknown Gear';
+      
+          fleetReport.push({
+            gear_code: parseInt(gear_code),
+            gear_name: gearName, // zdet gear name to the report
+            month,
+            freq,
+            activeDays: active
+          });
+        });
+      
+        return fleetReport;
+      }
+    }; 
+    //ghayaret l return w hatta zedet gear code w gear name la tenbaat aal front la hatta bl table bas fi chi 
+    //ghalat shuf http://localhost:3000/fleet_senses_report w hat date 1 10 2024 ekher whde yaane 
+    //w port beirut w shuf shu aam yaato l values       

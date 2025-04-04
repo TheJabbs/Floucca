@@ -90,45 +90,64 @@ export class ActiveDaysService {
         }
     }
 
+    async getActiveDaysByPortId(port_id: number, period: string) {
+        const ad = await this.prisma.active_days.findFirst({
+            where: {
+                port_id: port_id,
+                period_date: period
+            }
+        });
+
+        if (!ad) {
+            throw new Error('No active days found');
+        }
+
+        return ad;
+    }
+
+    async test(){
+        let newPeriod = await this.prisma.period.findFirst({
+            orderBy: {period_date: 'desc'}
+        })
+
+        const [allPorts, allGears] = await Promise.all([
+            this.prisma.ports.findMany(),
+            this.prisma.gear.findMany({
+                select: {
+                    gear_code: true
+                }
+            })
+        ]);
+
+        const codes = allGears.map(gear => gear.gear_code);
+
+        const data = allPorts.flatMap(port =>
+            codes.map(code => ({
+                port_id: port.port_id,
+                period_date: newPeriod.period_date,
+                active_days: 28,
+                gear_code: code
+            }))
+        );
+
+        await this.prisma.active_days.createMany({ data });
+    }
+
     //================================================================
     async validate(gd: any, isCreate: boolean) {
-        if (gd.period_date) {
-            const [checkAlreadyExists, checkIfExists] = await Promise.all([
-                this.prisma.active_days.findMany({
-                    where: {
-                        period_date: gd.period_date
-                    }
-                }),
-                this.prisma.period.findUnique({
-                    where: {
-                        period_date: gd.period_date
-                    }
-                })
-            ])
-
-            if (!(((checkAlreadyExists.length === 0 && isCreate) || (checkAlreadyExists.length !== 0 && !isCreate)) && checkIfExists))
+        if (isCreate) {
+            const check = await this.prisma.active_days.findFirst({
+                where: {
+                    port_id: gd.port_id,
+                    period_date: gd.period_date,
+                    gear_code: gd.gear_code
+                }
+            });
+            if (check) {
                 return false;
+            }
         }
 
-        if (gd.port_id) {
-            const [checkAlreadyExists, checkIfExists] = await Promise.all([
-                this.prisma.active_days.findMany({
-                    where: {
-                        port_id: gd.port_id
-                    }
-                }),
-                this.prisma.ports.findUnique({
-                    where: {
-                        port_id: gd.port_id
-                    }
-                })
-            ])
-
-            if (!(((checkAlreadyExists.length === 0 && isCreate) || (checkAlreadyExists.length !== 0 && !isCreate)) && checkIfExists))
-                return false;
-
-        }
-
-        return true
+        return true;
     }
 }

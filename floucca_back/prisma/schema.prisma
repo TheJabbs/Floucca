@@ -93,6 +93,7 @@ model gear {
   gear_name      String         @db.VarChar(30)
   equipment_id   String         @db.VarChar(20)
   equipment_name String         @db.VarChar(50)
+  active_days    active_days[]
   fish           fish[]
   gear_details   gear_details[]
   gear_usage     gear_usage[]
@@ -229,10 +230,13 @@ model active_days {
   active_id   Int      @id @default(autoincrement())
   period_date DateTime @db.Date
   port_id     Int
+  gear_code   Int?
   active_days Int      @default(31)
   period      period   @relation(fields: [period_date], references: [period_date], onDelete: Cascade, map: "active_days_ibfk_1")
   ports       ports    @relation(fields: [port_id], references: [port_id], onDelete: Cascade, map: "active_days_ibfk_2")
+  gear        gear?    @relation(fields: [gear_code], references: [gear_code], onDelete: Cascade, map: "active_days_ibfk_3")
 
   @@index([period_date], map: "active_days_ibfk_1")
   @@index([port_id], map: "active_days_ibfk_2")
+  @@index([gear_code], map: "active_days_ibfk_3_idx")
 }

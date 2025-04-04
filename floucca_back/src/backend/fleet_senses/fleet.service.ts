@@ -5,6 +5,8 @@ import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 import {SenseFormContentInterface} from "./interface/sense_form_content.interface";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
+import {FleetReportInterface} from "./interface/fleetReport.interface";
+
 
 @Injectable()
 export class FleetService {
@@ -147,26 +149,26 @@ export class FleetService {
     }
 
     async createFleetSensesForm(content: SenseFormContentInterface): Promise<ResponseMessage<any>> {
-        const boatDetails = await this.prisma.boat_details.create({ data: content.boatDetails });
+        const boatDetails = await this.prisma.boat_details.create({data: content.boatDetails});
         content.form.boat_detail = boatDetails.boat_id;
 
         return await this.prisma.$transaction(async (prisma) => {
             let newestPeriod = await prisma.period.findFirst({
-                orderBy: { period_date: 'desc' }
+                orderBy: {period_date: 'desc'}
             });
 
             if (!newestPeriod) {
                 newestPeriod = await prisma.period.create({
-                    data: { period_date: new Date() }
+                    data: {period_date: new Date()}
                 });
             }
 
             content.form.period_date = newestPeriod.period_date;
 
-            const form = await prisma.form.create({ data: content.form });
+            const form = await prisma.form.create({data: content.form});
             if (!form) throw new Error("Failed to create form");
 
-            const sense = await prisma.fleet_senses.create({ data: { form_id: form.form_id } });
+            const sense = await prisma.fleet_senses.create({data: {form_id: form.form_id}});
 
             if (sense && content.gearUsage.length > 0) {
                 await Promise.all(
@@ -182,77 +184,118 @@ export class FleetService {
                 );
             }
 
-            return { message: 'Fleet senses form created successfully' };
+            return {message: 'Fleet senses form created successfully'};
         }).catch(async (error) => {
-            await this.prisma.boat_details.delete({ where: { boat_id: boatDetails.boat_id} });
+            await this.prisma.boat_details.delete({where: {boat_id: boatDetails.boat_id}});
             console.error("Transaction failed:", error);
-            return { message: `Failed to create fleet senses form: ${error.message}` };
+            return {message: `Failed to create fleet senses form: ${error.message}`};
         });
     }
 
     async generateFleetReport(filter: GeneralFilterDto, month?: number) {
-        const time = new Date (filter.period);
+        const time = new Date(filter.period);
         const start = new Date(time.getFullYear(), 0, 1);
         const end = new Date(time.getFullYear(), 11, 31);
 
-        const fleet = await this.prisma.fleet_senses.findMany({
-            where: {
-                form: {
-                    creation_time: {
-                        gte: start,
-                        lte: end
+        const [fleet, activeDays] = await Promise.all([
+            this.prisma.fleet_senses.findMany({
+                where: {
+                    form: {
+                        creation_time: {
+                            gte: start,
+                            lte: end
+                        },
+                        port_id: filter.port_id ? { in: filter.port_id } : undefined,
                     },
-                    port_id: filter.port_id ? {in: filter.port_id} : undefined,
+                    gear_usage: {
+                        some: {
+                            months: month ? month : undefined,
+                            gear_code: filter.gear_code ? { in: filter.gear_code } : undefined,
+                        }
+                    },
                 },
-                gear_usage: {
-                    some: {
-                        months: month ? month : undefined,
-                        gear_code: filter.gear_code ? {in: filter.gear_code} : undefined,
+                select: {
+                    gear_usage: {
+                        select: {
+                            gear_code: true,
+                            months: true
+                        }
                     }
                 }
-            },
-            include: {
-                form:{
-                    select:{
-                        period_date: true
-                    }
-                },
-                gear_usage: {
-                    select: {
-                        gear_code: true,
-                        months: true
+            }),
+            this.prisma.active_days.findMany({
+                where: {
+                    port_id: filter.port_id ? { in: filter.port_id } : undefined,
+                    gear_code: filter.gear_code ? { in: filter.gear_code } : undefined,
+                    period_date: {
+                        gt: start,
+                        lt: end
                     }
                 }
-            }
-        });
+            }),
+        ]);
 
         if (!fleet || fleet.length === 0) {
             throw new NotFoundException('No fleet senses found');
         }
 
-        const record: Record<string, number[]> = {}
+        // 1. Frequency of gear use per month
+        const freqMap = new Map<string, number>(); // key: gear_code_month
 
-        fleet.forEach((item) => {
-            item.gear_usage.forEach((gear) => {
-                if (!record[gear.gear_code]) {
-                    record[gear.gear_code] = [];
-                }
-                record[gear.gear_code].push(gear.months);
-            });
-        });
+        for (const sense of fleet) {
+            for (const usage of sense.gear_usage) {
+                const key = `${usage.gear_code}_${usage.months}`;
+                freqMap.set(key, (freqMap.get(key) || 0) + 1);
+            }
+        }
 
-        const result = Object.entries(record).map(([gear_code, months]) => {
-            return {
-                gear_code,
-                months: months.reduce((acc, month) => {
-                    acc[month] = (acc[month] || 0) + 1;
-                    return acc;
-                }, {})
+        // 2. Calculate average active_days per (gear_code, month) across ports
+        const activeDayMap = new Map<string, number[]>(); // key: gear_code_month => array of values
+
+        for (const day of activeDays) {
+            if (day.gear_code === null) continue;
+            const month = day.period_date.getMonth() + 1;
+            const key = `${day.gear_code}_${month}`;
+            if (!activeDayMap.has(key)) {
+                activeDayMap.set(key, []);
+            }
+            activeDayMap.get(key)?.push(day.active_days);
+        }
+
+        const activeAverages = new Map<string, number>();
+        for (const [key, daysArr] of activeDayMap.entries()) {
+            const avg = daysArr.reduce((sum, val) => sum + val, 0) / daysArr.length;
+            activeAverages.set(key, Math.round(avg)); // rounding is optional
+        }
+
+        // 3. Merge into final report
+        const fleetReport = new Map<number, FleetReportInterface[]>();
+
+        for (const [key, freq] of freqMap.entries()) {
+            const [gear_code, monthStr] = key.split('_');
+            const m = parseInt(monthStr, 10);
+            const active = activeAverages.get(key) || 0;
+
+            const entry: FleetReportInterface = {
+                month: m,
+                freq,
+                activeDays: active
             };
+
+            if (!fleetReport.has(m)) {
+                fleetReport.set(m, []);
+            }
+
+            fleetReport.get(m)?.push(entry);
+        }
+
+        const record: Record<number, FleetReportInterface[]> = {};
+
+        fleetReport.forEach((value, key) => {
+            record[key] = value;
         });
 
-        return  result
-
+        return record;
     }
 
 }

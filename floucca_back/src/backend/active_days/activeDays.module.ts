@@ -5,6 +5,7 @@ import {ActiveDaysService} from "./activeDays.service";
 @Module({
     imports: [],
     controllers: [ActiveDaysController],
-    providers: [ActiveDaysService]
+    providers: [ActiveDaysService],
+    exports: [ActiveDaysService],
 })
 export class ActiveDaysModule {}

@@ -65,7 +65,7 @@ export class FleetController {
         return this.fleetService.createFleetSensesForm(senseFormContent);
     }
 
-    @Get('/report/' )
+    @Post('/report/' )
     getFleetSenses(@Body() filter: GeneralFilterDto) {
         return this.fleetService.generateFleetReport(filter);
     }

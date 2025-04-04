@@ -13,6 +13,11 @@ export class UpdateActiveDaysDto {
     @IsInt()
     @IsPositive()
     @IsOptional()
+    gear_code: number;
+
+    @IsInt()
+    @IsPositive()
+    @IsOptional()
     active_fays: number;
 
 }

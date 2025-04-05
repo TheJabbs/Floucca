@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import ReusableTable from "../../utils/table";
 
@@ -18,7 +19,7 @@ const EffortTable: React.FC<EffortTableProps> = ({ isLoading, effortData }) => {
   // Define columns for the table
   const columns = [
     { key: "records", header: "Records" },
-    { key: "gears", header: "Boats/Gears" },
+    { key: "gears", header: "Gears" },
     { key: "activeDays", header: "Active Days" },
     { key: "pba", header: "PBA" },
     { key: "estEffort", header: "Estimated Effort" },

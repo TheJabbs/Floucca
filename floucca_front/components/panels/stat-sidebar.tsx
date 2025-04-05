@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronDown, Filter, RefreshCw, PanelLeft, Pin } from "lucide-react";
+import { getFromCache, saveToCache, isCacheValid } from "@/components/utils/cache-utils";
 
 interface StatsData {
   strata: {
@@ -12,12 +13,16 @@ interface StatsData {
   speciesKind: number;
   effortRecord: number;
   landingRecord: number;
-  uniqueGears: number;
+  totalGears: number;
+  sampleCatch: number;
 }
 
 interface ApiResponse {
   [date: string]: StatsData;
 }
+
+const STATS_PANEL_CACHE_KEY = 'flouca_stats_panel';
+const CACHE_EXPIRATION = 15 * 60 * 1000;
 
 const ReportsLeftPanel: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -28,32 +33,69 @@ const ReportsLeftPanel: React.FC = () => {
   const [expandedPeriods, setExpandedPeriods] = useState<Record<string, boolean>>({});
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
   const [showPeriodFilter, setShowPeriodFilter] = useState(false);
+  const [lastFetched, setLastFetched] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('http://localhost:4000/api/dev/formulas/report/leftPanel');
-        if (!response.ok) {
-          throw new Error('Failed to fetch statistics');
+  const fetchStats = async (forceRefresh = false) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Try to get from cache if not forcing refresh
+      if (!forceRefresh) {
+        const cachedData = getFromCache<ApiResponse>(STATS_PANEL_CACHE_KEY, CACHE_EXPIRATION);
+        if (cachedData) {
+          console.log('Using cached stats data');
+          setStatsData(cachedData);
+          
+          // Get the timestamp from cache
+          if (isCacheValid(STATS_PANEL_CACHE_KEY, CACHE_EXPIRATION)) {
+            const timestamp = localStorage.getItem(`${STATS_PANEL_CACHE_KEY}_timestamp`);
+            setLastFetched(timestamp ? parseInt(timestamp, 10) : null);
+          }
+          
+          setIsLoading(false);
+          
+          // Initialize expanded periods from cached data
+          const periodsState = Object.keys(cachedData).reduce((acc, period) => {
+            acc[period] = true;
+            return acc;
+          }, {} as Record<string, boolean>);
+          setExpandedPeriods(periodsState);
+          
+          return;
         }
-        
-        const data: ApiResponse = await response.json();
-        setStatsData(data);
-        
-        const periodsState = Object.keys(data).reduce((acc, period) => {
-          acc[period] = true;
-          return acc;
-        }, {} as Record<string, boolean>);
-        
-        setExpandedPeriods(periodsState);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error occurred');
-      } finally {
-        setIsLoading(false);
       }
-    };
 
+      // Fetch fresh data
+      console.log('Fetching fresh stats data');
+      const response = await fetch('http://localhost:4000/api/dev/formulas/report/leftPanel');
+      if (!response.ok) {
+        throw new Error('Failed to fetch statistics');
+      }
+      
+      const data: ApiResponse = await response.json();
+      setStatsData(data);
+      
+      // Save to cache
+      saveToCache(STATS_PANEL_CACHE_KEY, data);
+      setLastFetched(Date.now());
+      
+      // Initialize expanded periods
+      const periodsState = Object.keys(data).reduce((acc, period) => {
+        acc[period] = true;
+        return acc;
+      }, {} as Record<string, boolean>);
+      setExpandedPeriods(periodsState);
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
     fetchStats();
   }, []);
 
@@ -90,22 +132,8 @@ const ReportsLeftPanel: React.FC = () => {
     setIsExpanded(true); 
   };
 
-  const refreshData = async () => {
-    try {
-      setIsLoading(true);
-      // Replace with your actual API endpoint
-      const response = await fetch('http://localhost:4000/api/dev/formulas/report/leftPanel');
-      if (!response.ok) {
-        throw new Error('Failed to fetch statistics');
-      }
-      
-      const data: ApiResponse = await response.json();
-      setStatsData(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+  const refreshData = () => {
+    fetchStats(true); // Force refresh from API
   };
 
   // Format date to display more readably
@@ -129,11 +157,12 @@ const ReportsLeftPanel: React.FC = () => {
       { type: "Species", records: data.speciesKind },
       { type: "Effort Records", records: data.effortRecord },
       { type: "Landing Records", records: data.landingRecord },
-      { type: "Unique Gears", records: data.uniqueGears },
+      { type: "Total Gears", records: data.totalGears },
+      { type: "Sample Catch", records: data.sampleCatch },
     ];
   };
 
-  if (isLoading && !statsData) {
+  if (isLoading && !statsData && isExpanded) {
     return (
       <div className="bg-white border-r border-gray-200 h-full flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
@@ -195,6 +224,12 @@ const ReportsLeftPanel: React.FC = () => {
                 </button>
               </div>
             </div>
+
+            {lastFetched && (
+              <div className="mb-2 text-xs text-gray-500">
+                Last updated: {new Date(lastFetched).toLocaleString()}
+              </div>
+            )}
 
             {error && (
               <div className="mb-4 p-2 bg-red-50 text-red-700 rounded border border-red-200 text-sm">

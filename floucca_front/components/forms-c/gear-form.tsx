@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { AlertCircle, Trash2, Plus } from 'lucide-react';
 import { Control, useFieldArray, useWatch } from "react-hook-form";

@@ -47,7 +47,7 @@ export class FleetController {
     }
 
     @Post("/form/create")
-    createSenseForm(@Body() senseForm : CreateFleetFormDto){
+    createSenseForm(@Body() senseForm: CreateFleetFormDto) {
         const form = senseForm.formDto;
         const boatDetails = senseForm.boatDetailDto
 
@@ -56,18 +56,22 @@ export class FleetController {
 
         const gearUsage = transformFormGearUsageToGearUsage(senseForm.gearUsageDto);
 
-        const senseFormContent : SenseFormContentInterface = {
-            form : form,
-            boatDetails : boatDetails,
+        const senseFormContent: SenseFormContentInterface = {
+            form: form,
+            boatDetails: boatDetails,
             gearUsage: gearUsage
         }
 
         return this.fleetService.createFleetSensesForm(senseFormContent);
     }
 
-    @Post('/report/' )
+    @Post('/report/')
     getFleetSenses(@Body() filter: GeneralFilterDto) {
         return this.fleetService.generateFleetReport(filter);
     }
 
+    @Post('/report/:id')
+    getFleetSensesWithMo(@Body() filter: GeneralFilterDto, @Param('id') id: number) {
+        return this.fleetService.generateFleetReport(filter, id);
+    }
 }

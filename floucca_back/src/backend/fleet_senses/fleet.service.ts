@@ -216,6 +216,7 @@ export class FleetService {
                 },
                 select: {
                     gear_usage: {
+                        where: month !== undefined ? { months: month } : undefined,
                         select: {
                             gear_code: true,
                             months: true

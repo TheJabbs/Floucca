@@ -7,12 +7,12 @@ import {GearService} from "../backend/gear/gear.service";
 import {GetFilteredLastWInterface} from "../backend/sense_lastw/interface/get_filtered_lastw.interface";
 import {GetFilteredInterface} from "../backend/landings/interface/get_filtered.interface";
 import {GeneralFilterDto} from "../shared/dto/general_filter.dto";
-import {getDaysInMonthByDate} from "../utils/date/get_days_in_a_month";
 import {specieMapMapper} from "./utils/specie_map.mapper";
 import {countUniquenessInterface} from "./interface/countUniqueness.interface";
 import {FleetService} from "../backend/fleet_senses/fleet.service";
 import {ActiveDaysService} from "../backend/active_days/activeDays.service";
 import {censusCounter} from "./utils/censusCounter";
+import {FleetReportInterface} from "../backend/fleet_senses/interface/fleetReport.interface";
 
 @Injectable()
 export class FormulasService {
@@ -36,13 +36,12 @@ export class FormulasService {
         console.log("Filter 1:", filter, "Filter 2:", filter2);
 
         const [effortData, landingData,
-            allEffort, fleetCensus, allCensus, activeD] = await Promise.all([
+            allEffort, fleetCensus, allCensus] = await Promise.all([
             this.senseLastWService.getEffortsByFilter(filter),
             this.landingsService.getLandingsByFilter(filter),
             this.senseLastWService.getEffortsByFilter(filter2),
             this.fleetService.generateFleetReport(filter, new Date(filter.period).getMonth() + 1),
-            this.fleetService.generateFleetReport(filter),
-            this.activeDaysService.getActiveDaysByPortId(filter.port_id[0], filter.period)
+            this.fleetService.generateFleetReport(filter2, new Date(filter.period).getMonth() + 1),
         ]);
 
         let totalGears = censusCounter(fleetCensus)
@@ -54,12 +53,10 @@ export class FormulasService {
         // const daysOfTheMonth = getDaysInMonthByDate(filter.period);
         // const sampleEffort = this.getTotalEffort(pba, daysOfTheMonth, allEffort.length);
 
-        const calculatedActiveDays = this.getActiveDays(totalGears, totalAllGears, activeD.active_days);
+        const calculatedActiveDays = this.getActiveDays(allCensus);
         const estEffort = this.getEstimateEffort(allEffort.length, calculatedActiveDays, pba);
 
         const estCatch = this.getEstimateTotalCatch(cpue, estEffort);
-        const effortRecords = effortData.length;
-        const totalRecords = allEffort.length;
 
         const landingRecords = this.countLandingForm(landingData);
         const sampleCatch = this.countWeightBySpecie(landingData);
@@ -69,9 +66,9 @@ export class FormulasService {
 
         let upperTables = {
             effort: {
-                records: effortRecords,
-                gears: totalRecords,
-                activeDays: activeD,
+                records: totalGears,
+                gears: totalAllGears,
+                activeDays: calculatedActiveDays,
                 pba: pba,
                 estEffort: estEffort
             },
@@ -166,9 +163,16 @@ export class FormulasService {
         return boatGears * activeDays * pba;
     }
 
-    getActiveDays(currentGears: number, allGears: number, calculatedD : number) {
-        //Calculate active days of each gear al summation taba3on over al sum of all gears sum(gearsNum * activD)/sum(all gears)
-        return currentGears * calculatedD / allGears;
+    getActiveDays(allGears: FleetReportInterface[]) {
+        let numerator= 0
+        let denominator = 0
+
+        allGears.forEach(element =>{
+            numerator = numerator + (element.freq * element.activeDays);
+            denominator += element.freq
+        })
+
+        return numerator/denominator
     }
 
     getEstimateCatch(estimateEffort: number, cpue: number) {

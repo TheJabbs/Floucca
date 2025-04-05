@@ -1,10 +1,10 @@
-export function censusCounter(fleetCensus: any){
+import {FleetReportInterface} from "../../backend/fleet_senses/interface/fleetReport.interface";
+
+export function censusCounter(fleetCensus: FleetReportInterface[]){
     let totalGears = 0;
-    for (const element of fleetCensus) {
-        const map = new Map<string, number>(Object.entries(element.months));
-        for (const [key, value] of map) {
-            totalGears += value;
-        }
-    }
+
+    fleetCensus.forEach((element) => {
+        totalGears += element.freq;
+    })
     return totalGears;
 }

@@ -1,56 +1,122 @@
 import React from "react";
-import DashboardCard from "@/components/dashboard/dashboard-card";
-import DashboardButton from "@/components/utils/dashboard-button";
+import {
+  Fish,
+  ChartLine,
+  GitBranch,
+  PieChart,
+  Anchor,
+  TrendingUp,
+  Scale,
+} from "lucide-react";
 
-const Dashboard: React.FC = () => {
+import ReportCard from "@/components/dashboard/report-card";
+import StatCard from "@/components/dashboard/stat-card";
+import RecentActivity from "@/components/dashboard/recent-activity";
+
+export default function ReportsDashboard() {
+  const reports = [
+    {
+      title: "Fishing Statistics Report",
+      description:
+        "View effort and landing data with filterable tables by time period, gear type, and port. Includes species data bar chart visualization.",
+      icon: <Fish className="h-6 w-6" />,
+      color: "bg-pink-50 hover:bg-pink-100 border-pink-200",
+      route: "/dashboard/stats/report",
+    },
+    {
+      title: "Species Analytics",
+      description:
+        "Track monthly species metrics using line charts showing average weight, length, quantity, and price trends over time.",
+      icon: <ChartLine className="h-6 w-6" />,
+      color: "bg-green-50 hover:bg-green-100 border-green-200",
+      route: "/dashboard/stats/analytic",
+    },
+    {
+      title: "Fleet Gear Usage Report",
+      description:
+        "Visualize monthly gear usage frequency and active days by selecting year and filtering by port, region, or cooperative.",
+      icon: <GitBranch className="h-6 w-6" />,
+      color: "bg-purple-50 hover:bg-purple-100 border-purple-200",
+      route: "/dashboard/stats/fleet-report",
+    },
+    {
+      title: "Advanced Reports",
+      description:
+        "Generate customized reports with detailed data filtering by gear, period, port, cooperative, region and species.",
+      icon: <PieChart className="h-6 w-6" />,
+      color: "bg-amber-50 hover:bg-amber-100 border-amber-200",
+      route: "/dashboard/stats/adv-report",
+    },
+  ];
+
+  const stats = [
+    {
+      title: "Active Ports",
+      value: "2",
+      icon: <Anchor className="h-5 w-5" />,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      title: "Landing Records",
+      value: "11",
+      icon: <Fish className="h-5 w-5" />,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      title: "Effort Records",
+      value: "8",
+      icon: <TrendingUp className="h-5 w-5" />,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      title: "Total Gears",
+      value: "11",
+      icon: <GitBranch className="h-5 w-5" />,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      title: "Species Kinds",
+      value: "4",
+      icon: <ChartLine className="h-5 w-5" />,
+      color: "bg-blue-50 text-blue-600",
+    },
+    {
+      title: "Sample Catch",
+      value: "592.4",
+      icon: <Scale className="h-5 w-5" />,
+      color: "bg-blue-50 text-blue-600",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-semibold text-gray-900 mb-6">
-        Administrator Dashboard
-      </h1>
+    <div className="container mx-auto px-4 py-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold">REPORTS</h1>
+        <p className="mt-1 text-gray-600">
+          Comprehensive fisheries data reporting and analytics
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <DashboardCard title="Administration Functions">
-          <div className="flex flex-col gap-4">
-            <DashboardButton label="Table of Users" />
-            <DashboardButton label="Table of Field Agents" />
-            <DashboardButton label="Workload Statistics" />
-            <DashboardButton label="Work Progress Monitoring" />
-          </div>
-        </DashboardCard>
-
-        <DashboardCard title="Maintenance Functions">
-          <div className="flex flex-col gap-4">
-            <DashboardButton label="System Backup" />
-            <DashboardButton label="System Recovery" />
-            <DashboardButton label="Allocation of Excel Outputs" />
-            <DashboardButton label="Create Diffusable Excel" />
-          </div>
-        </DashboardCard>
-
-        <DashboardCard title="Monthly Databases">
-          <div className="grid grid-cols-2 gap-4">
-            <DashboardButton label="Create a New Database" />
-            <DashboardButton label="Use Tables of Another Database" />
-            <DashboardButton label="Set Up Tables Manually" />
-            <DashboardButton label="Delete a Database" />
-            <DashboardButton label="Release for Inputting" />
-            <DashboardButton label="Block a Database" />
-            <DashboardButton label="Finalize" />
-            <DashboardButton label="Move to History" />
-            <DashboardButton label="Bring in from History" />
-          </div>
-        </DashboardCard>
+      <div>
+        <p className="mb-3 text-gray-800 font-medium">
+          Data shown is from October 1, 2024
+        </p>
       </div>
 
-      <DashboardCard title="Authorized Access">
-        <div className="flex flex-wrap gap-4">
-          <DashboardButton label="Privileged Users' Functions" />
-          <DashboardButton label="Data Operators' Functions" />
-        </div>
-      </DashboardCard>
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        {stats.map((stat, index) => (
+          <StatCard key={index} {...stat} />
+        ))}
+      </div>
+
+      <h2 className="mb-4 text-xl font-semibold">Available Reports</h2>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
+        {reports.map((report, index) => (
+          <ReportCard key={index} {...report} />
+        ))}
+      </div>
+
+      <RecentActivity />
     </div>
   );
-};
-
-export default Dashboard;
+}

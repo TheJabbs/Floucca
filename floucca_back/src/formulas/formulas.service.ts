@@ -62,26 +62,8 @@ export class FormulasService {
         const sampleCatch = this.countWeightBySpecie(landingData);
 
         const avgPrice = this.getAvgPrice(landingData);
-        const estValue = avgPrice * estCatch;
 
-        let upperTables = {
-            effort: {
-                records: totalGears,
-                gears: totalAllGears,
-                activeDays: calculatedActiveDays,
-                pba: pba,
-                estEffort: estEffort
-            },
-            landings: {
-                records: landingRecords,
-                avgPrice: avgPrice,
-                estValue: estValue,
-                cpue: cpue,
-                estCatch: estCatch,
-                // sampleEffort: sampleEffort,
-                sampleCatch: sampleCatch
-            }
-        }
+
 
         let mappedSpecies = specieMapMapper(landingData);
         let lowerTable = []
@@ -111,6 +93,30 @@ export class FormulasService {
                 specie_name: fish[0].fish.specieName
             })
         });
+
+        let totalVal = 0
+        lowerTable.forEach((element) => {
+           totalVal += element.value
+        })
+
+        let upperTables = {
+            effort: {
+                records: totalGears,
+                gears: totalAllGears,
+                activeDays: calculatedActiveDays,
+                pba: pba,
+                estEffort: estEffort
+            },
+            landings: {
+                records: landingRecords,
+                avgPrice: avgPrice,
+                estValue: totalVal,
+                cpue: cpue,
+                estCatch: estCatch,
+                // sampleEffort: sampleEffort,
+                sampleCatch: sampleCatch
+            }
+        }
 
         return {
             upperTables: upperTables,

@@ -58,18 +58,3 @@ export const getFleetSensesById = async (fleetSensesId: number): Promise<any> =>
     return handleApiError(error, `fetching fleet senses ${fleetSensesId}`);
   }
 };
-
-// Get fleet senses report
-export const getFleetSensesReport = async (filter: any): Promise<any[]> => {
-  try {
-    const response = await apiClient.post<ApiResponse>("/api/dev/fleet_senses/report", filter);
-    console.log("Fetched fleet senses report data:", response.data); // Check this
-
-    // Assuming the response is an object with a `data` property that contains the array
-    return Array.isArray(response.data) ? response.data : []; // Ensure the response is an array
-  } catch (error) {
-    return handleApiError(error, "fetching fleet senses report");
-  }
-};
-
-

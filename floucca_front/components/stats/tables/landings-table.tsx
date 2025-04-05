@@ -24,7 +24,7 @@ const LandingsTable: React.FC<LandingsTableProps> = ({ isLoading, landingsData }
     { key: "estValue", header: "Estimated Value" },
     { key: "cpue", header: "CPUE" },
     { key: "estCatch", header: "Estimated Catch" },
-    { key: "sampleEffort", header: "Sample Effort" },
+    { key: "sampleCatch", header: "Sample Catch" },
   ];
 
   // Convert object data to array format for the reusable table

@@ -192,6 +192,20 @@ export class FleetService {
         });
     }
 
+    /**
+     * Generate a fleet report based on the given filter and month.
+     *
+     * The report will contain the frequency of gear use per month and the average
+     * number of active days per month for each gear type.
+     *
+     * @param filter - The filter to apply to the report.
+     * @param month - The month to report on. If not provided, the report will
+     * be generated for all months.
+     * @returns A list of FleetReportInterface objects, each containing the gear
+     * code, gear name, month, frequency of gear use, and average number of active
+     * days for that gear type and month.
+     * @throws {NotFoundException} If no fleet senses are found.
+     */
     async generateFleetReport(filter: GeneralFilterDto, month?: number) {
         const time = new Date(filter.period);
         const start = new Date(time.getFullYear(), 0, 1);

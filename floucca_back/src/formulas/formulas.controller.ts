@@ -52,5 +52,9 @@ export class FormulasController {
         return this.service.getLeftPanelInfo();
     }
 
+    @Get()
+    async test(){
+        return Promise.all([this.service.getAllFishingGears(), this.service.getLandingRecordsByPeriod()])
+    }
 
 }

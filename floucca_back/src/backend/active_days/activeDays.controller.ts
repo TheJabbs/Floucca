@@ -33,9 +33,5 @@ export class ActiveDaysController {
         return this.service.deleteActiveDays(active_id);
     }
 
-    @Get()
-    test(){
-        return this.service.test()
-    }
 
 }

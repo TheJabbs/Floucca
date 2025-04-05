@@ -225,21 +225,22 @@ export class FormulasService {
         let numberOfCatch = 0
 
         landingsData.forEach((element) => {
-            numberOfCatch += element.fish.fish_weight;
+            numberOfCatch += element.fish.fish_weight * element.fish.fish_quantity;
         });
 
-        return numberOfCatch;
+        return numberOfCatch/landingsData.length;
     }
 
 
     //========================Left Panel=====================================
     async getLeftPanelInfo() {
-        const [portsCount, uniqueSpecies, effortRecord, landingRecord, uniqueGears] = await Promise.all([
+        const [portsCount, uniqueSpecies, effortRecord, landingRecord, uniqueGears, sampleCatch] = await Promise.all([
             this.getSampledPortsCount(),
             this.getUniqueSpeciesFishedByPeriod(),
             this.getRecordsEffortInPeriod(),
             this.getLandingRecordsByPeriod(),
-            this.GetUniqueFishingGears()
+            this.getAllFishingGears(),
+            this.getCatchByPeriod()
         ]);
 
         // Collect all unique periods from all datasets
@@ -248,7 +249,8 @@ export class FormulasService {
             ...Object.keys(uniqueSpecies),
             ...Object.keys(effortRecord),
             ...Object.keys(landingRecord),
-            ...Object.keys(uniqueGears)
+            ...Object.keys(uniqueGears),
+            ...Object.keys(sampleCatch)
         ]);
 
         const dataCombine: Record<string, any> = {};
@@ -259,7 +261,8 @@ export class FormulasService {
                 speciesKind: uniqueSpecies[period] || 0,
                 effortRecord: effortRecord[period] || 0,
                 landingRecord: landingRecord[period] || 0,
-                uniqueGears: uniqueGears[period] || 0
+                totalGears: uniqueGears[period] || 0,
+                sampleCatch: sampleCatch[period] || 0
             };
         });
 
@@ -432,35 +435,54 @@ export class FormulasService {
         return mapUsingPeriodDate;
     }
 
-    async GetUniqueFishingGears() {
-        const form = await this.prisma.form.findMany({
+    async getAllFishingGears() {
+        const periods = await this.prisma.period.findMany({ select: { period_date: true } });
+        const promises = periods.map((period) => {
+            return this.fleetService.generateFleetReport({period: period.period_date.toString()}, period.period_date.getMonth());
+        });
+        const results = await Promise.all(promises);
+        const record: Record<string, number> = {}
+
+        for (let i = 0; i < results.length; i++) {
+            let gearsNum = 0;
+            for (let j = 0; j < results[i].length; j++) {
+                gearsNum += results[i][j].freq;
+            }
+            record[periods[i].period_date.toDateString()] = gearsNum;
+        }
+
+        return record
+    }
+
+    async getCatchByPeriod(){
+        const form = await this.prisma.landing.findMany({
             select: {
-                period_date: true,
-                sense_lastw: {
-                    select: {
-                        gear_code: true
+                form:{
+                    select:{
+                        period_date: true
+                    }
+                },
+                fish:{
+                    select:{
+                        fish_weight: true,
+                        fish_quantity: true
                     }
                 }
             }
         })
 
-        const mapUsingPeriodDate: Record<string, number> = {};
+        const record: Record<string, number> = {};
 
-        form.forEach((element) => {
-            const periodKey = element.period_date.toDateString();
-            const counter: Set<number> = new Set();
+        form.forEach(val =>{
+            let totalCatch = 0
 
+            val.fish.forEach(fish =>{
+                totalCatch = totalCatch + fish.fish_weight * fish.fish_quantity
+            })
+            record[val.form.period_date.toDateString()] = totalCatch
+        })
 
-            if (element.sense_lastw) {
-                element.sense_lastw.forEach((gear) => {
-                    counter.add(gear.gear_code);
-                });
-            }
-
-            mapUsingPeriodDate[periodKey] = counter.size;
-        });
-
-        return mapUsingPeriodDate;
+        return record
     }
 
     //=============================================================

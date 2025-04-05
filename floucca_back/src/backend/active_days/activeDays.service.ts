@@ -105,33 +105,33 @@ export class ActiveDaysService {
         return ad;
     }
 
-    async test(){
-        let newPeriod = await this.prisma.period.findFirst({
-            orderBy: {period_date: 'desc'}
-        })
-
-        const [allPorts, allGears] = await Promise.all([
-            this.prisma.ports.findMany(),
-            this.prisma.gear.findMany({
-                select: {
-                    gear_code: true
-                }
-            })
-        ]);
-
-        const codes = allGears.map(gear => gear.gear_code);
-
-        const data = allPorts.flatMap(port =>
-            codes.map(code => ({
-                port_id: port.port_id,
-                period_date: newPeriod.period_date,
-                active_days: 28,
-                gear_code: code
-            }))
-        );
-
-        await this.prisma.active_days.createMany({ data });
-    }
+    // async test(){
+    //     let newPeriod = await this.prisma.period.findFirst({
+    //         orderBy: {period_date: 'desc'}
+    //     })
+    //
+    //     const [allPorts, allGears] = await Promise.all([
+    //         this.prisma.ports.findMany(),
+    //         this.prisma.gear.findMany({
+    //             select: {
+    //                 gear_code: true
+    //             }
+    //         })
+    //     ]);
+    //
+    //     const codes = allGears.map(gear => gear.gear_code);
+    //
+    //     const data = allPorts.flatMap(port =>
+    //         codes.map(code => ({
+    //             port_id: port.port_id,
+    //             period_date: newPeriod.period_date,
+    //             active_days: 28,
+    //             gear_code: code
+    //         }))
+    //     );
+    //
+    //     await this.prisma.active_days.createMany({ data });
+    // }
 
     //================================================================
     async validate(gd: any, isCreate: boolean) {

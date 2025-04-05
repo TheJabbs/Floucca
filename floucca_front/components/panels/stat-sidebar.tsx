@@ -12,7 +12,8 @@ interface StatsData {
   speciesKind: number;
   effortRecord: number;
   landingRecord: number;
-  uniqueGears: number;
+  totalGears: number;
+  sampleCatch: number;
 }
 
 interface ApiResponse {
@@ -93,7 +94,6 @@ const ReportsLeftPanel: React.FC = () => {
   const refreshData = async () => {
     try {
       setIsLoading(true);
-      // Replace with your actual API endpoint
       const response = await fetch('http://localhost:4000/api/dev/formulas/report/leftPanel');
       if (!response.ok) {
         throw new Error('Failed to fetch statistics');
@@ -129,7 +129,8 @@ const ReportsLeftPanel: React.FC = () => {
       { type: "Species", records: data.speciesKind },
       { type: "Effort Records", records: data.effortRecord },
       { type: "Landing Records", records: data.landingRecord },
-      { type: "Unique Gears", records: data.uniqueGears },
+      { type: "Total Gears", records: data.totalGears },
+      { type: "Sample Catch", records: data.sampleCatch },
     ];
   };
 

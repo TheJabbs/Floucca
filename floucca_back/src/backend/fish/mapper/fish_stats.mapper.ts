@@ -1,53 +1,58 @@
-import { FishInterface } from "../interface/fish.interface";
-import { FishStatInterface } from "../interface/fish_stat.interface";
-import {FishV2Interface} from "../interface/fish_v2.interface";
+import { FishAnalyticMapperInterface } from "../interface/fishAnalyticMapper.interface";
+import {FishStatInterface} from "../interface/fish_stat.interface";
 
-export function fishStatsMapper(map: Map<string, FishV2Interface[]>): Record<string, Record<number, FishStatInterface>> {
-    const fishStatsMap: Map<string, Map<number, FishStatInterface>> = new Map();
+export function fishStatsMapper(data: FishAnalyticMapperInterface[]): any {
+    const fishStatsMap: Map<string, Map<number, FishAnalyticMapperInterface[]>> = new Map();
 
-    map.forEach((fishes, period) => {
-        const specieMap: Map<number, { stats: FishStatInterface, count: number }> = new Map();
+    for (const d of data) {
+        const periodKey = d.period_date.toLocaleDateString();
+        let statsInterfaceMap = fishStatsMap.get(periodKey);
 
-        fishes.forEach((fish) => {
-            if (!specieMap.has(fish.specie_code)) {
-                specieMap.set(fish.specie_code, {
-                    stats: {
-                        specie_name: fish.specie_name,
-                        avg_quantity: 0,
-                        avg_weight: 0,
-                        avg_length: 0,
-                        avg_price: 0
-                    },
-                    count: 0
-                });
-            }
+        if (!statsInterfaceMap) {
+            statsInterfaceMap = new Map();
+            fishStatsMap.set(periodKey, statsInterfaceMap);
+        }
 
-            const entry = specieMap.get(fish.specie_code)!;
-            entry.count += 1;
-            entry.stats.avg_quantity += fish.fish_quantity;
-            entry.stats.avg_weight += fish.fish_weight;
-            entry.stats.avg_length += fish.fish_length;
-            entry.stats.avg_price += fish.price;
-        });
+        if (!statsInterfaceMap.has(d.specie_code)) {
+            statsInterfaceMap.set(d.specie_code, []);
+        }
 
-        const finalSpecieMap: Map<number, FishStatInterface> = new Map();
-        specieMap.forEach((entry, specie_code) => {
-            finalSpecieMap.set(specie_code, {
-                specie_name: entry.stats.specie_name,
-                avg_quantity: entry.stats.avg_quantity / entry.count,
-                avg_weight: entry.stats.avg_weight / entry.count,
-                avg_length: entry.stats.avg_length / entry.count,
-                avg_price: entry.stats.avg_price / entry.count
-            });
-        });
+        statsInterfaceMap.get(d.specie_code)!.push(d);
+    }
 
-        fishStatsMap.set(period, finalSpecieMap);
-    });
+    const fishStats: Map<string, Map<number, FishStatInterface>> = new Map();
+    for (const [period, speciesMap] of fishStatsMap) {
+        const speciesStats: Map<number, FishStatInterface> = new Map();
 
-    return Object.fromEntries(
-        [...fishStatsMap.entries()].map(([period, species]) => [
-            period,
-            Object.fromEntries(species)
-        ])
-    );
+        for (const [specieCode, fishes] of speciesMap) {
+            const avgLength = fishes.reduce((acc, fish) => acc + fish.fish_length, 0) / fishes.length;
+            const avgWeight = fishes.reduce((acc, fish) => acc + fish.fish_weight, 0) / fishes.length;
+            const avgPrice = fishes.reduce((acc, fish) => acc + fish.price, 0) / fishes.length;
+            const avgQuantity = fishes.reduce((acc, fish) => acc + fish.fish_quantity, 0) / fishes.length;
+
+            const fishStat: FishStatInterface = {
+                specie_name: fishes[0].specie_name,
+                avg_length: avgLength,
+                avg_weight: avgWeight,
+                avg_price: avgPrice,
+                avg_quantity: avgQuantity
+            };
+
+            speciesStats.set(specieCode, fishStat);
+        }
+
+        fishStats.set(period, speciesStats);
+    }
+
+    //make it return a record
+    const result: Record<string, Record<number, FishStatInterface>> = {};
+    for (const [period, speciesMap] of fishStats) {
+        const speciesStats: Record<number, FishStatInterface> = {};
+        for (const [specieCode, fishStat] of speciesMap) {
+            speciesStats[specieCode] = fishStat;
+        }
+        result[period] = speciesStats;
+    }
+
+    return result;
 }

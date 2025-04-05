@@ -311,6 +311,16 @@ export class FleetService {
             });
         });
 
+        for (let i = 0; i < fleetReport.length - 1; i++) {
+            for (let j = i + 1; j < fleetReport.length; j++) {
+                if (fleetReport[i].gear_code === fleetReport[j].gear_code && fleetReport[i].month === fleetReport[j].month) {
+                    fleetReport[i].freq += fleetReport[j].freq;
+                    fleetReport.splice(j, 1);
+                    j--;
+                }
+            }
+        }
+
         return fleetReport;
     }
 }

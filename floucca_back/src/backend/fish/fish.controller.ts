@@ -3,6 +3,7 @@ import {FishService} from "./fish.service";
 import {idDTO} from "../../shared/dto/id.dto";
 import {CreateFishDto} from "./dto/create_fish.dto";
 import {UpdateFishDto} from "./dto/update_fish.dto";
+import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 
 @Controller('/api/fish')
 export class FishController {
@@ -34,9 +35,9 @@ export class FishController {
         return this.fishService.deleteFish(id.id);
     }
 
-    @Get('/stats/avg')
-    getFishStats() {
-        return this.fishService.getFishesMappedByPeriod();
+    @Post('/stats/avg')
+    getFishStats(@Body() filter: GeneralFilterDto) {
+        return this.fishService.getFishesMappedByPeriod(filter);
     }
 
 

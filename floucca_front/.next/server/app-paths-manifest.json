@@ -3,10 +3,10 @@
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/page": "app/page.js",
   "/dashboard/stats/fleet-report/page": "app/dashboard/stats/fleet-report/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
   "/dashboard/stats/report/page": "app/dashboard/stats/report/page.js",
-  "/dashboard/stats/analytic/page": "app/dashboard/stats/analytic/page.js",
   "/do/history/page": "app/do/history/page.js",
+  "/dashboard/stats/analytic/page": "app/dashboard/stats/analytic/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/do/forms/census/page": "app/do/forms/census/page.js",
   "/do/forms/effort&landing/page": "app/do/forms/effort&landing/page.js"
 }

@@ -76,7 +76,7 @@ const SubmissionHistory = () => {
     try {
       const userId = 1;
       console.log("Fetching submissions from API");
-      const baseURL = process.env.API_URL;
+      const baseURL = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${baseURL}/api/dev/form/top/${userId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch submissions');

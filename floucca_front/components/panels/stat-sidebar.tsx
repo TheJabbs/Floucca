@@ -68,7 +68,7 @@ const ReportsLeftPanel: React.FC = () => {
 
       // Fetch fresh data
       console.log('Fetching fresh stats data');
-      const baseURL = process.env.API_URL;
+      const baseURL = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${baseURL}/api/dev/formulas/report/leftPanel`);
       if (!response.ok) {
         throw new Error('Failed to fetch statistics');

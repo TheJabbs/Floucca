@@ -8,10 +8,12 @@ import {CreateFormLandingDto} from "./dto/create_form_landing.dto";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {GetFilteredInterface} from "./interface/get_filtered.interface";
 import {filterToFilteredInterfaceMapper} from "../fish/mapper/filter_to_filtered_interface.mapper";
+import {FormGateway} from "../form/form.gateWay";
 
 @Injectable()
 export class LandingsService {
-    constructor(private readonly prisma: PrismaService) {
+    constructor(private readonly prisma: PrismaService,
+                private readonly formGateway: FormGateway) {
     }
 
     async getAllLandings()
@@ -157,6 +159,10 @@ export class LandingsService {
                 });
                 await Promise.all(lastwPromises);
             }
+
+            const newForm = await this.prisma.form.findUnique({where: {form_id: form.form_id}, include: {users: true}});
+            this.formGateway.notifyNewForm(newForm);
+
 
             return {
                 message: `Landing form created successfully. Errors - Fish: ${fishError}, Gear: ${gearError}, Sense: ${senseError}`,

@@ -30,7 +30,8 @@ export default function FishStatsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/fish/stats/avg', {
+        const baseURL = process.env.API_URL;
+        const response = await fetch(`${baseURL}/api/fish/stats/avg`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

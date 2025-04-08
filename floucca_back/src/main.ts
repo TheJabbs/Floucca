@@ -23,7 +23,7 @@ async function bootstrap() {
     );
 
 
-    await app.listen(4000);
+    await app.listen(4000, '0.0.0.0');
 }
 
 bootstrap();

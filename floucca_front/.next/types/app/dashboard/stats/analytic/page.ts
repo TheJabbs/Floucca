@@ -1,4 +1,4 @@
-// File: D:\seniorproject\Floucca\Floucca\floucca_front\app\dashboard\stats\analytic\page.tsx
+// File: E:\Rebecca Sleiman\rebecca D 2\desktop\COLLEGE\spring 2025\CSIS290\Floucca\floucca_front\app\dashboard\stats\analytic\page.tsx
 import * as entry from '../../../../../../app/dashboard/stats/analytic/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

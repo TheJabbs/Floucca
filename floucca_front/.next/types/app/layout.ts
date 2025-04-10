@@ -1,4 +1,4 @@
-// File: D:\seniorproject\Floucca\Floucca\floucca_front\app\layout.tsx
+// File: E:\Rebecca Sleiman\rebecca D 2\desktop\COLLEGE\spring 2025\CSIS290\Floucca\floucca_front\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

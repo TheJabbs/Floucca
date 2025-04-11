@@ -89,9 +89,9 @@ export default function ReportsDashboard() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">REPORTS</h1>
+    <div className="container mx-auto px-4 py-4">
+      <header className="mb-6">
+      <h1 className="text-2xl font-bold text-blue-800">REPORTS</h1>
         <p className="mt-1 text-gray-600">
           Comprehensive fisheries data reporting and analytics
         </p>

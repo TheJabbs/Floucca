@@ -1,17 +1,27 @@
 import { Controller, Get, Post, Param, Delete, Body, Put, UseGuards, Req } from "@nestjs/common";
 import { UserService } from "./users.service";
+import { CreateUserWithDetailsDto } from "./dto/createUserWithDetails.dto";
 import { CreateUserDto } from "./dto/create-users.dto";
 import { User } from "./interfaces/users.interface";
 import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { ResponseMessage } from "src/shared/interface/response.interface";
+//import { RolesGuard } from '../../auth/guards/roles.guard'; // for later restrictions
+//import { Roles } from '../../auth/decorators/roles.decorator'; // might use this or the one after, enum 
+//import { RoleEnum } from '../../auth/enums/role.enum'; 
 
 @Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post("create")
-  async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.userService.createUser(createUserDto);
+  @Post('admin-create')
+  async adminCreatesUser(
+    @Body() body: CreateUserWithDetailsDto
+  ): Promise<ResponseMessage<null>> {
+    return this.userService.createUserWithDetails(body);
   }
+
+
+
 
   @UseGuards(JwtAuthGuard)
   @Get("all")

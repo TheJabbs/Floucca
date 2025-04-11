@@ -82,9 +82,7 @@ const MultiLineBarChartFish: React.FC<MultiLineBarChartFishProps> = ({ fishStats
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">Fish Statistics Over Time</h2>
 
-        // SELECTOR FOR THE Y AXIS ATTRIBUTES FOR THE CHART
       <div className="mb-4">
         <label htmlFor="metricSelect" className="mr-2 font-semibold">
           Select Metric:
@@ -104,8 +102,7 @@ const MultiLineBarChartFish: React.FC<MultiLineBarChartFishProps> = ({ fishStats
           ))}
         </select>
       </div>
-            //SPECIE SELECTOR FOR THE CHART 
-            //note that this is not tested !
+            
       <div className="flex flex-wrap gap-3 mb-4">
         {allSpecies.map((specie) => (
           <label key={specie} className="flex items-center space-x-2">

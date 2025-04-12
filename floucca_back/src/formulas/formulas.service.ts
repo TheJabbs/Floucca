@@ -48,7 +48,7 @@ export class FormulasService {
         let totalAllGears = censusCounter(allCensus)
 
         const pba = this.getPba(effortData);
-        const cpue = this.getCpue(effortData.length, landingData);
+        const cpue = this.getCpue(landingData.length, landingData);
 
         // const daysOfTheMonth = getDaysInMonthByDate(filter.period);
         // const sampleEffort = this.getTotalEffort(pba, daysOfTheMonth, allEffort.length);
@@ -139,14 +139,14 @@ export class FormulasService {
     }
 
     //Checked
-    getCpue(nbOfEffortData: number, landingsData: GetFilteredInterface[]) {
+    getCpue(tripDuration: number, landingsData: GetFilteredInterface[]) {
         let sumLandings = 0;
 
         landingsData.forEach((element) => {
             sumLandings += element.fish.fish_weight;
         });
 
-        return sumLandings / nbOfEffortData;
+        return sumLandings / tripDuration;
     }
 
     //Is total number of gear the sum of gears in effort?
@@ -208,13 +208,15 @@ export class FormulasService {
 
     //to be checked
     getAvgPrice(landingsData: GetFilteredInterface[]) {
-        let sumLandings = 0;
+        let totalCatch = 0
+        let sumPrices = 0
 
-        landingsData.forEach((element) => {
-            sumLandings += element.fish.price;
-        });
+        landingsData.forEach(fish => {
+            totalCatch += fish.fish.fish_weight
+            sumPrices += fish.fish.price * fish.fish.fish_weight
+        })
 
-        return sumLandings / landingsData.length;
+        return sumPrices / totalCatch;
     }
 
     getAvgQuantity(landingsData: GetFilteredInterface[]) {

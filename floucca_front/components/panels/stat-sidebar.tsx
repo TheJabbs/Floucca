@@ -1,104 +1,35 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ChevronRight, ChevronDown, Filter, RefreshCw, PanelLeft, Pin } from "lucide-react";
-import { getFromCache, saveToCache, isCacheValid } from "@/components/utils/cache-utils";
-
-interface StatsData {
-  strata: {
-    port: number;
-    coop: number;
-    region: number;
-  };
-  speciesKind: number;
-  effortRecord: number;
-  landingRecord: number;
-  totalGears: number;
-  sampleCatch: number;
-}
-
-interface ApiResponse {
-  [date: string]: StatsData;
-}
-
-const STATS_PANEL_CACHE_KEY = 'flouca_stats_panel';
-const CACHE_EXPIRATION = 15 * 60 * 1000;
+import { useSharedStats } from "@/contexts/SharedStatContext";
 
 const ReportsLeftPanel: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
-  const [statsData, setStatsData] = useState<ApiResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [expandedPeriods, setExpandedPeriods] = useState<Record<string, boolean>>({});
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
   const [showPeriodFilter, setShowPeriodFilter] = useState(false);
-  const [lastFetched, setLastFetched] = useState<number | null>(null);
 
-  const fetchStats = async (forceRefresh = false) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const { 
+    statsData, 
+    isLoading, 
+    error, 
+    lastFetched, 
+    refreshStats 
+  } = useSharedStats();
 
-      // Try to get from cache if not forcing refresh
-      if (!forceRefresh) {
-        const cachedData = getFromCache<ApiResponse>(STATS_PANEL_CACHE_KEY, CACHE_EXPIRATION);
-        if (cachedData) {
-          console.log('Using cached stats data');
-          setStatsData(cachedData);
-          
-          // Get the timestamp from cache
-          if (isCacheValid(STATS_PANEL_CACHE_KEY, CACHE_EXPIRATION)) {
-            const timestamp = localStorage.getItem(`${STATS_PANEL_CACHE_KEY}_timestamp`);
-            setLastFetched(timestamp ? parseInt(timestamp, 10) : null);
-          }
-          
-          setIsLoading(false);
-          
-          // Initialize expanded periods from cached data
-          const periodsState = Object.keys(cachedData).reduce((acc, period) => {
-            acc[period] = true;
-            return acc;
-          }, {} as Record<string, boolean>);
-          setExpandedPeriods(periodsState);
-          
-          return;
-        }
-      }
-
-      // Fetch fresh data
-      console.log('Fetching fresh stats data');
-      const baseURL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${baseURL}/api/dev/formulas/report/leftPanel`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch statistics');
-      }
-      
-      const data: ApiResponse = await response.json();
-      setStatsData(data);
-      
-      // Save to cache
-      saveToCache(STATS_PANEL_CACHE_KEY, data);
-      setLastFetched(Date.now());
-      
-      // Initialize expanded periods
-      const periodsState = Object.keys(data).reduce((acc, period) => {
-        acc[period] = true;
+  // Set initial expanded state for periods when data is loaded
+  React.useEffect(() => {
+    if (statsData && Object.keys(statsData).length > 0) {
+      const periodsState = Object.keys(statsData).reduce((acc, period) => {
+        acc[period] = true;  // Default all periods to expanded
         return acc;
       }, {} as Record<string, boolean>);
-      setExpandedPeriods(periodsState);
       
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
-    } finally {
-      setIsLoading(false);
+      setExpandedPeriods(periodsState);
     }
-  };
-
-  // Initial data fetch
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  }, [statsData]);
 
   const togglePeriod = (period: string) => {
     setExpandedPeriods((prev) => ({
@@ -131,10 +62,6 @@ const ReportsLeftPanel: React.FC = () => {
   const togglePin = () => {
     setIsPinned(!isPinned);
     setIsExpanded(true); 
-  };
-
-  const refreshData = () => {
-    fetchStats(true); // Force refresh from API
   };
 
   // Format date to display more readably
@@ -216,7 +143,7 @@ const ReportsLeftPanel: React.FC = () => {
                   <Filter size={16} />
                 </button>
                 <button
-                  onClick={refreshData}
+                  onClick={() => refreshStats()}
                   className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500" 
                   title="Refresh data"
                   disabled={isLoading}
@@ -237,7 +164,7 @@ const ReportsLeftPanel: React.FC = () => {
                 {error}
                 <button 
                   className="ml-2 text-red-600 hover:text-red-800 underline text-xs"
-                  onClick={refreshData}
+                  onClick={() => refreshStats()}
                 >
                   Retry
                 </button>

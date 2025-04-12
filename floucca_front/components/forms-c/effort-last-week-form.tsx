@@ -24,11 +24,12 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
 }) => {
   const [currentGear, setCurrentGear] = useState<{
     gear_code: number;
-    days_used: number;
+    days_used: string;
   }>({
     gear_code: 0,
-    days_used: 1,
+    days_used: "",
   });
+  
 
   const { fields, append, remove } = useFieldArray<{
     effortLastWeek: {
@@ -47,29 +48,37 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
   };
 
   const handleDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || 1;
-    if (value >= 1 && value <= 7) {
+    const value = e.target.value;
+    if (/^\d{0,1}$|^[1-7]$/.test(value) || value === "") {
       setCurrentGear((prev) => ({
         ...prev,
         days_used: value,
       }));
     }
   };
+  
 
   const addGear = () => {
+    const parsedDays = parseInt(currentGear.days_used);
     if (
       currentGear.gear_code === 0 ||
-      currentGear.days_used < 1 ||
-      currentGear.days_used > 7
+      isNaN(parsedDays) ||
+      parsedDays < 1 ||
+      parsedDays > 7
     )
       return;
-
-    append(currentGear);
+  
+    append({
+      gear_code: currentGear.gear_code,
+      days_used: parsedDays,
+    });
+  
     setCurrentGear({
       gear_code: 0,
-      days_used: 1,
+      days_used: "1",
     });
   };
+  
 
   const remainingGears = gears.filter(
     (gear) => !fields.some((entry) => entry.gear_code === gear.gear_code)
@@ -81,8 +90,7 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
 
   const isAddDisabled =
     currentGear.gear_code === 0 ||
-    currentGear.days_used < 1 ||
-    currentGear.days_used > 7;
+    currentGear.days_used === "" 
 
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6">
@@ -125,12 +133,9 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
                   max={7}
                   value={currentGear.days_used}
                   onChange={handleDaysChange}
-                  placeholder="1 to 7"
+                  placeholder="1 to 7 days"
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-500 whitespace-nowrap">
-                  (1-7 days)
-                </span>
               </div>
             </div>
           </div>

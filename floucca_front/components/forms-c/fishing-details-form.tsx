@@ -305,7 +305,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
         <div className="grid md:grid-cols-4 gap-4">
           <div className="space-y-1">
             <label className="block text-gray-700 text-sm font-medium mb-1">
-              Weight (kg) {required && <span className="text-red-500">*</span>}
+              Total Weight (kg) {required && <span className="text-red-500">*</span>}
             </label>
             <input
               type="number"
@@ -347,7 +347,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
 
           <div className="space-y-1">
             <label className="block text-gray-700 text-sm font-medium mb-1">
-              Quantity {required && <span className="text-red-500">*</span>}
+              Quantity (per kg) {required && <span className="text-red-500">*</span>}
             </label>
             <input
               type="number"
@@ -368,7 +368,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
 
           <div className="space-y-1">
             <label className="block text-gray-700 text-sm font-medium mb-1">
-              Price (LBP) {required && <span className="text-red-500">*</span>}
+              Price (LBP per kg) {required && <span className="text-red-500">*</span>}
             </label>
             <input
               type="number"

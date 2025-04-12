@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useFieldArray, Control, Controller } from "react-hook-form";
 import { Plus, Trash2, AlertCircle } from "lucide-react";
+import FormField from "@/components/utils/form-field";
 
 interface Gear {
   gear_code: number;
@@ -21,13 +22,6 @@ interface GearEntry {
   id?: string;
   gear_code: number;
   gear_details: GearDetail[];
-}
-
-interface LandingFormValues {
-  effortToday: {
-    hours_fished: number;
-    gear_entries: GearEntry[];
-  };
 }
 
 interface EffortTodayProps {
@@ -91,13 +85,13 @@ const EffortToday: React.FC<EffortTodayProps> = ({
 
   const getCurrentGearSpecs = (): GearSpec[] => {
     const matchingGears = gears.filter((g) => g.gear_code === currentGearCode);
-    
+
     if (matchingGears.length === 0) return [];
 
     return matchingGears.map((gear) => ({
       equipment_id: gear.equipment_id,
       equipment_name: gear.equipment_name,
-      type: "number", // Default type, can be customized if needed
+      type: "number",
     }));
   };
 
@@ -107,13 +101,16 @@ const EffortToday: React.FC<EffortTodayProps> = ({
 
   const areSpecsComplete = () => {
     const requiredSpecs = getCurrentGearSpecs();
-    return requiredSpecs.every((spec) => 
+    return requiredSpecs.every((spec) =>
       currentSpecs[spec.equipment_name]?.trim()
     );
   };
 
   const availableGears = gears.filter(
-    (gear) => !fields.some((field) => (field as unknown as GearEntry).gear_code === gear.gear_code)
+    (gear) =>
+      !fields.some(
+        (field) => (field as unknown as GearEntry).gear_code === gear.gear_code
+      )
   );
 
   const uniqueGearOptions = Array.from(
@@ -135,37 +132,15 @@ const EffortToday: React.FC<EffortTodayProps> = ({
       <div className="space-y-3">
         {/* Hours fished input */}
         <div className="flex items-center gap-2">
-          <Controller
-            name="effortToday.hours_fished"
+          <FormField
             control={control}
-            rules={{
-              min: { value: 0, message: "Hours must be between 0 and 24" },
-              max: { value: 24, message: "Hours must be between 0 and 24" },
-            }}
-            render={({ field, fieldState: { error } }) => (
-              <div className="form-group mb-2 w-full">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Hours Fished Today
-                  {required && <span className="text-red-500">*</span>}
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={24}
-                  placeholder="(1-24 hours)"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                    error
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }`}
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                />
-                {error && (
-                  <p className="text-red-500 text-sm mt-1">{error.message}</p>
-                )}
-              </div>
-            )}
+            name="effortToday.hours_fished"
+            label="Hours Fished Today"
+            placeholder="1 to 24 hours"
+            type="number"
+            min={1}
+            max={24}
+            required={required}
           />
         </div>
 
@@ -208,10 +183,7 @@ const EffortToday: React.FC<EffortTodayProps> = ({
                         type={spec.type}
                         value={currentSpecs[spec.equipment_name] || ""}
                         onChange={(e) =>
-                          handleSpecChange(
-                            spec.equipment_name,
-                            e.target.value
-                          )
+                          handleSpecChange(spec.equipment_name, e.target.value)
                         }
                         onKeyDown={(e) => {
                           if (e.key === "-" || e.key === "e") {

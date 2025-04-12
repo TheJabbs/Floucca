@@ -18,21 +18,25 @@ export class UserService {
 
   async createUserWithDetails(
     input: CreateUserWithDetailsDto
-  ): Promise<ResponseMessage<null>> {
-    const { user, coop_codes, role_ids } = input;
+  ): Promise<ResponseMessage<{ user_id: number }>> {
+    const { coop_codes=[], role_ids=[], ...user } = input;
 
-    const existingEmail = user.user_email
-      ? await this.prisma.users.findUnique({ where: { user_email: user.user_email } })
-      : null;
-    if (existingEmail) {
-      throw new BadRequestException("Email already exists.");
+    if (user.user_email) {
+      const existingEmail = await this.prisma.users.findUnique({
+        where: { user_email: user.user_email },
+      });
+      if (existingEmail) {
+        throw new BadRequestException("Email already exists.");
+      }
     }
 
-    const existingPhone = user.user_phone
-      ? await this.prisma.users.findUnique({ where: { user_phone: user.user_phone } })
-      : null;
-    if (existingPhone) {
-      throw new BadRequestException("Phone number already exists.");
+    if (user.user_phone) {
+      const existingPhone = await this.prisma.users.findUnique({
+        where: { user_phone: user.user_phone },
+      });
+      if (existingPhone) {
+        throw new BadRequestException("Phone number already exists.");
+      }
     }
 
     const hashedPassword = await bcrypt.hash(user.user_pass, 10);
@@ -46,7 +50,9 @@ export class UserService {
       });
 
       const coopPromises = coop_codes.map(async (code) => {
-        const coopExists = await tx.coop.findUnique({ where: { coop_code: code } });
+        const coopExists = await tx.coop.findUnique({
+          where: { coop_code: code },
+        });
         if (!coopExists) {
           throw new BadRequestException(`Coop code ${code} does not exist.`);
         }
@@ -59,7 +65,9 @@ export class UserService {
       });
 
       const rolePromises = role_ids.map(async (roleId) => {
-        const roleExists = await tx.roles.findUnique({ where: { role_id: roleId } });
+        const roleExists = await tx.roles.findUnique({
+          where: { role_id: roleId },
+        });
         if (!roleExists) {
           throw new BadRequestException(`Role ID ${roleId} does not exist.`);
         }
@@ -75,7 +83,7 @@ export class UserService {
 
       return {
         message: `User ${newUser.user_fname} ${newUser.user_lname} created successfully.`,
-        data: null,
+        data: { user_id: newUser.user_id },
       };
     });
   }

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateUserDto } from "./dto/create-users.dto";
 import { CreateUserWithDetailsDto } from "./dto/createUserWithDetails.dto";
+import { UpdateUserWithDetailsDto } from "./dto/updateUserWithDetails.dto";
 import { User } from "./interfaces/users.interface";
 import { ResponseMessage } from "src/shared/interface/response.interface";
 import * as bcrypt from "bcrypt";
@@ -122,15 +123,56 @@ export class UserService {
     });
   }
   
-  async updateUser(user_id: number, updateUserDto: CreateUserDto): Promise<User> {
-    const userExists = await this.validateUser(user_id);
+  async updateUserWithDetails(
+    user_id: number,
+    input: UpdateUserWithDetailsDto
+  ): Promise<ResponseMessage<{ user_id: number }>> {
+    const userExists = await this.prisma.users.findUnique({ where: { user_id } });
     if (!userExists) {
       throw new NotFoundException(`User with ID ${user_id} not found.`);
     }
 
-    return this.prisma.users.update({
-      where: { user_id },
-      data: updateUserDto,
+    const { coop_codes, role_ids, ...userData } = input;
+
+    if (userData.user_pass) {
+      userData.user_pass = await bcrypt.hash(userData.user_pass, 10);
+    }
+
+    return await this.prisma.$transaction(async (tx) => {
+      await tx.users.update({
+        where: { user_id },
+        data: userData,
+      });
+
+      if (coop_codes?.length) {
+        await tx.user_coop.deleteMany({ where: { user_id } });
+
+        const coopPromises = coop_codes.map(async (code) => {
+          const coopExists = await tx.coop.findUnique({ where: { coop_code: code } });
+          if (!coopExists) throw new BadRequestException(`Coop code ${code} does not exist.`);
+          return tx.user_coop.create({ data: { user_id, coop_code: code } });
+        });
+
+        await Promise.all(coopPromises);
+      }
+
+      
+      if (role_ids?.length) {
+        await tx.user_role.deleteMany({ where: { user_id } });
+
+        const rolePromises = role_ids.map(async (id) => {
+          const roleExists = await tx.roles.findUnique({ where: { role_id: id } });
+          if (!roleExists) throw new BadRequestException(`Role ID ${id} does not exist.`);
+          return tx.user_role.create({ data: { user_id, role_id: id } });
+        });
+
+        await Promise.all(rolePromises);
+      }
+
+      return {
+        message: `User with ID ${user_id} updated successfully.`,
+        data: { user_id },
+      };
     });
   }
 

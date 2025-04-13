@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Param, Delete, Body, Put, UseGuards, Req } from "@nestjs/common";
 import { UserService } from "./users.service";
 import { CreateUserWithDetailsDto } from "./dto/createUserWithDetails.dto";
-import { CreateUserDto } from "./dto/create-users.dto";
+import { UpdateUserWithDetailsDto } from "./dto/updateUserWithDetails.dto";
 import { User } from "./interfaces/users.interface";
 import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import { ResponseMessage } from "src/shared/interface/response.interface";
@@ -40,12 +40,16 @@ async adminCreatesUser(
     return this.userService.findUserById(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+ // @UseGuards(JwtAuthGuard)
   @Put("update/:user_id")
-  async updateUser(@Param("user_id") user_id: string, @Body() updateUserDto: CreateUserDto): Promise<User> {
+  async updateUser(
+    @Param("user_id") user_id: string,
+    @Body() updateDto: UpdateUserWithDetailsDto
+  ): Promise<ResponseMessage<{ user_id: number }>> {
     const id = parseInt(user_id, 10);
-    return this.userService.updateUser(id, updateUserDto);
+    return this.userService.updateUserWithDetails(id, updateDto);
   }
+  
 
   @UseGuards(JwtAuthGuard)
   @Put("update-last-login/:user_id")

@@ -4,11 +4,9 @@ import React, { createContext, ReactNode, useContext, useState, useEffect } from
 import { fetchLeftPanelStats } from "@/services/leftPanelService";
 import { getFromCache, saveToCache, isCacheValid } from "@/components/utils/cache-utils";
 
-// Cache constants
 const STATS_PANEL_CACHE_KEY = 'flouca_stats_panel';
 const CACHE_EXPIRATION = 15 * 60 * 1000; // 15 minutes
 
-// Stats data interfaces
 export interface StatsData {
   strata: {
     port: number;
@@ -45,10 +43,8 @@ interface SharedStatsContextType {
   } | null;
 }
 
-// Create the context
 const SharedStatsContext = createContext<SharedStatsContextType | undefined>(undefined);
 
-// Provider component
 export function SharedStatsProvider({ children }: { children: ReactNode }) {
   const [statsData, setStatsData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);

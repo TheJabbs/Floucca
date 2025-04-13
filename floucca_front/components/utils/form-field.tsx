@@ -36,16 +36,14 @@ const FormField = <T extends FieldValues>({
       rules={{
         required: required ? `${label} is required` : false,
         min:
-  min !== undefined
-    ? { value: min, message: `Minimum value is ${min}` }
-    : undefined,
-max:
-  max !== undefined
-    ? { value: max, message: `Maximum value is ${max}` }
-    : undefined,
-
+          required && min !== undefined
+            ? { value: min, message: `Minimum value is ${min}` }
+            : undefined,
+        max:
+          required && max !== undefined
+            ? { value: max, message: `Maximum value is ${max}` }
+            : undefined,
       }}
-      
       render={({ field, fieldState: { error } }) => (
         <div className="form-group mb-2 w-full">
           <label

@@ -87,13 +87,41 @@ export class UserService {
 
 
   async findAllUsers(): Promise<User[]> {
-    return this.prisma.users.findMany();
+    return this.prisma.users.findMany({
+      include: {
+        user_role: {
+          include: {
+            roles: true,
+          },
+        },
+        user_coop: {
+          include: {
+            coop: true,
+          },
+        },
+      },
+    });
   }
+  
 
   async findUserById(user_id: number): Promise<User | null> {
-    return this.prisma.users.findUnique({ where: { user_id } });
+    return this.prisma.users.findUnique({
+      where: { user_id },
+      include: {
+        user_role: {
+          include: {
+            roles: true,
+          },
+        },
+        user_coop: {
+          include: {
+            coop: true,
+          },
+        },
+      },
+    });
   }
-
+  
   async updateUser(user_id: number, updateUserDto: CreateUserDto): Promise<User> {
     const userExists = await this.validateUser(user_id);
     if (!userExists) {

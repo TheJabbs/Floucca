@@ -26,17 +26,17 @@ async adminCreatesUser(
 }
 
 
-  @UseGuards(JwtAuthGuard)
+ // @UseGuards(JwtAuthGuard)
   @Get("all")
   async findAllUsers(): Promise<User[]> {
     return this.userService.findAllUsers();
   }
 
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Get(":user_id")
   async findUserById(@Param("user_id") user_id: string, @Req() req): Promise<User | null> {
     const id = parseInt(user_id, 10);
-    console.log(`Authenticated user: ${req.user.user_id}`);
+    //console.log(`Authenticated user: ${req.user.user_id}`);
     return this.userService.findUserById(id);
   }
 

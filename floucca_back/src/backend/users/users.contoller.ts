@@ -14,13 +14,16 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('admin-create')
-  async adminCreatesUser(
-    @Body() body: CreateUserWithDetailsDto
-  ): Promise<ResponseMessage<null>> {
-    return this.userService.createUserWithDetails(body);
+async adminCreatesUser(
+  @Body() body: CreateUserWithDetailsDto
+): Promise<ResponseMessage<{ user_id: number }>> {
+  try {
+    return await this.userService.createUserWithDetails(body);
+  } catch (error) {
+    console.error('errir in adminCreatesUser:', error);
+    throw error;
   }
-
-
+}
 
 
   @UseGuards(JwtAuthGuard)

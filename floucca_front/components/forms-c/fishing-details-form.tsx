@@ -37,6 +37,8 @@ interface FishEntry {
   fish_length: number;
   fish_quantity: number;
   price: number;
+  total_value?: number;
+  total_quantity?: number;
 }
 
 interface FishingDetailsProps {
@@ -64,6 +66,8 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     fish_length: number;
     fish_quantity: number;
     price: number;
+    total_value?: number;
+    total_quantity?: number;
   }>({
     gear_code: 0,
     specie_code: 0,
@@ -71,6 +75,8 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     fish_length: 0,
     fish_quantity: 0,
     price: 0,
+    total_value: undefined,
+    total_quantity: undefined,
   });
 
   // Get relevant data from form state
@@ -96,10 +102,28 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
 
   // Update current entry field
   const updateCurrentEntry = (field: string, value: any) => {
-    setCurrentEntry(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    const updatedEntry = { ...currentEntry, [field]: value };
+    // 2 ways calcs
+    // when price or weight changes, update total value
+    if ((field === 'price' || field === 'fish_weight') && updatedEntry.price > 0 && updatedEntry.fish_weight > 0) {
+      updatedEntry.total_value = Math.round(updatedEntry.price * updatedEntry.fish_weight);
+    }
+    
+    // when total_value changes, update price
+    if (field === 'total_value' && value > 0 && updatedEntry.fish_weight > 0) {
+      updatedEntry.price = Math.round(value / updatedEntry.fish_weight);
+    }
+    
+    // when fish_quantity or weight changes, update total quantity
+    if ((field === 'fish_quantity' || field === 'fish_weight') && updatedEntry.fish_quantity > 0 && updatedEntry.fish_weight > 0) {
+      updatedEntry.total_quantity = Math.round(updatedEntry.fish_quantity * updatedEntry.fish_weight);
+    }
+    
+    // when total_quantity changes, update fish_quantity
+    if (field === 'total_quantity' && value > 0 && updatedEntry.fish_weight > 0) {
+      updatedEntry.fish_quantity = Math.round(value / updatedEntry.fish_weight);
+    }
+    setCurrentEntry(updatedEntry);
   };
 
   // Check if current entry is valid before adding
@@ -132,6 +156,8 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
       fish_length: 0,
       fish_quantity: 0,
       price: 0,
+      total_value: undefined,
+      total_quantity: undefined,
     });
     setSelectedSpecies(null);
   };
@@ -302,7 +328,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
         </div>
 
         {/* Fish details inputs */}
-        <div className="grid md:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           <div className="space-y-1">
             <label className="block text-gray-700 text-sm font-medium mb-1">
               Total Weight (kg) {required && <span className="text-red-500">*</span>}
@@ -365,7 +391,10 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+        </div>
 
+        {/* Optional fields - second row */}
+        <div className="grid md:grid-cols-3 gap-4">
           <div className="space-y-1">
             <label className="block text-gray-700 text-sm font-medium mb-1">
               Price (LBP per kg) {required && <span className="text-red-500">*</span>}
@@ -385,6 +414,52 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
               placeholder="Enter price"
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          {/*Total Value */}
+          <div className="space-y-1">
+            <label className="block text-gray-700 text-sm font-medium mb-1">
+              Total Value (LBP) <span className="text-xs text-gray-500">(Optional)</span>
+            </label>
+            <input
+              type="number"
+              value={currentEntry.total_value || ''}
+              onChange={(e) => updateCurrentEntry('total_value', Number(e.target.value) || undefined)}
+              min={0}
+              onInput={(e) => {
+                const input = e.currentTarget;
+                if (parseFloat(input.value) < 0) {
+                  input.value = "0";
+                }
+              }}              
+              onKeyDown={preventNegativeAndE}
+              placeholder="Total bulk sale value"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">Auto-syncs with price*weight</p>
+          </div>
+
+          {/*Total Quantity */}
+          <div className="space-y-1">
+            <label className="block text-gray-700 text-sm font-medium mb-1">
+              Total Quantity <span className="text-xs text-gray-500">(Optional)</span>
+            </label>
+            <input
+              type="number"
+              value={currentEntry.total_quantity || ''}
+              onChange={(e) => updateCurrentEntry('total_quantity', Number(e.target.value) || undefined)}
+              min={0}
+              onInput={(e) => {
+                const input = e.currentTarget;
+                if (parseFloat(input.value) < 0) {
+                  input.value = "0";
+                }
+              }}              
+              onKeyDown={preventNegativeAndE}
+              placeholder="Total fish count"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">Auto-syncs with quantity*weight</p>
           </div>
         </div>
 
@@ -415,25 +490,25 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="grid grid-cols-2 md:grid-cols-5 flex-1">
                       <div className="flex items-center gap-1">
-                        <span className="text-gray-900 ">
+                        <span className="text-gray-900 font-medium">
                           {getSpecieName(entry.specie_code)}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="text-gray-600 ">
+                        <span className="text-gray-600">
                           {getGearName(entry.gear_code)}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <span className="text-gray-600 truncate">
-                          {entry.fish_weight}kg, {entry.fish_quantity} fish
+                          {entry.fish_weight}kg, {entry.fish_quantity} fish/kg
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <span className="text-gray-600 truncate">{entry.fish_length}cm</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="text-gray-600 truncate">{entry.price} LBP</span>
+                        <span className="text-gray-600 truncate">{entry.price} LBP/kg</span>
                       </div>
                     </div>
                     <button
@@ -444,6 +519,12 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
+                  {(entry.total_value || entry.total_quantity) && (
+                    <div className="mt-2 text-sm text-gray-500 pl-2">
+                      {entry.total_value && <span className="mr-3">Total value: {entry.total_value} LBP</span>}
+                      {entry.total_quantity && <span>Total quantity: {entry.total_quantity} fish</span>}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -457,5 +538,4 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     </div>
   );
 };
-
 export default FishingDetails;

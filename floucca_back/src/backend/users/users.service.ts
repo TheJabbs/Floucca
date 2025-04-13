@@ -6,14 +6,10 @@ import { User } from "./interfaces/users.interface";
 import { ResponseMessage } from "src/shared/interface/response.interface";
 import * as bcrypt from "bcrypt";
 import { BadRequestException } from "@nestjs/common";
-import { UserCoopService } from "../user_coop/user_coop.service";
-import { UserRoleService } from "../user_role/user_role.service";
+
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService,
-    private readonly userCoopService: UserCoopService,
-    private readonly userRoleService: UserRoleService
-  ) {}
+  constructor(private prisma: PrismaService,) {}
 
   async validateUser(user_id: number): Promise<boolean> {
     const user = await this.prisma.users.findUnique({ where: { user_id } });
@@ -50,7 +46,7 @@ export class UserService {
         },
       });
 
-      // Coops
+      // Coops table data insert
       await Promise.all(
         coop_codes.map(async (code) => {
           const coopExists = await tx.coop.findUnique({ where: { coop_code: code } });
@@ -66,7 +62,7 @@ export class UserService {
         })
       );
 
-      // Roles
+      // Roles table 
       await Promise.all(
         role_ids.map(async (roleId) => {
           const roleExists = await tx.roles.findUnique({ where: { role_id: roleId } });

@@ -20,35 +20,26 @@ export class UserService {
     return !!user;
   }
 
-  async createUserWithDetails(
-    input: CreateUserWithDetailsDto
-  ): Promise<ResponseMessage<{ user_id: number }>> {
-    const {
-      user_fname,
-      user_lname,
-      user_email,
-      user_phone,
-      user_pass,
-      coop_codes = [],
-      role_ids = [],
-    } = input;
+  async createUserWithDetails(input: CreateUserWithDetailsDto): Promise<ResponseMessage<{ user_id: number }>> {
+    const { user_fname, user_lname, user_email, user_phone, user_pass, coop_codes, role_ids } = input;
 
-    // Email/Phone validations
-    if (user_email) {
-      const existingEmail = await this.prisma.users.findUnique({ where: { user_email } });
-      if (existingEmail) throw new BadRequestException("Email already exists.");
+    const existingEmail = user_email
+      ? await this.prisma.users.findUnique({ where: { user_email } })
+      : null;
+    if (existingEmail) {
+      throw new BadRequestException('Email already exists.');
     }
 
-    if (user_phone) {
-      const existingPhone = await this.prisma.users.findUnique({ where: { user_phone } });
-      if (existingPhone) throw new BadRequestException("Phone number already exists.");
+    const existingPhone = user_phone
+      ? await this.prisma.users.findUnique({ where: { user_phone } })
+      : null;
+    if (existingPhone) {
+      throw new BadRequestException('Phone number already exists.');
     }
 
     const hashedPassword = await bcrypt.hash(user_pass, 10);
 
-    // Transaction block
     return await this.prisma.$transaction(async (tx) => {
-      // 1. Create the user
       const newUser = await tx.users.create({
         data: {
           user_fname,
@@ -59,22 +50,34 @@ export class UserService {
         },
       });
 
-      // 2. Add entries to user_coop table using the service
+      // Coops
       await Promise.all(
-        coop_codes.map(async (coop_code) => {
-          await this.userCoopService.createUserCoop({
-            user_id: newUser.user_id,
-            coop_code,
+        coop_codes.map(async (code) => {
+          const coopExists = await tx.coop.findUnique({ where: { coop_code: code } });
+          if (!coopExists) {
+            throw new BadRequestException(`Coop code ${code} does not exist.`);
+          }
+          return tx.user_coop.create({
+            data: {
+              user_id: newUser.user_id,
+              coop_code: code,
+            },
           });
         })
       );
 
-      // 3. Add entries to user_role table using the service
+      // Roles
       await Promise.all(
-        role_ids.map(async (role_id) => {
-          await this.userRoleService.createUserRole({
-            user_id: newUser.user_id,
-            role_id,
+        role_ids.map(async (roleId) => {
+          const roleExists = await tx.roles.findUnique({ where: { role_id: roleId } });
+          if (!roleExists) {
+            throw new BadRequestException(`Role ID ${roleId} does not exist.`);
+          }
+          return tx.user_role.create({
+            data: {
+              user_id: newUser.user_id,
+              role_id: roleId,
+            },
           });
         })
       );

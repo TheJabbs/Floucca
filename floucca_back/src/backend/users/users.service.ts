@@ -36,7 +36,7 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(user_pass, 10);
 
-    return await this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx) => {
       const newUser = await tx.users.create({
         data: {
           user_fname,
@@ -49,39 +49,39 @@ export class UserService {
 
       // Coops table data insert
       await Promise.all(
-        coop_codes.map(async (code) => {
-          const coopExists = await tx.coop.findUnique({ where: { coop_code: code } });
-          if (!coopExists) {
-            throw new BadRequestException(`Coop code ${code} does not exist.`);
-          }
-          return tx.user_coop.create({
-            data: {
-              user_id: newUser.user_id,
-              coop_code: code,
-            },
-          });
-        })
+          coop_codes.map(async (code) => {
+            const coopExists = await tx.coop.findUnique({where: {coop_code: code}});
+            if (!coopExists) {
+              throw new BadRequestException(`Coop code ${code} does not exist.`);
+            }
+            return tx.user_coop.create({
+              data: {
+                user_id: newUser.user_id,
+                coop_code: code,
+              },
+            });
+          })
       );
 
       // Roles table 
       await Promise.all(
-        role_ids.map(async (roleId) => {
-          const roleExists = await tx.roles.findUnique({ where: { role_id: roleId } });
-          if (!roleExists) {
-            throw new BadRequestException(`Role ID ${roleId} does not exist.`);
-          }
-          return tx.user_role.create({
-            data: {
-              user_id: newUser.user_id,
-              role_id: roleId,
-            },
-          });
-        })
+          role_ids.map(async (roleId) => {
+            const roleExists = await tx.roles.findUnique({where: {role_id: roleId}});
+            if (!roleExists) {
+              throw new BadRequestException(`Role ID ${roleId} does not exist.`);
+            }
+            return tx.user_role.create({
+              data: {
+                user_id: newUser.user_id,
+                role_id: roleId,
+              },
+            });
+          })
       );
 
       return {
         message: `User ${newUser.user_fname} ${newUser.user_lname} created successfully.`,
-        data: { user_id: newUser.user_id },
+        data: {user_id: newUser.user_id},
       };
     });
   }

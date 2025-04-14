@@ -1,13 +1,14 @@
 import {Injectable} from "@nestjs/common";
 import {PrismaService} from "../../prisma/prisma.service";
 import {CreateActiveDaysDto} from "./dto/createActiveDays.dto";
+import {GetAllActiveDaysInterface} from "./interface/getAllActiveDays.interface";
 
 @Injectable()
 export class ActiveDaysService {
     constructor(private readonly prisma: PrismaService) {
     }
 
-    async getAllActiveDays() {
+    async getAllActiveDays(): Promise<GetAllActiveDaysInterface[]> {
         const ad = await this.prisma.active_days.findMany();
         if (ad.length === 0) {
             throw new Error('No active days found');
@@ -105,33 +106,33 @@ export class ActiveDaysService {
         return ad;
     }
 
-    // async test(){
-    //     let newPeriod = await this.prisma.period.findFirst({
-    //         orderBy: {period_date: 'desc'}
-    //     })
-    //
-    //     const [allPorts, allGears] = await Promise.all([
-    //         this.prisma.ports.findMany(),
-    //         this.prisma.gear.findMany({
-    //             select: {
-    //                 gear_code: true
-    //             }
-    //         })
-    //     ]);
-    //
-    //     const codes = allGears.map(gear => gear.gear_code);
-    //
-    //     const data = allPorts.flatMap(port =>
-    //         codes.map(code => ({
-    //             port_id: port.port_id,
-    //             period_date: newPeriod.period_date,
-    //             active_days: 28,
-    //             gear_code: code
-    //         }))
-    //     );
-    //
-    //     await this.prisma.active_days.createMany({ data });
-    // }
+    async test(){
+        let newPeriod = await this.prisma.period.findFirst({
+            orderBy: {period_date: 'desc'}
+        })
+
+        const [allPorts, allGears] = await Promise.all([
+            this.prisma.ports.findMany(),
+            this.prisma.gear.findMany({
+                select: {
+                    gear_code: true
+                }
+            })
+        ]);
+
+        const codes = allGears.map(gear => gear.gear_code);
+
+        const data = allPorts.flatMap(port =>
+            codes.map(code => ({
+                port_id: port.port_id,
+                period_date: newPeriod.period_date,
+                active_days: 28,
+                gear_code: code
+            }))
+        );
+
+        await this.prisma.active_days.createMany({ data });
+    }
 
     //================================================================
     async validate(gd: any, isCreate: boolean) {

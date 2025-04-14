@@ -3,12 +3,17 @@ import {ResponseMessage} from "../../shared/interface/response.interface";
 import {GetAllPeriodInterface} from "./interface/get_all_period.interface";
 import {UpdateGearDetailDto} from "../gear_detail/dto/update_gear_detail.dto";
 import {PrismaService} from "../../prisma/prisma.service";
+import {mapPeriodWithActiveDays} from "./mapper/mapPeriodWithActiveDays";
+import {ActiveDaysService} from "../active_days/activeDays.service";
+import {UpdatePeriodAndActiveDaysDto} from "./dto/UpdatePeriodAndActiveDays.dto";
+import {UpdatePeriodDto} from "./dto/update_period.dto";
 
 
 @Injectable()
 export class PeriodService {
 
-    constructor(private readonly prisma: PrismaService) {
+    constructor(private readonly prisma: PrismaService,
+                private readonly activeDaysService: ActiveDaysService) {
     }
 
 
@@ -24,7 +29,8 @@ export class PeriodService {
         });
     }
 
-    async updatePeriod(periodId: Date, updatedPeriod: UpdateGearDetailDto): Promise<ResponseMessage<any>> {
+    async updatePeriod(periodId: string, updatedPeriod: UpdatePeriodDto): Promise<ResponseMessage<any>> {
+
         try {
             await this.prisma.period.update({
                 where: {
@@ -36,6 +42,7 @@ export class PeriodService {
                 message: 'Period updated successfully.'
             };
         } catch (e) {
+            console.error(e);
             return {
                 message: 'Failed to update period.'
             };
@@ -57,6 +64,49 @@ export class PeriodService {
                 message: 'Failed to delete period.'
             };
         }
+    }
+
+    //===================================================================
+
+    async getPeriodsWithActiveDays(){
+        const [periods , activeDays] = await Promise.all([
+            this.prisma.period.findMany(),
+            this.prisma.active_days.findMany()
+        ])
+
+        const map = mapPeriodWithActiveDays(periods, activeDays);
+
+
+        return Array.from(map.entries()).map(([period, activeDays]) => ({
+            period,
+            activeDays
+        }));
+
+    }
+
+    async updatePeriodWithActiveDays(toUpdate: UpdatePeriodAndActiveDaysDto): Promise<ResponseMessage<any>> {
+        const periods = toUpdate.modifiedPeriod;
+        const activeDays = toUpdate.modifiedActiveDays;
+
+        const periodUpdatePromises = periods.map(async (period) => {
+            return this.prisma.period.update({
+                where: {
+                    period_date: period.period_date
+                },
+                data: period.period
+            });
+        });
+
+        const activeDaysUpdatePromises = activeDays.map(async (activeDay) => {
+            return this.activeDaysService.updateActiveDays(activeDay.activeDays_id, activeDay.activeDays);
+        });
+
+        await Promise.all([...periodUpdatePromises, ...activeDaysUpdatePromises]);
+
+        return {
+            message: 'Period and Active Days updated successfully.'
+        };
+
     }
 
 }

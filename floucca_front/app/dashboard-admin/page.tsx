@@ -1,12 +1,35 @@
-import React, { useState } from "react";
-import { 
-  Database, Users, UserCheck, BarChart2, LineChart, 
-  Save, RotateCcw, FileSpreadsheet, FilePlus, Copy, 
-  Trash2, Unlock, Lock, CheckSquare, History, ChevronRight, 
-  LayoutGrid
+"use client";
+import React from "react";
+import {
+  Database,
+  Users,
+  UserCheck,
+  BarChart2,
+  LineChart,
+  Save,
+  RotateCcw,
+  FileSpreadsheet,
+  FilePlus,
+  Copy,
+  FileChartColumnIncreasing,
+  CalendarRange,
+  Upload,
+  FileText,
+  FileBarChart,
+  ClipboardList,
+  Trash2,
+  Unlock,
+  Lock,
+  CheckSquare,
+  History,
+  ChevronRight,
+  LayoutGrid,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const AdminDashboard = () => {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <main className="flex flex-1">
@@ -18,7 +41,9 @@ const AdminDashboard = () => {
               Administration Functions
             </h2>
             <nav className="space-y-1">
-              <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700">
+              <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
+                onClick={() => router.push("/dashboard-admin/users")}
+              >
                 <Users className="w-4 h-4 mr-3 text-blue-600" />
                 <span>Table of Users</span>
               </button>
@@ -33,6 +58,13 @@ const AdminDashboard = () => {
               <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700">
                 <LineChart className="w-4 h-4 mr-3 text-blue-600" />
                 <span>Progress Monitoring</span>
+              </button>
+              <button
+                className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
+                onClick={() => router.push("/dashboard")}
+              >
+                <FileChartColumnIncreasing className="w-4 h-4 mr-3 text-blue-600" />
+                <span>Reports and Stats</span>
               </button>
             </nav>
           </div>
@@ -65,20 +97,29 @@ const AdminDashboard = () => {
 
         {/* Main Panel */}
         <div className="flex-1 p-6">
-      <h1 className="text-2xl font-bold text-blue-800 mb-3 px-3">ADMIN DASHBOARD</h1>
+          <h1 className="text-2xl font-bold text-blue-800 mb-3 px-3">
+            ADMIN DASHBOARD
+          </h1>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="md:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
                 Note for: UOB, Administrator
               </h2>
               <p className="text-gray-700 mb-4">
-                You have exclusive access to key functions of the system which cover administration and maintenance of databases and software, full handling of all data and standards and designating access levels to data operators and privileged users.
+                You have exclusive access to key functions of the system which
+                cover administration and maintenance of databases and software,
+                full handling of all data and standards and designating access
+                levels to data operators and privileged users.
               </p>
               <p className="text-gray-700 mb-4">
-                The administration and maintenance functions are given on the left column.
+                The administration and maintenance functions are given on the
+                left column.
               </p>
               <p className="text-gray-700">
-                The right column handles the system databases. At the bottom of the middle column there are two links to privileged and data operations functions respectively. Access to them is direct and does not require a new login.
+                The right column handles the system databases. At the bottom of
+                the middle column there are two links to privileged and data
+                operations functions respectively. Access to them is direct and
+                does not require a new login.
               </p>
             </div>
 
@@ -91,75 +132,56 @@ const AdminDashboard = () => {
               <div className="space-y-2">
                 <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
                   <span className="flex items-center">
-                    <FilePlus className="w-4 h-4 mr-3" />
-                    <span>Create a new database</span>
+                    <CalendarRange className="w-4 h-4 mr-3" />
+                    <span>Manage Periods</span>
                   </span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                
-                <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
-                  <span className="flex items-center">
-                    <Copy className="w-4 h-4 mr-3" />
-                    <span>Use tables of another database</span>
-                  </span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                
-                <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
-                  <span className="flex items-center">
-                    <Database className="w-4 h-4 mr-3" />
-                    <span>Set-up tables manually</span>
-                  </span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                
+
                 <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
                   <span className="flex items-center">
                     <Trash2 className="w-4 h-4 mr-3" />
-                    <span>Delete a database</span>
+                    <span>Delete data</span>
                   </span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                
-                <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
-                  <span className="flex items-center">
-                    <Unlock className="w-4 h-4 mr-3" />
-                    <span>Release for inputting</span>
-                  </span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                
-                <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
-                  <span className="flex items-center">
-                    <Lock className="w-4 h-4 mr-3" />
-                    <span>Block a database</span>
-                  </span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                
-                <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
-                  <span className="flex items-center">
-                    <CheckSquare className="w-4 h-4 mr-3" />
-                    <span>Finalize</span>
-                  </span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                
-                <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
-                  <span className="flex items-center">
-                    <History className="w-4 h-4 mr-3" />
-                    <span>Move to history</span>
-                  </span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                
-                <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
-                  <span className="flex items-center">
-                    <RotateCcw className="w-4 h-4 mr-3" />
-                    <span>Bring-in from history</span>
-                  </span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+
+                {/* Data Entry as a subsection within Monthly databases */}
+                <div>
+                  <h3 className="text-md font-medium text-blue-700 mb-3 mt-4 flex items-center">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Data Entry
+                  </h3>
+                  <div className="space-y-2 pl-6">
+                    <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
+                      <span className="flex items-center">
+                        <span>Bulk Landing</span>
+                      </span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+
+                    <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
+                      <span className="flex items-center">
+                        <span>Bulk Effort</span>
+                      </span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+
+                    <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
+                      <span className="flex items-center">
+                        <span>Bulk Census</span>
+                      </span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+
+                    <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
+                      <span className="flex items-center">
+                        <span>Enter forms data</span>
+                      </span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

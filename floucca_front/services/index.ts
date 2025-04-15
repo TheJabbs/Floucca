@@ -8,6 +8,8 @@ export * from './speciesService';
 export * from './periodService';
 export * from './regionService';
 export * from './coopService';
+export * from './userService';
+export * from './roleService';
 
 // Form submission services
 export * from './landingService';

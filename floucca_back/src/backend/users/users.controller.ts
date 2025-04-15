@@ -51,7 +51,7 @@ async adminCreatesUser(
   }
   
 
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Put("update-last-login/:user_id")
   async updateLastLogin(@Param("user_id") user_id: string): Promise<void> {
     const id = parseInt(user_id, 10);
@@ -59,7 +59,7 @@ async adminCreatesUser(
     await this.userService.updateLastLogin(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Delete("delete/:user_id")
   async deleteUser(@Param("user_id") user_id: string): Promise<User> {
     const id = parseInt(user_id, 10);

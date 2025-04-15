@@ -29,7 +29,6 @@ export const getCoopByCode = async (coopCode: number): Promise<Coop> => {
 // Get coops by region
 export const getCoopsByRegion = async (regionCode: number): Promise<Coop[]> => {
   try {
-    // Assuming the API supports this filtering, otherwise you'd need to fetch all and filter client-side
     const allCoops = await getCoops();
     return allCoops.filter(coop => coop.region_code === regionCode);
   } catch (error) {

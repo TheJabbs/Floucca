@@ -20,9 +20,9 @@ export class PeriodController {
         return this.periodService.getPeriodById(periodId);
     }
 
-    @Put('/update/period/:period_id')
-   async  updatePeriod(@Param('period_id') periodId: string, @Body() updatedPeriod: UpdatePeriodDto) {
-        return this.periodService.updatePeriod(periodId, updatedPeriod);
+    @Put('/update')
+   async  updatePeriod( @Body() updatedPeriod: UpdatePeriodDto) {
+        return this.periodService.updatePeriod( updatedPeriod);
     }
 
     @Delete('/delete/period/:period_id')
@@ -37,8 +37,9 @@ export class PeriodController {
         return this.periodService.getPeriodsWithActiveDays();
     }
 
-    @Put('/update/period/active_days')
-    async updatePeriodAndActiveDays(@Body() updatedPeriod: UpdatePeriodAndActiveDaysDto): Promise<ResponseMessage<any>> {
-        return this.periodService.updatePeriodWithActiveDays(updatedPeriod);
-    }
+    // @Put('/update/pad')
+    // async updatePeriodAndActiveDays(@Body() updatedPeriod: UpdatePeriodAndActiveDaysDto[]): Promise<ResponseMessage<any>> {
+    //     console.log('Updated Period and Active Days:', updatedPeriod);
+    //     return this.periodService.updatePeriodWithActiveDays(updatedPeriod);
+    // }
 }

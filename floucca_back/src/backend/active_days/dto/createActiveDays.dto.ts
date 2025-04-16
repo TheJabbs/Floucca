@@ -18,6 +18,6 @@ export class CreateActiveDaysDto {
     @IsInt()
     @IsPositive()
     @IsOptional()
-    active_fays: number;
+    active_days: number;
 
 }

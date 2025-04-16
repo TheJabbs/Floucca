@@ -29,14 +29,17 @@ export class PeriodService {
         });
     }
 
-    async updatePeriod(periodId: string, updatedPeriod: UpdatePeriodDto): Promise<ResponseMessage<any>> {
+    async updatePeriod( updatedPeriod: UpdatePeriodDto): Promise<ResponseMessage<any>> {
+        const date = new Date(updatedPeriod.period_date);
 
         try {
             await this.prisma.period.update({
                 where: {
-                    period_date: periodId
+                    period_date: date.toISOString()
                 },
-                data: updatedPeriod
+                data: {
+                    period_status: updatedPeriod.period_status,
+                }
             });
             return {
                 message: 'Period updated successfully.'
@@ -77,29 +80,28 @@ export class PeriodService {
         return mapPeriodWithActiveDays(periods, activeDays);
     }
 
-    async updatePeriodWithActiveDays(toUpdate: UpdatePeriodAndActiveDaysDto): Promise<ResponseMessage<any>> {
-        const periods = toUpdate.modifiedPeriod;
-        const activeDays = toUpdate.modifiedActiveDays;
-
-        const periodUpdatePromises = periods.map(async (period) => {
-            return this.prisma.period.update({
-                where: {
-                    period_date: period.period_date
-                },
-                data: period.period
-            });
-        });
-
-        const activeDaysUpdatePromises = activeDays.map(async (activeDay) => {
-            return this.activeDaysService.updateActiveDays(activeDay.activeDays_id, activeDay.activeDays);
-        });
-
-        await Promise.all([...periodUpdatePromises, ...activeDaysUpdatePromises]);
-
-        return {
-            message: 'Period and Active Days updated successfully.'
-        };
-
-    }
+    // async updatePeriodWithActiveDays(toUpdate: UpdatePeriodAndActiveDaysDto[]): Promise<ResponseMessage<any>> {
+    //
+    //
+    //     const periodUpdatePromises = periods.map(async (period) => {
+    //         return this.prisma.period.update({
+    //             where: {
+    //                 period_date: period.period_date
+    //             },
+    //             data: period.period
+    //         });
+    //     });
+    //
+    //     const activeDaysUpdatePromises = activeDays.map(async (activeDay) => {
+    //         return this.activeDaysService.updateActiveDays(activeDay.activeDays_id, activeDay.activeDays);
+    //     });
+    //
+    //     await Promise.all([...periodUpdatePromises, ...activeDaysUpdatePromises]);
+    //
+    //     return {
+    //         message: 'Period and Active Days updated successfully.'
+    //     };
+    //
+    // }
 
 }

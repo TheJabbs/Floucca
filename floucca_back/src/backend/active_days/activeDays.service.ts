@@ -2,6 +2,7 @@ import {Injectable} from "@nestjs/common";
 import {PrismaService} from "../../prisma/prisma.service";
 import {CreateActiveDaysDto} from "./dto/createActiveDays.dto";
 import {GetAllActiveDaysInterface} from "./interface/getAllActiveDays.interface";
+import {UpdateActiveDaysDto} from "./dto/updateActiveDays.dto";
 
 @Injectable()
 export class ActiveDaysService {
@@ -47,14 +48,7 @@ export class ActiveDaysService {
         }
     }
 
-    async updateActiveDays(id: number, gd: CreateActiveDaysDto) {
-        const isValid = await this.validate(gd, false);
-        if (!isValid) {
-            return {
-                message: 'Invalid active days',
-                data: null
-            }
-        }
+    async updateActiveDays(id: number, gd: UpdateActiveDaysDto) {
 
         const updatedActiveDays = await this.prisma.active_days.update({
             where: {

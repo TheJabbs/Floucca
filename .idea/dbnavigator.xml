@@ -38,6 +38,7 @@
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="cccecdde-5c22-41d3-bb4f-077e1c1a5bdb" dataset="floucca.active_days" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="cccecdde-5c22-41d3-bb4f-077e1c1a5bdb" dataset="floucca.period" active-filter-id="" />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
@@ -66,7 +67,7 @@
           <token-type value="" />
           <token-config-file value="" />
           <token-profile value="" />
-          <session-user value="root@193.227.175.115" />
+          <session-user value="root@94.187.22.26" />
         </database>
         <properties>
           <auto-commit value="false" />

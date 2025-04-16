@@ -1,6 +1,11 @@
-import {Transform} from "class-transformer";
+import { IsNotEmpty, IsString, IsDateString } from 'class-validator';
 
-export class UpdatePeriodDto{
-    @Transform(({ value }) => value.toUpperCase())
-    period_status : string
+export class UpdatePeriodDto {
+    @IsNotEmpty()
+    @IsDateString()
+    period_date: string;
+
+    @IsNotEmpty()
+    @IsString()
+    period_status: string;
 }

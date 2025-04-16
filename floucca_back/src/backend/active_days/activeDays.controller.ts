@@ -23,7 +23,7 @@ export class ActiveDaysController {
         return this.service.createActiveDays(newActiveDays);
     }
 
-    @Put('/update/active_days/:active_id')
+    @Put('/update/:active_id')
     updateActiveDays(@Param('active_id') active_id: number, @Body() updatedActiveDays : UpdateActiveDaysDto) {
         return this.service.updateActiveDays(active_id, updatedActiveDays);
     }

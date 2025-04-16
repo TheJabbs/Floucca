@@ -1,18 +1,13 @@
 import {GetAllPeriodInterface} from "../interface/get_all_period.interface";
 import {GetAllActiveDaysInterface} from "../../active_days/interface/getAllActiveDays.interface";
+import {GetPeriodWithActiveDaysInterface} from "../interface/getPeriodWithActiveDays.interface";
 
-export function mapPeriodWithActiveDays(period: GetAllPeriodInterface[], activeDays: GetAllActiveDaysInterface[]) : Map<GetAllPeriodInterface, GetAllActiveDaysInterface[]>{
-    const map = new Map<GetAllPeriodInterface, GetAllActiveDaysInterface[]>();
-
-    console.log(`Total periods: ${period.length}`);
-    console.log(`Total active days: ${activeDays.length}`);
-
-    period.forEach((p) => {
-        const activeDaysForPeriod = activeDays.filter((ad) => ad.period_date.getTime() === p.period_date.getTime());
-        map.set(p, activeDaysForPeriod);
-
-        console.log(`Period: ${p.period_date}, Active Days: ${activeDaysForPeriod.length}`);
+export function mapPeriodWithActiveDays(period: GetAllPeriodInterface[], activeDays: GetAllActiveDaysInterface[]) : GetPeriodWithActiveDaysInterface[]{
+    return period.map((periodItem) => {
+        const activeDaysForPeriod = activeDays.filter(activeDay => activeDay.period_date.toDateString() === periodItem.period_date.toDateString());
+        return {
+            period: periodItem,
+            activeDays: activeDaysForPeriod
+        };
     });
-
-    return map;
 }

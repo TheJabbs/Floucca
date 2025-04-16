@@ -74,14 +74,7 @@ export class PeriodService {
             this.prisma.active_days.findMany()
         ])
 
-        const map = mapPeriodWithActiveDays(periods, activeDays);
-
-
-        return Array.from(map.entries()).map(([period, activeDays]) => ({
-            period,
-            activeDays
-        }));
-
+        return mapPeriodWithActiveDays(periods, activeDays);
     }
 
     async updatePeriodWithActiveDays(toUpdate: UpdatePeriodAndActiveDaysDto): Promise<ResponseMessage<any>> {

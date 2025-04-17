@@ -8,6 +8,7 @@ import {transformFormGearUsageToGearUsage} from "../../utils/transformation/form
 import {SenseFormContentInterface} from "./interface/sense_form_content.interface";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {IsOptional} from "class-validator";
+import {CreateBulkDto} from "./DTO/createBulk.dto";
 
 @Controller('api/dev/fleet_senses')
 export class FleetController {
@@ -68,6 +69,12 @@ export class FleetController {
     @Post('/report/')
     getFleetSenses(@Body() filter: GeneralFilterDto) {
         return this.fleetService.generateFleetReport(filter);
+    }
+
+    @Post('/bulk')
+    enterBulk(@Body() bulk: CreateBulkDto){
+        console.log("bulk", JSON.stringify(bulk, null, 2));
+        return this.fleetService.enterBulk(bulk)
     }
 
     @Post('/report/:id')

@@ -95,7 +95,9 @@ export class LandingsService {
             select: {period_date: true, period_status: true}
         });
 
-        data.form.period_date = newPeriod.period_date;
+        console.log("newestPeriod", newPeriod.period_date);
+
+        data.form.period_date = newPeriod.period_date.toISOString();
 
         const boatDetails = await this.prisma.boat_details.create({data: data.boat_details});
         data.form.boat_detail = boatDetails.boat_id;

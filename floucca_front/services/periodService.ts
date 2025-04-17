@@ -39,3 +39,20 @@ export const getPeriodActiveDays = async (
     return handleApiError(error, "fetching period active days");
   }
 };
+export const updatePeriodStatus = async ({
+  period_date,
+  period_status,
+}: {
+  period_date: string;
+  period_status: 'A' | 'B' | 'F';
+}) => {
+  try {
+    const response = await apiClient.put(`/api/dev/period/update`, {
+      period_date,
+      period_status,
+    });
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, 'updating period');
+  }
+};

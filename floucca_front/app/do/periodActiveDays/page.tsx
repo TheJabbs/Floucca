@@ -1,13 +1,9 @@
-import React from "react";
-import PeriodList from "@/components/managePeriod/periodList";
+import dynamic from 'next/dynamic';
 
-const PeriodActiveDaysPage = () => {
-  return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Manage Periods</h1>
-      <PeriodList />
-    </div>
-  );
-};
+const ManagePeriods = dynamic(() => import('@/components/managePeriod/managePeriod'), {
+  ssr: false,
+});
 
-export default PeriodActiveDaysPage;
+export default function PeriodActiveDaysPage() {
+  return <ManagePeriods />;
+}

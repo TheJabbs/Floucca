@@ -55,4 +55,31 @@ export class PortsService {
       where: { port_id: id },
     });
   }
+
+  async getAllPortDetailed(){
+    const ports = await this.prisma.ports.findMany({
+      select:{
+        port_id: true,
+        port_name: true,
+        coop:{
+          select:{
+            coop_code: true,
+            coop_name: true,
+            region:{
+              select:{
+                region_name: true,
+                region_code: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if(ports.length === 0){
+        throw new NotFoundException('No ports found');
+    }
+
+    return ports;
+  }
 }

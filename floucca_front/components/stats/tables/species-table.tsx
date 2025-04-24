@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import ReusableTable from "../../utils/table";
+import ReusableTable from "./table";
 import SpeciesBarChart from "../charts/species-bar-chart";
 import { BarChart2 } from "lucide-react";
 

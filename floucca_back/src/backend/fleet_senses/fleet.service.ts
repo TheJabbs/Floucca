@@ -6,6 +6,8 @@ import {ResponseMessage} from "../../shared/interface/response.interface";
 import {SenseFormContentInterface} from "./interface/sense_form_content.interface";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {FleetReportInterface} from "./interface/fleetReport.interface";
+import {CreateBulkDto} from "./DTO/createBulk.dto";
+import {CreateGearUsageDto} from "../gear_usage/DTO";
 
 
 @Injectable()
@@ -163,7 +165,7 @@ export class FleetService {
                 });
             }
 
-            content.form.period_date = newestPeriod.period_date;
+            content.form.period_date = newestPeriod.period_date.toISOString();
 
             const form = await prisma.form.create({data: content.form});
             if (!form) throw new Error("Failed to create form");
@@ -191,6 +193,47 @@ export class FleetService {
             return {message: `Failed to create fleet senses form: ${error.message}`};
         });
     }
+
+
+    async enterBulk(bulk: CreateBulkDto) {
+        const BATCH_SIZE = 50;
+        let createdCount = 0;
+
+        const form = await this.prisma.form.create({ data: bulk.formDto });
+        const sense = await this.prisma.fleet_senses.create({
+            data: { form_id: form.form_id },
+        });
+
+        const { gear_code, months } = bulk.gearUsageDto;
+        const entries = Array.from({ length: bulk.numberOfGears * months.length }, (_, index) => {
+            const month = months[index % months.length];
+            return {
+                fleet_senses_id: sense.fleet_senses_id,
+                gear_code,
+                months: month,
+            };
+        });
+
+        for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+            const batch = entries.slice(i, i + BATCH_SIZE);
+            const results = await Promise.all(
+                batch.map(entry =>
+                    this.prisma.gear_usage.create({ data: entry })
+                        .then(() => true)
+                        .catch(() => false) // Optional: skip failed inserts
+                )
+            );
+
+            createdCount += results.filter(success => success).length;
+        }
+
+        return {
+            message: 'Bulk entries created successfully',
+            entriesCreated: createdCount,
+            expectedEntries: entries.length,
+        };
+    }
+
 
     /**
      * Generate a fleet report based on the given filter and month.
@@ -230,7 +273,7 @@ export class FleetService {
                 },
                 select: {
                     gear_usage: {
-                        where: month !== undefined ? { months: month } : undefined,
+                        where: month !== undefined ? {months: month} : undefined,
                         select: {
                             gear_code: true,
                             months: true

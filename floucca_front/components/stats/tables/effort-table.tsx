@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import ReusableTable from "../../utils/table";
+import ReusableTable from "./table";
 
 interface EffortData {
   records: number;

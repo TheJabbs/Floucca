@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo } from "react";
-import ReusableTable from "@/components/utils/table";
+import ReusableTable from "@/components/stats/tables/table";
 
 interface FormattedGearData {
   gear_code: number;

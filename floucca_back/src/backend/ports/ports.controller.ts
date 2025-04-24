@@ -20,18 +20,18 @@ export class PortsController {
   }
 
   @Get(':id')
-  async findOne(@Param() params: idDTO): Promise<Port> {
-    return this.portsService.getPortById(params.id);
+  async findOne(@Param('id') id: number): Promise<Port> {
+    return this.portsService.getPortById(id);
   }
 
   @Put(':id')
-  async update(@Param() params: idDTO, @Body() updatePortDto: CreatePortDto): Promise<Port> {
-    return this.portsService.updatePort(params.id, updatePortDto);
+  async update(@Param('id') id: number, @Body() updatePortDto: CreatePortDto): Promise<Port> {
+    return this.portsService.updatePort(id, updatePortDto);
   }
 
-  @Delete(':id')
-  async remove(@Param() params: idDTO): Promise<Port> {
-    return this.portsService.deletePort(params.id);
+   @Delete(':id')
+  async remove(@Param('id') id: number): Promise<Port> {
+    return this.portsService.deletePort(id);
   }
 
   @Get()

@@ -39,24 +39,21 @@ export class GearService {
     }
 
     async createGear(gear: CreateGearDto): Promise<ResponseMessage<any>> {
-        const checkGear = await this.getGearById(gear.gear_code);
-        if (checkGear) {
-            return {
-                message: 'Gear already exists',
-                data: checkGear
-            }
-        }
-
-        const newGear = await this.prisma.gear.create({
-            data: gear,
-        });
-
-        return {
+        try {
+          const checkGear = await this.getGearById(gear.gear_code);
+          return {
+            message: 'Gear already exists',
+            data: checkGear
+          };
+        } catch {
+          const newGear = await this.prisma.gear.create({ data: gear });
+          return {
             message: 'Gear created successfully',
             data: newGear
+          };
         }
-
-    }
+      }
+      
 
     async updateGear(id: number, gear: CreateGearDto): Promise<ResponseMessage<Any>> {
         const checkGear = await this.getGearById(id);

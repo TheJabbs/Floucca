@@ -2,6 +2,7 @@ import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {GearService} from "./gear.service";
 import {GearIdDto} from "./dto/gear_id.dto";
 import {CreateGearDto} from "./dto/create_gear.dto";
+import { UpdateGearDto } from './dto/update_gear.dto';
 
 @Controller("api/dev/gear")
 export class GearController {
@@ -29,8 +30,13 @@ export class GearController {
     }
 
     @Put("/update/gear/:gear_code")
-    updateGear(@Param("gear_code") gear_code: GearIdDto, @Body() updatedGear: CreateGearDto) {
-        return this.service.updateGear(gear_code.gear_id, updatedGear);
+    updateGear(
+      @Param("gear_code") gear_code: number,
+      @Body() updatedGear: UpdateGearDto
+    ) {
+      return this.service.updateGear(gear_code, updatedGear); 
     }
+    
+    
 
 }

@@ -4,6 +4,7 @@ import {CreateGearDto} from "./dto/create_gear.dto";
 import Any = jasmine.Any;
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
+import { UpdateGearDto } from './dto/update_gear.dto';
 
 @Injectable()
 export class GearService {
@@ -55,23 +56,30 @@ export class GearService {
       }
       
 
-    async updateGear(id: number, gear: CreateGearDto): Promise<ResponseMessage<Any>> {
+      async updateGear(id: number, gear: UpdateGearDto): Promise<ResponseMessage<any>> {
         const checkGear = await this.getGearById(id);
+      
         if (!checkGear) {
-            return {
-                message: 'Gear not found'
-            }
+          return { message: 'Gear not found' };
         }
-
+      
         const updatedGear = await this.prisma.gear.update({
-            where: {gear_code: id},
-            data: gear
+          where: { gear_code: id },
+          data: {
+            gear_name: gear.gear_name ?? checkGear.gear_name,
+            equipment_id: gear.equipment_id ?? checkGear.equipment_id,
+            equipment_name: gear.equipment_name ?? checkGear.equipment_name,
+          },
         });
-
+      
         return {
-            message: 'Gear updated successfully',
-        }
-    }
+          message: 'Gear updated successfully',
+          data: updatedGear,
+        };
+      }
+      
+      
+      
 
     async deleteGear(id: number): Promise<ResponseMessage<Any>> {
         const checkGear = await this.getGearById(id);

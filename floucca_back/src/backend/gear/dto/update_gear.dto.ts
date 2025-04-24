@@ -1,22 +1,16 @@
-import {IsNumber, IsPositive, IsString, Length} from "class-validator";
-import {Optional} from "@nestjs/common";
+import { IsNumber, IsPositive, IsString, Length, IsOptional } from 'class-validator';
 
 export class UpdateGearDto {
-    @IsNumber()
-    @IsPositive()
-    @Optional()
-    gear_code?: number;
+  @IsOptional()
+  @IsString()
+  gear_name?: string;
 
-    @IsString()
-    @Optional()
-    gear_name?: string;
+  @IsOptional()
+  @IsString()
+  @Length(3, 5)
+  equipment_id?: string;
 
-    @IsString()
-    @Optional()
-    @Length(3,5)
-    equipment_id?: string;
-
-    @IsString()
-    @Optional()
-    equipment_name?: string;
+  @IsOptional()
+  @IsString()
+  equipment_name?: string;
 }

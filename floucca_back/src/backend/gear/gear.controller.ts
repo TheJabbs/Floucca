@@ -25,8 +25,8 @@ export class GearController {
     }
 
     @Delete("/delete/gear/:gear_code")
-    deleteGear(@Param("gear_code") gear_code: GearIdDto) {
-        return this.service.deleteGear(gear_code.gear_id);
+    deleteGear(@Param("gear_code") gear_code: string) {
+      return this.service.deleteGear(+gear_code);
     }
 
     @Put("/update/gear/:gear_code")

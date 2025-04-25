@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { Calendar, Clock, Fish, MapPin, Users, Ruler, Scale, Hash, Anchor, RefreshCw } from 'lucide-react';
 import { getFromCache, saveToCache, isCacheValid } from '@/components/utils/cache-utils';
@@ -92,7 +92,7 @@ const SubmissionHistory = () => {
     }
   };
 
-  const loadSubmissions = async () => {
+  const loadSubmissions = useCallback(async () => {
     setLoading(true);
     try {
       // Try to get data from cache first
@@ -114,7 +114,11 @@ const SubmissionHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadSubmissions();
+  }, [loadSubmissions]);
 
   // Force refresh submissions from API
   const refreshSubmissions = async () => {
@@ -130,10 +134,6 @@ const SubmissionHistory = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    loadSubmissions();
-  }, []);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';

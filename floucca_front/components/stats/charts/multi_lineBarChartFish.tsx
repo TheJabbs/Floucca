@@ -56,7 +56,7 @@ const MultiLineBarChartFish: React.FC<MultiLineBarChartFishProps> = ({ fishStats
 
   useEffect(() => {
     setSelectedSpecies(allSpecies);
-  }, [fishStats]);
+  }, [fishStats, allSpecies]);
 
   const chartData: ChartDataEntry[] = Object.entries(fishStats).map(
     ([period, species]) => {

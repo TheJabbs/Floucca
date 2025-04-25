@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { RefreshCw } from "lucide-react";
 import { useStatsData } from "@/contexts/StatsDataContext";
 import EffortTable from "@/components/stats/tables/effort-table";
@@ -56,11 +56,11 @@ const StatsPage: React.FC = () => {
     setSelectedPort(Number(e.target.value));
   };
 
-  const areFiltersSelected = () => {
+  const areFiltersSelected = useCallback(() => {
     return selectedPeriod !== "" && selectedGear !== 0 && selectedPort !== 0;
-  };
+  }, [selectedPeriod, selectedGear, selectedPort]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!areFiltersSelected()) return;
 
     setIsEffortLoading(true);
@@ -91,14 +91,14 @@ const StatsPage: React.FC = () => {
       setIsLandingsLoading(false);
       setIsStatsLoading(false);
     }
-  };
+  }, [areFiltersSelected, selectedPeriod, selectedGear, selectedPort]);
 
   // Fetch data when filters change
   useEffect(() => {
     if (areFiltersSelected()) {
       fetchData();
     }
-  }, [selectedPeriod, selectedGear, selectedPort]);
+  }, [areFiltersSelected, fetchData]);
 
   if (isLoading) {
     return (

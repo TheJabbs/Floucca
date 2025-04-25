@@ -9,7 +9,7 @@ export interface Port {
 // Fetch all ports
 export const getPorts = async (): Promise<Port[]> => {
   try {
-    const response = await apiClient.get("/ports");
+    const response = await apiClient.get("/api/dev/ports");
     return response.data;
   } catch (error) {
     return handleApiError(error, "fetching ports");
@@ -19,7 +19,7 @@ export const getPorts = async (): Promise<Port[]> => {
 // Get port by ID
 export const getPortById = async (portId: number): Promise<Port> => {
   try {
-    const response = await apiClient.get(`/ports/${portId}`);
+    const response = await apiClient.get(`/api/dev/ports/${portId}`);
     return response.data;
   } catch (error) {
     return handleApiError(error, `fetching port ${portId}`);

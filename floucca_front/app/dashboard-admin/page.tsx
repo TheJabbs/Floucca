@@ -193,10 +193,10 @@ const AdminDashboard = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button className="w-full py-3 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium transition">
-                Privileged Users' Functions
+                Privileged Users Functions
               </button>
               <button className="w-full py-3 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium transition">
-                Data Operators' Functions
+                Data Operators Functions
               </button>
             </div>
           </div>

@@ -105,7 +105,7 @@ const GearUsageForm: React.FC<GearUsageProps> = ({ gears, required = false, cont
                 key={month}
                 type="button"
                 onClick={() => handleMonthToggle(month)}
-                className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors
+                className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-colors
                   ${selectedMonths.includes(month)
                     ? 'bg-blue-500 border-blue-500 text-white'
                     : 'border-gray-300 text-gray-600 hover:border-blue-400'

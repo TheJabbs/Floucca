@@ -11,6 +11,7 @@ import {
   FileSpreadsheet,
   FilePlus,
   Copy,
+  Anchor,
   FileChartColumnIncreasing,
   CalendarRange,
   Upload,
@@ -18,6 +19,7 @@ import {
   FileBarChart,
   ClipboardList,
   Trash2,
+  MapPin,
   Unlock,
   Lock,
   CheckSquare,
@@ -45,7 +47,19 @@ const AdminDashboard = () => {
                 onClick={() => router.push("/dashboard-admin/users")}
               >
                 <Users className="w-4 h-4 mr-3 text-blue-600" />
-                <span>Table of Users</span>
+                <span>Users Table</span>
+              </button>
+              <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
+                onClick={() => router.push("/dashboard-admin/sites")}
+              >
+                <MapPin className="w-4 h-4 mr-3 text-blue-600" />
+                <span>Landing Sites</span>
+              </button>
+              <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
+                onClick={() => router.push("/dashboard-admin/gears")}
+              >
+                <Anchor className="w-4 h-4 mr-3 text-blue-600" />
+                <span>Gears Table</span>
               </button>
               <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700">
                 <UserCheck className="w-4 h-4 mr-3 text-blue-600" />

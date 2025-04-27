@@ -2,7 +2,7 @@ import { Injectable, ConflictException, NotFoundException } from "@nestjs/common
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateRegionDto } from "./dto/create-region.dto";
 import { Region } from "./interfaces/region.interface";
-
+import { UpdateRegionDto } from "./dto/update-region.dto";
 @Injectable()
 export class RegionService {
   constructor(private prisma: PrismaService) {}
@@ -52,21 +52,19 @@ export class RegionService {
     });
   }
 
-  async updateRegion(region_code: number, updateRegionDto: CreateRegionDto): Promise<Region> {
-    console.log(`Updating region with ID: ${region_code} with data:`, updateRegionDto);
-
-    const regionExists = await this.validateRegion(region_code);
+  async updateRegion(region_code: number, updateRegionDto: UpdateRegionDto): Promise<Region> {
+    const regionExists = await this.findRegionById(region_code);
+  
     if (!regionExists) {
       throw new NotFoundException(`Region with code ${region_code} not found.`);
     }
-
-    await this.validateRegionData(updateRegionDto); 
-
+  
     return this.prisma.region.update({
       where: { region_code },
-      data: updateRegionDto,
+      data: updateRegionDto, 
     });
   }
+  
 
   async deleteRegion(region_code: number): Promise<Region> {
     console.log(`Deleting region with ID: ${region_code}`);

@@ -19,11 +19,6 @@ export class CoopController {
 
   @Post('/create')
   createCoop(@Body() coop: CoopDto) {
-    const check = this.coopService.getCoopById(coop.coop_code);
-    if (check) {
-      return "Coop already exists";
-    }
-
     return this.coopService.createCoop(mapCoopToReturnCoopInterface(coop));
   }
 

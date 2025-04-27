@@ -3,6 +3,7 @@ import { PortsService } from './ports.service';
 import { CreatePortDto } from './dto/create_port.dto';
 import { idDTO } from '../../shared/dto/id.dto';
 import { Port } from './interfaces/port.interface';
+import { PortDetailed } from './interfaces/port-detailed.interface';
 
 @Controller('api/dev/ports')
 export class PortsController {
@@ -10,13 +11,18 @@ export class PortsController {
 
   @Post()
   async create(@Body() createPortDto: CreatePortDto): Promise<Port> {
-    console.log('Received request:', createPortDto); // Log request data
+    console.log('Received request:', createPortDto);
     return this.portsService.createPort(createPortDto);
   }
 
   @Get()
   async findAll(): Promise<Port[]> {
     return this.portsService.getAllPorts();
+  }
+
+  @Get('detailed')
+  async getAllPortsDetailed(): Promise<PortDetailed[]> {
+    return this.portsService.getAllPortDetailed();
   }
 
   @Get(':id')
@@ -29,13 +35,8 @@ export class PortsController {
     return this.portsService.updatePort(id, updatePortDto);
   }
 
-   @Delete(':id')
+  @Delete(':id')
   async remove(@Param('id') id: number): Promise<Port> {
     return this.portsService.deletePort(id);
-  }
-
-  @Get()
-  async getAllPortsDetailed(){
-    return this.portsService.getAllPortDetailed();
   }
 }

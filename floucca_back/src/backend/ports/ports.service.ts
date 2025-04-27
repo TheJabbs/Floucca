@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePortDto } from './dto/create_port.dto';
 import { Port } from './interfaces/port.interface';
-
+import { PortDetailed } from './interfaces/port-detailed.interface';
 @Injectable()
 export class PortsService {
   constructor(private prisma: PrismaService) {}
@@ -42,7 +42,7 @@ export class PortsService {
   }
 
   async updatePort(id: number, updatePortDto: CreatePortDto): Promise<Port> {
-    await this.validatePortData(updatePortDto); // Validate before updating
+    await this.validatePortData(updatePortDto); 
 
     return this.prisma.ports.update({
       where: { port_id: id },
@@ -56,30 +56,33 @@ export class PortsService {
     });
   }
 
-  async getAllPortDetailed(){
+  async getAllPortDetailed(): Promise<PortDetailed[]> {
     const ports = await this.prisma.ports.findMany({
-      select:{
+      select: {
         port_id: true,
         port_name: true,
-        coop:{
-          select:{
+        coop: {
+          select: {
             coop_code: true,
             coop_name: true,
-            region:{
-              select:{
+            region: {
+              select: {
+                region_code: true,
                 region_name: true,
-                region_code: true
-              }
-            }
-          }
-        }
-      }
-    })
-
-    if(ports.length === 0){
-        throw new NotFoundException('No ports found');
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        port_name: 'asc', 
+      },
+    });
+  
+    if (ports.length === 0) {
+      throw new NotFoundException('No ports found');
     }
-
+  
     return ports;
   }
 }

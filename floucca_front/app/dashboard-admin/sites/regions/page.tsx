@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, RefreshCw } from "lucide-react";
 import { 
   getRegions, 
   createRegion, 
@@ -10,6 +10,14 @@ import {
   Region 
 } from "@/services/regionService";
 import ReusableDataTable from "@/components/admin/table";
+import { 
+  getFromCache, 
+  saveToCache, 
+  removeFromCache 
+} from "@/components/utils/cache-utils";
+
+const CACHE_KEY = 'flouca_admin_regions';
+const CACHE_DURATION = 30 * 60 * 1000;
 
 interface RegionFormData {
   region_code: number;
@@ -25,6 +33,7 @@ const RegionManagement = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editRegionCode, setEditRegionCode] = useState<number | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [lastFetched, setLastFetched] = useState<Date | null>(null);
 
   const {
     register,
@@ -40,11 +49,34 @@ const RegionManagement = () => {
     { key: "region_name", header: "Region Name" },
   ];
 
-  const fetchRegionsData = async () => {
+  const fetchRegionsData = async (skipCache = false) => {
     try {
       setIsLoading(true);
+      
+      if (!skipCache) {
+        const cachedRegions = getFromCache<Region[]>(CACHE_KEY, CACHE_DURATION);
+        
+        if (cachedRegions) {
+          console.log("Using cached regions data");
+          setRegions(cachedRegions);
+          setError(null);
+          
+          const timestamp = localStorage.getItem(`${CACHE_KEY}_timestamp`);
+          if (timestamp) {
+            setLastFetched(new Date(parseInt(timestamp)));
+          }
+          
+          setIsLoading(false);
+          return;
+        }
+      }
+      
       const data = await getRegions();
+      
+      saveToCache(CACHE_KEY, data);
+      
       setRegions(data);
+      setLastFetched(new Date());
       setError(null);
     } catch (err) {
       console.error("Error fetching regions:", err);
@@ -52,6 +84,10 @@ const RegionManagement = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const refreshData = () => {
+    fetchRegionsData(true);
   };
 
   useEffect(() => {
@@ -77,13 +113,24 @@ const RegionManagement = () => {
     try {
       if (isEditMode && editRegionCode) {
         await updateRegion(editRegionCode, formattedData);
+        
         setRegions(regions.map((region) =>
           region.region_code === editRegionCode ? formattedData : region
         ));
+        
+        const cachedRegions = getFromCache<Region[]>(CACHE_KEY);
+        if (cachedRegions) {
+          const updatedCache = cachedRegions.map((region) =>
+            region.region_code === editRegionCode ? formattedData : region
+          );
+          saveToCache(CACHE_KEY, updatedCache);
+        }
       } else {
         console.log("Creating new region:", formattedData);
         await createRegion(formattedData);
-        await fetchRegionsData();
+        
+        removeFromCache(CACHE_KEY);
+        await fetchRegionsData(true); 
       }
       closeModal();
     } catch (err: any) {
@@ -91,7 +138,6 @@ const RegionManagement = () => {
       setError("Failed to save region data. Please try again.");
     }
   };
-  
 
   const handleEdit = (region: Region) => {
     setIsEditMode(true);
@@ -102,7 +148,15 @@ const RegionManagement = () => {
   const handleDelete = async (region: Region) => {
     try {
       await deleteRegion(region.region_code);
+      
       setRegions(regions.filter((r) => r.region_code !== region.region_code));
+      
+      const cachedRegions = getFromCache<Region[]>(CACHE_KEY);
+      if (cachedRegions) {
+        const updatedCache = cachedRegions.filter((r) => r.region_code !== region.region_code);
+        saveToCache(CACHE_KEY, updatedCache);
+      }
+      
       setDeleteConfirmId(null);
     } catch (err: any) {
       console.error("Error deleting region:", err);
@@ -127,21 +181,38 @@ const RegionManagement = () => {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Region Management</h1>
-        <button
-          onClick={() => {
-            setIsEditMode(false);
-            setEditRegionCode(null);
-            reset({
-              region_code: undefined,
-              region_name: "",
-            });
-            setShowAddModal(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
-        >
-          <Plus className="w-4 h-4 mr-2" /> Add Region
-        </button>
+        <div>
+          <h1 className="text-2xl font-bold">Region Management</h1>
+          {lastFetched && (
+            <p className="mt-2 text-sm text-gray-500">
+              Last updated: {lastFetched.toLocaleString()}
+            </p>
+          )}
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={refreshData}
+            className="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg flex items-center"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} /> 
+            Refresh
+          </button>
+          <button
+            onClick={() => {
+              setIsEditMode(false);
+              setEditRegionCode(null);
+              reset({
+                region_code: undefined,
+                region_name: "",
+              });
+              setShowAddModal(true);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
+          >
+            <Plus className="w-4 h-4 mr-2" /> Add Region
+          </button>
+        </div>
       </div>
 
       <div className="mb-4 relative">
@@ -210,7 +281,7 @@ const RegionManagement = () => {
                   type="text"
                   {...register("region_name", { required: "Region name is required" })}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                placeholder="Enter region name"
+                  placeholder="Enter region name"
                 />
                 {errors.region_name && (
                   <p className="text-red-500 text-xs mt-1">{errors.region_name.message}</p>

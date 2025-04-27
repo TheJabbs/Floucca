@@ -1,17 +1,23 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, RefreshCw } from "lucide-react";
 import { 
   getGears, 
   createGear, 
   updateGear, 
   deleteGear, 
   Gear, 
-  CreateGearDto, 
-  UpdateGearDto 
 } from "@/services/gearService";
 import ReusableDataTable from "@/components/admin/table";
+import { 
+  getFromCache, 
+  saveToCache, 
+  removeFromCache 
+} from "@/components/utils/cache-utils";
+
+const CACHE_KEY = 'flouca_admin_gears';
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
 interface GearFormData {
   gear_code: number;
@@ -29,6 +35,7 @@ const GearManagement = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editGearCode, setEditGearCode] = useState<number | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [lastFetched, setLastFetched] = useState<Date | null>(null);
 
   const {
     register,
@@ -46,11 +53,35 @@ const GearManagement = () => {
     { key: "equipment_name", header: "Equipment Name" },
   ];
 
-  const fetchGearsData = async () => {
+  const fetchGearsData = async (skipCache = false) => {
     try {
       setIsLoading(true);
+      
+      if (!skipCache) {
+        const cachedGears = getFromCache<Gear[]>(CACHE_KEY, CACHE_DURATION);
+        
+        if (cachedGears) {
+          console.log("Using cached gears data");
+          setGears(cachedGears);
+          setError(null);
+          
+          // Set last fetched time from cache timestamp
+          const timestamp = localStorage.getItem(`${CACHE_KEY}_timestamp`);
+          if (timestamp) {
+            setLastFetched(new Date(parseInt(timestamp)));
+          }
+          
+          setIsLoading(false);
+          return;
+        }
+      }
+      
       const data = await getGears();
+      
+      saveToCache(CACHE_KEY, data);
+      
       setGears(data);
+      setLastFetched(new Date());
       setError(null);
     } catch (err) {
       console.error("Error fetching gears:", err);
@@ -58,6 +89,10 @@ const GearManagement = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const refreshData = () => {
+    fetchGearsData(true);
   };
 
   useEffect(() => {
@@ -85,13 +120,19 @@ const GearManagement = () => {
     try {
       if (isEditMode && editGearCode) {
         await updateGear(editGearCode, formattedData);
-        setGears(gears.map((gear) => 
+        
+        const updatedGears = gears.map((gear) => 
           gear.gear_code === editGearCode ? formattedData : gear
-        ));
+        );
+        setGears(updatedGears);
+        
+        saveToCache(CACHE_KEY, updatedGears);
       } else {
         console.log("Creating new gear:", formattedData);
         await createGear(formattedData);
-        await fetchGearsData();
+        
+        removeFromCache(CACHE_KEY);
+        await fetchGearsData(true); // Force refresh to get the newly created gear
       }
       closeModal();
     } catch (err: any) {
@@ -109,7 +150,14 @@ const GearManagement = () => {
   const handleDelete = async (gear: Gear) => {
     try {
       await deleteGear(gear.gear_code);
-      setGears(gears.filter((g) => g.gear_code !== gear.gear_code));
+      
+      // Update local state
+      const updatedGears = gears.filter((g) => g.gear_code !== gear.gear_code);
+      setGears(updatedGears);
+      
+      // Update cache
+      saveToCache(CACHE_KEY, updatedGears);
+      
       setDeleteConfirmId(null);
     } catch (err: any) {
       console.error("Error deleting gear:", err);
@@ -138,23 +186,40 @@ const GearManagement = () => {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gear Management</h1>
-        <button
-          onClick={() => {
-            setIsEditMode(false);
-            setEditGearCode(null);
-            reset({
-              gear_code: undefined,
-              gear_name: "",
-              equipment_id: "",
-              equipment_name: "",
-            });
-            setShowAddModal(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
-        >
-          <Plus className="w-4 h-4 mr-2" /> Add Gear
-        </button>
+        <div>
+          <h1 className="text-2xl font-bold">Gear Management</h1>
+          {lastFetched && (
+            <p className="mt-2 text-sm text-gray-500">
+              Last updated: {lastFetched.toLocaleString()}
+            </p>
+          )}
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={refreshData}
+            className="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg flex items-center"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} /> 
+            Refresh
+          </button>
+          <button
+            onClick={() => {
+              setIsEditMode(false);
+              setEditGearCode(null);
+              reset({
+                gear_code: undefined,
+                gear_name: "",
+                equipment_id: "",
+                equipment_name: "",
+              });
+              setShowAddModal(true);
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
+          >
+            <Plus className="w-4 h-4 mr-2" /> Add Gear
+          </button>
+        </div>
       </div>
 
       <div className="mb-4 relative">

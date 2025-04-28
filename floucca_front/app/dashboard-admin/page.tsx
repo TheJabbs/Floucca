@@ -43,19 +43,22 @@ const AdminDashboard = () => {
               Administration Functions
             </h2>
             <nav className="space-y-1">
-              <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
+              <button
+                className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
                 onClick={() => router.push("/dashboard-admin/users")}
               >
                 <Users className="w-4 h-4 mr-3 text-blue-600" />
                 <span>Users Table</span>
               </button>
-              <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
+              <button
+                className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
                 onClick={() => router.push("/dashboard-admin/sites")}
               >
                 <MapPin className="w-4 h-4 mr-3 text-blue-600" />
                 <span>Landing Sites</span>
               </button>
-              <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
+              <button
+                className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
                 onClick={() => router.push("/dashboard-admin/gears")}
               >
                 <Anchor className="w-4 h-4 mr-3 text-blue-600" />
@@ -181,7 +184,12 @@ const AdminDashboard = () => {
                       <ChevronRight className="w-4 h-4" />
                     </button>
 
-                    <button className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition">
+                    <button
+                      className="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 transition"
+                      onClick={() =>
+                        router.push("/dashboard-admin/data-entry/bulk-census")
+                      }
+                    >
                       <span className="flex items-center">
                         <span>Bulk Census</span>
                       </span>

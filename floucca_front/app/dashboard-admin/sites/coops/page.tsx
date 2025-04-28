@@ -205,7 +205,7 @@ const CoopManagement = () => {
   };
 
   const filteredCoops = coops.filter(
-    (coop) => coop.coop_name.toLowerCase().includes(searchTerm.toLowerCase())
+    (coop) => coop.coop_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

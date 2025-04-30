@@ -1,13 +1,13 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import {GetAllFleetInterface} from "./interface/get_all_fleet.interface";
-import {CreateFleetDto} from "./dto";
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 import {SenseFormContentInterface} from "./interface/sense_form_content.interface";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {FleetReportInterface} from "./interface/fleetReport.interface";
-import {CreateBulkDto} from "./DTO/createBulk.dto";
-import {CreateGearUsageDto} from "../gear_usage/DTO";
+import {CreateBulkDto} from "./dto/createBulk.dto";
+import {CreateGearUsageDto} from "../gear_usage/dto";
+import {CreateFleetDto} from "./dto/create_fleet.dto";
 
 
 @Injectable()

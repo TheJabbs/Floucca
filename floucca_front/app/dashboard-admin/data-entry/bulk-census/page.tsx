@@ -24,7 +24,7 @@ interface BulkEntryFormData {
 }
 
 const BulkEntriesPage = () => {
-  const { ports, isLoading: isDataLoading, error: dataError } = useFormsData();
+  const { ports } = useFormsData();
 
   const [reportData, setReportData] = useState<GearReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);

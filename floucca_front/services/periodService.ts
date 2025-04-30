@@ -69,3 +69,12 @@ export const formatDate = (dateString: string): string => {
     month: "long"
   });
 };
+
+export const getPeriods = async (): Promise<Period[]> => {
+  try {
+    const response = await apiClient.get("/api/dev/period/all/period");
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "fetching periods");
+  }
+};

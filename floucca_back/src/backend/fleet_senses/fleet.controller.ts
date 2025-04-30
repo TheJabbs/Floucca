@@ -78,13 +78,6 @@ export class FleetController {
     }
 
     @Post('/report/:id')
-    /**
-     * @description
-     * Get fleet senses report, given a filter and a specific month.
-     * @param {GeneralFilterDto} filter - The filter to apply to the report.
-     * @param {number} id - The month (1-12) to generate the report for.
-     * @returns {Promise<any[]>} - The report.
-     */
     getFleetSensesWithMo(@Body() filter: GeneralFilterDto, @Param('id') id: number) {
         return this.fleetService.generateFleetReport(filter, id);
     }

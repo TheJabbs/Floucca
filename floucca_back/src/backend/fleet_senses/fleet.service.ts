@@ -6,7 +6,6 @@ import {SenseFormContentInterface} from "./interface/sense_form_content.interfac
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {FleetReportInterface} from "./interface/fleetReport.interface";
 import {CreateBulkDto} from "./dto/createBulk.dto";
-import {CreateGearUsageDto} from "../gear_usage/dto";
 import {CreateFleetDto} from "./dto/create_fleet.dto";
 
 

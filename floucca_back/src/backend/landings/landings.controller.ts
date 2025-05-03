@@ -4,11 +4,17 @@ import {idDTO} from "../../shared/dto/id.dto";
 import {CreateLandingDto} from "./dto/create_landings.dto";
 import {UpdateLandingsDto} from "./dto/update_landings.dto";
 import {CreateFormLandingDto} from "./dto/create_form_landing.dto";
+import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 
 
 @Controller("api/dev/landings")
 export class LandingsController {
     constructor(private readonly service: LandingsService) {
+    }
+
+    @Post("/coordinates")
+    getCoordinates(@Body() filter: GeneralFilterDto){
+        return this.service.getCoordinates(filter);
     }
 
     @Get("/all/landings")

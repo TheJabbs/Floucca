@@ -30,6 +30,7 @@ export default function FishMultiLineChart({ filter }: Props) {
   useEffect(() => {
     const fetchData = async () => {
       const data = await fishService.getFishStats(filter);
+      console.log('Fetched data:', data); 
       setFishData(data);
       const uniqueSpecies = Array.from(new Set(data.map(f => f.specie_name)));
       setSpecies(uniqueSpecies);

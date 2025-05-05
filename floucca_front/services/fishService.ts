@@ -19,9 +19,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 export const fishService = {
   async getFishStats(filter: GeneralFilterDto): Promise<FishStat[]> {
     try {
-      const response = await axios.post(`${API_URL}/stats/avg`, filter);
-      return response.data;
-    } catch (error) {
+        const response = await axios.post(`${API_URL}/api/fish/stats/avg`, filter);
+        console.log("API response", response.data); 
+        return response.data.data || []; 
+      } catch (error) {
       console.error('Error fetching fish stats:', error);
       return [];
     }

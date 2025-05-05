@@ -36,7 +36,7 @@ async login(loginDto: LoginUserDto) {
   return this.generateToken(user.user_id);
 }
 
-
+  //modify to include needed inputs
   private generateToken(user_id: number) {
     return {
       access_token: this.jwtService.sign({ user_id }),

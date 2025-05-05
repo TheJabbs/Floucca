@@ -1,154 +1,71 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
+'use client';
+import { useEffect, useState } from 'react';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { FishStatInterface } from "../../../../floucca_back/src/backend/fish/interface/fish_stat.interface";
+  LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
+import { fishService } from '@/services/fishService';
 
-interface MultiLineBarChartFishProps {
-  fishStats: Record<string, Record<number, FishStatInterface>>;
+interface FishStat {
+  period_date: string;
+  specie_name: string;
+  quantity: number;
 }
 
-interface ChartDataEntry {
+interface GeneralFilterDto {
   period: string;
-  [specieName: string]: string | number;
+  port_id?: number[];
+  coop?: number[];
+  region?: number[];
+  gear_code?: number[];
 }
 
-const COLORS = [
-  "#8884d8", "#82ca9d", "#ffc658", "#ff7300",
-  "#0088FE", "#00C49F", "#FFBB28", "#FF8042",
-];
+interface Props {
+  filter: GeneralFilterDto;
+}
 
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-};
-
-const METRICS: { key: keyof FishStatInterface; label: string; unit?: string }[] = [
-  { key: "avg_quantity", label: "Quantity" },
-  { key: "avg_weight", label: "Weight" },
-  { key: "avg_length", label: "Length" },
-  { key: "avg_price", label: "Price", unit: "L.L." },
-];
-
-const MultiLineBarChartFish: React.FC<MultiLineBarChartFishProps> = ({ fishStats }) => {
-  const [selectedMetric, setSelectedMetric] = useState<keyof FishStatInterface>("avg_quantity");
-  const [selectedSpecies, setSelectedSpecies] = useState<string[]>([]);
-
-  const allSpecies = Array.from(
-    new Set(
-      Object.values(fishStats)
-        .flatMap((periodData) => Object.values(periodData))
-        .map((stat) => stat.specie_name)
-    )
-  );
+export default function FishMultiLineChart({ filter }: Props) {
+  const [fishData, setFishData] = useState<FishStat[]>([]);
+  const [species, setSpecies] = useState<string[]>([]);
 
   useEffect(() => {
-    setSelectedSpecies(allSpecies);
-  }, [fishStats, allSpecies]);
+    const fetchData = async () => {
+      const data = await fishService.getFishStats(filter);
+      setFishData(data);
+      const uniqueSpecies = Array.from(new Set(data.map(f => f.specie_name)));
+      setSpecies(uniqueSpecies);
+    };
 
-  const chartData: ChartDataEntry[] = Object.entries(fishStats).map(
-    ([period, species]) => {
-      const entry: ChartDataEntry = {
-        period: formatDate(period),
-      };
+    fetchData();
+  }, [filter]);
 
-      Object.values(species).forEach((stat) => {
-        const value = stat[selectedMetric];
-        const rounded =
-          typeof value === "number" ? Math.round(value / 10) * 10 : 0;
-
-        if (selectedMetric === "avg_price") {
-          entry[stat.specie_name] = `${rounded} L.L.`;
-        } else {
-          entry[stat.specie_name] = rounded;
-        }
-      });
-
-      return entry;
-    }
+  // grouping all species per period_date
+  const structuredData = Object.values(
+    fishData.reduce((acc, stat) => {
+      const date = stat.period_date;
+      if (!acc[date]) acc[date] = { period_date: date };
+      acc[date][stat.specie_name] = stat.quantity;
+      return acc;
+    }, {} as Record<string, any>)
   );
 
   return (
-    <div>
-
-      <div className="mb-4">
-        <label htmlFor="metricSelect" className="mr-2 font-semibold">
-          Select Metric:
-        </label>
-        <select
-          id="metricSelect"
-          value={selectedMetric}
-          onChange={(e) =>
-            setSelectedMetric(e.target.value as keyof FishStatInterface)
-          }
-          className="border border-gray-300 rounded px-2 py-1"
-        >
-          {METRICS.map((metric) => (
-            <option key={metric.key} value={metric.key}>
-              {metric.label}
-            </option>
-          ))}
-        </select>
-      </div>
-            
-      <div className="flex flex-wrap gap-3 mb-4">
-        {allSpecies.map((specie) => (
-          <label key={specie} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={selectedSpecies.includes(specie)}
-              onChange={() =>
-                setSelectedSpecies((prev) =>
-                  prev.includes(specie)
-                    ? prev.filter((s) => s !== specie)
-                    : [...prev, specie]
-                )
-              }
-            />
-            <span>{specie}</span>
-          </label>
-        ))}
-      </div>
-
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={chartData}>
-          <XAxis dataKey="period" />
-          <YAxis
-            label={{
-              value: selectedMetric.replace("avg_", ""),
-              angle: -90,
-              position: "insideLeft",
-            }}
+    <ResponsiveContainer width="100%" height={400}>
+      <LineChart data={structuredData}>
+        <XAxis dataKey="period_date" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        {species.map((name, index) => (
+          <Line
+            key={name}
+            type="monotone"
+            dataKey={name}
+            stroke={`hsl(${(index * 60) % 360}, 70%, 50%)`}
+            strokeWidth={2}
+            dot={false}
           />
-          <Tooltip />
-          <Legend />
-
-          {selectedSpecies.map((specie, index) => (
-            <Line
-              key={specie}
-              type="monotone"
-              dataKey={specie}
-              stroke={COLORS[index % COLORS.length]}
-              name={specie}
-              isAnimationActive={false}
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+        ))}
+      </LineChart>
+    </ResponsiveContainer>
   );
-};
-
-export default MultiLineBarChartFish;
+}

@@ -4,46 +4,38 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreateUserDto } from "src/backend/users/dto/create-users.dto";
 import { LoginUserDto } from "src/backend/users/dto/login-user.dto";
 import * as bcrypt from "bcryptjs";
-
+import { UserService } from "src/backend/users/users.service";
+import { CreateUserWithDetailsDto } from "src/backend/users/dto/createUserWithDetails.dto";
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
+  constructor(
+    private prisma: PrismaService, 
+    private jwtService: JwtService,
+    private readonly userService: UserService, 
 
-  async register(registerDto: CreateUserDto) {
-    const existingUser = await this.prisma.users.findUnique({
-      where: { user_email: registerDto.user_email },
-    });
+  ) {}
+  
+  async register(registerDto: CreateUserWithDetailsDto) {
+  const result = await this.userService.createUserWithDetails(registerDto);
+  return this.generateToken(result.data.user_id);
+}
 
-    if (existingUser) {
-      throw new UnauthorizedException("Email already in use");
-    }
 
-    const hashedPassword = await bcrypt.hash(registerDto.user_pass, 10);
+ // auth.service.ts
+async login(loginDto: LoginUserDto) {
+  const user = await this.prisma.users.findUnique({
+    where: { user_email: loginDto.user_email },
+  });
 
-    const newUser = await this.prisma.users.create({
-      data: {
-        user_fname: registerDto.user_fname,
-        user_lname: registerDto.user_lname,
-        user_email: registerDto.user_email,
-        user_pass: hashedPassword,
-        user_phone: registerDto.user_phone
-      },
-    });
-
-    return this.generateToken(newUser.user_id);
+  if (!user || !(await bcrypt.compare(loginDto.user_pass, user.user_pass))) {
+    throw new UnauthorizedException('Invalid credentials');
   }
 
-  async login(loginDto: LoginUserDto) {
-    const user = await this.prisma.users.findUnique({
-      where: { user_email: loginDto.user_email },
-    });
+  await this.userService.updateLastLogin(user.user_id);
 
-    if (!user || !(await bcrypt.compare(loginDto.user_pass, user.user_pass))) {
-      throw new UnauthorizedException("Invalid credentials");
-    }
+  return this.generateToken(user.user_id);
+}
 
-    return this.generateToken(user.user_id);
-  }
 
   private generateToken(user_id: number) {
     return {
@@ -51,3 +43,12 @@ export class AuthService {
     };
   }
 }
+/**
+beda shel l register w hek bas khalion for now la shuf wen ha nhaton
+aw eza ha aadil bl logic la yetnesa2o mae l users table
+Returns a signed JWT token.
+login
+Verification la email/password
+Returns token signed 
+generateToken: Sign  token bi  user id.
+ */

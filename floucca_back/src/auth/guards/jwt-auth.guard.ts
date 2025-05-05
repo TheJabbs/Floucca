@@ -14,3 +14,7 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
     return user;
   }
 }
+/**
+Protects lroutes  bl JWT validation.
+eza l token missing aw invalid throws UnauthorizedException.
+ */

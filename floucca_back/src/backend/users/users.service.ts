@@ -85,7 +85,44 @@ export class UserService {
       };
     });
   }
-
+//TO BE SEEN AND IMPLEMENTED LATER WITH TOKEN 
+// AND Modify generateToken() to use it
+  async getUserWithDetails(user_id: number) {
+    const user = await this.prisma.users.findUnique({
+      where: { user_id },
+      select: {
+        user_id: true,
+        user_fname: true,
+        user_lname: true,
+        user_email: true,
+        user_phone: true,
+        user_role: {
+          select: {
+            roles: {
+              select: {
+                role_id: true,
+                role_name: true,
+              }
+            }
+          }
+        },
+        user_coop: {
+          select: {
+            coop: {
+              select: {
+                coop_code: true,
+                coop_name: true,
+              }
+            }
+          }
+        },
+      }
+    });
+  
+    if (!user) throw new NotFoundException('User not found.');
+    return user;
+  }
+  
 
   async findAllUsers(): Promise<User[]> {
     return this.prisma.users.findMany({

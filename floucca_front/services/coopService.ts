@@ -1,4 +1,4 @@
-import { apiClient, handleApiError } from "./apiClient";
+import { apiClient, handleApiError, ApiResponse } from "./apiClient";
 
 export interface Coop {
   coop_code: number;
@@ -23,6 +23,36 @@ export const getCoopByCode = async (coopCode: number): Promise<Coop> => {
     return response.data;
   } catch (error) {
     return handleApiError(error, `fetching coop ${coopCode}`);
+  }
+};
+
+// Create a new coop
+export const createCoop = async (coopData: Coop): Promise<ApiResponse> => {
+  try {
+    const response = await apiClient.post("/api/coop/create", coopData);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "creating coop");
+  }
+};
+
+// Update an existing coop
+export const updateCoop = async (coopCode: number, coopData: Coop): Promise<ApiResponse> => {
+  try {
+    const response = await apiClient.put(`/api/coop/update/${coopCode}`, coopData);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, `updating coop ${coopCode}`);
+  }
+};
+
+// Delete a coop
+export const deleteCoop = async (coopCode: number): Promise<ApiResponse> => {
+  try {
+    const response = await apiClient.delete(`/api/coop/delete/${coopCode}`);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, `deleting coop ${coopCode}`);
   }
 };
 

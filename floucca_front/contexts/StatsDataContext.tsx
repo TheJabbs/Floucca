@@ -5,7 +5,7 @@ import {
   getGears, 
   getPorts, 
   getRegions, 
-  getCoops, 
+  getCoops,
   getPeriods
 } from "@/services";
 import { useDataContext, formatPeriodDate } from "@/hooks/useDataContext";

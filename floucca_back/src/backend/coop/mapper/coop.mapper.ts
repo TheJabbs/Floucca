@@ -1,4 +1,4 @@
-import {CoopDto} from "../dto/coop.Dto";
+import {CoopDto} from "../dto/coop.dto";
 import {CoopInterface} from "../interface/coop.interface";
 
 export function mapCoopToReturnCoopInterface(coop : CoopDto) : CoopInterface{

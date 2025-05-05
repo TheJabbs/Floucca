@@ -9,6 +9,9 @@ import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {GetFilteredInterface} from "./interface/get_filtered.interface";
 import {filterToFilteredInterfaceMapper} from "../fish/mapper/filter_to_filtered_interface.mapper";
 import {FormGateway} from "../form/form.gateWay";
+import {GetCoordinatesInterface} from "./interface/getCoordinates.interface";
+import {PrismaPromise} from "@prisma/client";
+import {Decimal} from "@prisma/client/runtime/library";
 
 @Injectable()
 export class LandingsService {
@@ -107,9 +110,9 @@ export class LandingsService {
             if (!form) throw new Error("Failed to create form data missing");
 
             let landing: any = null;
-            if(data.landing){
-            data.landing.form_id = form.form_id;
-            landing = await prisma.landing.create({data: data.landing});
+            if (data.landing) {
+                data.landing.form_id = form.form_id;
+                landing = await prisma.landing.create({data: data.landing});
             }
 
             const [gears, species] = await Promise.all([
@@ -229,8 +232,8 @@ export class LandingsService {
                         fish_length: true,
                         gear_code: true,
                         price: true,
-                        specie:{
-                            select:{
+                        specie: {
+                            select: {
                                 specie_name: true
                             }
                         }
@@ -244,6 +247,59 @@ export class LandingsService {
         }
 
         return filterToFilteredInterfaceMapper(landings);
+    }
+
+    async getCoordinates(filter: GeneralFilterDto): Promise<GetCoordinatesInterface[]> {
+        const promises: PrismaPromise<{ landing: { longitude: Decimal; latitude: Decimal } }[]>[] = [];
+        const answer: GetCoordinatesInterface[] = [];
+
+        filter.specie_code.forEach(specie => {
+            answer.push({
+                landing: [],
+                specie_code: specie,
+            });
+
+            promises.push(
+                this.prisma.fish.findMany({
+                    where: {
+                        landing: {
+                            form: {
+                                period_date: filter.period ? filter.period : undefined,
+                                port_id: filter.port_id ? {in: filter.port_id} : undefined,
+                                ports: {
+                                    coop_code: filter.coop ? {in: filter.coop} : undefined,
+                                    coop: {
+                                        region_code: filter.region ? {in: filter.region} : undefined
+                                    }
+                                }
+                            }
+                        },
+                        specie_code: specie
+                    },
+                    select: {
+                        landing: {
+                            select: {
+                                longitude: true,
+                                latitude: true
+                            }
+                        }
+                    }
+                })
+            );
+        });
+
+        const data = await Promise.all(promises);
+
+        data.forEach((entries, index) => {
+            entries.forEach(entry => {
+                answer[index].landing.push({
+                    longitude: entry.landing.longitude.toNumber(),
+                    latitude: entry.landing.latitude.toNumber(),
+                });
+            });
+        });
+
+        return answer;
     }
 
 

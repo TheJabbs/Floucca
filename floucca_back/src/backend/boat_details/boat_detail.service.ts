@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateBoatDetailsDto } from './dto';
-import {GetAllBoatDetailsInterface} from "./interface";
 import {ResponseMessage} from "../../shared/interface/response.interface";
+import {CreateBoatDetailsDto} from "./dto/create_boatDetails.dto";
+import {GetAllBoatDetailsInterface} from "./interface/boat_detail.interface";
 
 @Injectable()
 export class BoatDetailsServices {

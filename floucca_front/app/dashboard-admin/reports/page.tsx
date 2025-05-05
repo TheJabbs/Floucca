@@ -49,7 +49,7 @@ export default function ReportsDashboard() {
         "View effort and landing data with filterable tables by time period, gear type, and port. Includes species data bar chart visualization.",
       icon: <Fish className="h-6 w-6" />,
       color: "bg-pink-50 hover:bg-pink-100 border-pink-200",
-      route: "/dashboard/stats/report",
+      route: "/dashboard-admin/reports/fishing-stats",
     },
     {
       title: "Species Analytics",
@@ -57,7 +57,7 @@ export default function ReportsDashboard() {
         "Track monthly species metrics using line charts showing average weight, length, quantity, and price trends over time.",
       icon: <ChartLine className="h-6 w-6" />,
       color: "bg-green-50 hover:bg-green-100 border-green-200",
-      route: "/dashboard/stats/analytic",
+      route: "/dashboard-admin/reports/species-analytics",
     },
     {
       title: "Fleet Gear Usage Report",
@@ -65,7 +65,7 @@ export default function ReportsDashboard() {
         "Visualize monthly gear usage frequency and active days by selecting year and filtering by port, region, or cooperative.",
       icon: <GitBranch className="h-6 w-6" />,
       color: "bg-purple-50 hover:bg-purple-100 border-purple-200",
-      route: "/dashboard/stats/fleet-report",
+      route: "/dashboard-admin/reports/fleet-report",
     },
     {
       title: "Advanced Reports",
@@ -73,7 +73,7 @@ export default function ReportsDashboard() {
         "Generate customized reports with detailed data filtering by gear, period, port, cooperative, region and species.",
       icon: <PieChart className="h-6 w-6" />,
       color: "bg-amber-50 hover:bg-amber-100 border-amber-200",
-      route: "/dashboard/stats/adv-report",
+      route: "/dashboard-admin/reports/adv-report",
     },
   ];
 

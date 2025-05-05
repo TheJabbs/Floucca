@@ -1,8 +1,6 @@
 import {IsInt, IsNotEmpty} from "class-validator";
-
-
-export class CoopDto {    @IsNotEmpty()
-
+export class CoopDto {
+    @IsNotEmpty()
     @IsInt()
     coop_code: number;
     @IsNotEmpty()

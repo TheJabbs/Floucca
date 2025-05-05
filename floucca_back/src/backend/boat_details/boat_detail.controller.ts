@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { BoatDetailsServices } from './boat_detail.service';
-import { CreateBoatDetailsDto } from './dto';
 import {idDTO} from "../../shared/dto/id.dto";
+import {CreateBoatDetailsDto} from "./dto/create_boatDetails.dto";
 
 @Controller('api/dev/boat_details')
 export class BoatDetailsController {

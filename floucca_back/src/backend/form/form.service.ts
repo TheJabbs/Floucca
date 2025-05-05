@@ -1,10 +1,10 @@
 import {Injectable, NotFoundException} from "@nestjs/common";
 import {CreateFormDto} from "./dto/create_form.dto";
-import {GetAllFormInterface} from './interface/index'
+import {GetAllFormInterface} from './interface'
 import {UpdateFormDto} from "./dto/update_form.dto";
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
-import {GetTopFormsInterface} from "./interface/index";
+import {GetTopFormsInterface} from "./interface";
 
 @Injectable()
 export class FormService {

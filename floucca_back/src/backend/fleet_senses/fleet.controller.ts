@@ -1,14 +1,14 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {FleetService} from "./fleet.service";
-import {FleetIdDto} from "./dto/fleet_id.dto";
-import {CreateFleetDto, DateRangeDto} from "./dto";
+
 import {idDTO} from "../../shared/dto/id.dto";
 import {CreateFleetFormDto} from "./dto/create_fleet_form.dto";
 import {transformFormGearUsageToGearUsage} from "../../utils/transformation/form_gear_usage_to_gear_usage.mapper";
 import {SenseFormContentInterface} from "./interface/sense_form_content.interface";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 import {IsOptional} from "class-validator";
-import {CreateBulkDto} from "./DTO/createBulk.dto";
+import {CreateBulkDto} from "./dto/createBulk.dto";
+import {CreateFleetDto} from "./dto/create_fleet.dto";
 
 @Controller('api/dev/fleet_senses')
 export class FleetController {
@@ -78,13 +78,6 @@ export class FleetController {
     }
 
     @Post('/report/:id')
-    /**
-     * @description
-     * Get fleet senses report, given a filter and a specific month.
-     * @param {GeneralFilterDto} filter - The filter to apply to the report.
-     * @param {number} id - The month (1-12) to generate the report for.
-     * @returns {Promise<any[]>} - The report.
-     */
     getFleetSensesWithMo(@Body() filter: GeneralFilterDto, @Param('id') id: number) {
         return this.fleetService.generateFleetReport(filter, id);
     }

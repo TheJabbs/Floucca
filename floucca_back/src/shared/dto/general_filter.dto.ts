@@ -8,8 +8,9 @@ import {
 import {Transform} from "class-transformer";
 
 export class GeneralFilterDto {
+
+    @IsOptional()
     @IsDateString()
-    @IsNotEmpty()
     @Transform(({ value }) => new Date(value).toISOString())
     period: string;
 

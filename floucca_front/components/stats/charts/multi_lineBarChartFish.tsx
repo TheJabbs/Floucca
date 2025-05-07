@@ -1,7 +1,14 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
 } from 'recharts';
 import { fishService } from '@/services/fishService';
 
@@ -30,7 +37,7 @@ export default function FishMultiLineChart({ filter }: Props) {
   useEffect(() => {
     const fetchData = async () => {
       const data = await fishService.getFishStats(filter);
-      console.log('Fetched data:', data); 
+      console.log('Fetched data:', data);
       setFishData(data);
       const uniqueSpecies = Array.from(new Set(data.map(f => f.specie_name)));
       setSpecies(uniqueSpecies);
@@ -39,7 +46,7 @@ export default function FishMultiLineChart({ filter }: Props) {
     fetchData();
   }, [filter]);
 
-  // grouping all species per period_date
+  // Structure data for chart
   const structuredData = Object.values(
     fishData.reduce((acc, stat) => {
       const date = stat.period_date;

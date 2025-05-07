@@ -1,10 +1,13 @@
 import axios from 'axios';
 
-interface FishStat {
+export interface FishStat {
   period_date: string;
   specie_name: string;
   quantity: number;
+  weight: number;
+  price: number;
 }
+
 
 interface GeneralFilterDto {
   period: string;
@@ -32,7 +35,10 @@ export const fishService = {
             period_date: periodDate,
             specie_name: entry.specie_name,
             quantity: entry.avg_quantity,
+            weight: entry.avg_weight,
+            price: entry.avg_price,
           });
+          
         }
       }
 

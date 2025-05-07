@@ -3,8 +3,8 @@
 import FishMultiLineChart from '@/components/stats/charts/multi_lineBarChartFish';
 
 const filter = {
-  period: new Date().toISOString(), // ISO format
-  port_id: [1], // example port
+  period: new Date().toISOString(), 
+  port_id: [1], 
 };
 
 export default function FishStatsPage() {

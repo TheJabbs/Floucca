@@ -37,11 +37,22 @@ async login(loginDto: LoginUserDto) {
 }
 
   //modify to include needed inputs
-  private generateToken(user_id: number) {
+  private async generateToken(user_id: number) {
+    const user = await this.userService.getUserWithDetails(user_id);
+  
     return {
-      access_token: this.jwtService.sign({ user_id }),
+      access_token: this.jwtService.sign({
+        user_id: user.user_id,
+        email: user.user_email,
+        fname: user.user_fname,
+        lname: user.user_lname,
+        phone: user.user_phone,
+        coops: user.user_coop.map(c => c.coop),
+        roles: user.user_role.map(r => r.roles.role_name),
+      }),
     };
   }
+  
 }
 /**
 beda shel l register w hek bas khalion for now la shuf wen ha nhaton

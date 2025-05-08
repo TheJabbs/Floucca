@@ -29,13 +29,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         user_fname: true,
         user_lname: true,
         user_email: true,
+        user_role: {
+          select: {
+            roles: {
+              select: {
+                role_name: true,
+              }
+            }
+          }
+        },
       },
     });
-
+  
     if (!user) {
       throw new UnauthorizedException('Invalid token');
     }
-
+  
     return user;
   }
+  
 }

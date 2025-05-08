@@ -1,13 +1,15 @@
-import { Controller, Get, Post, Param, Delete, Body, Put, UseGuards, Req } from "@nestjs/common";
+import { Controller, Get, Post, Param, Delete, Body, Put, Req } from "@nestjs/common";
 import { UserService } from "./users.service";
 import { CreateUserWithDetailsDto } from "./dto/createUserWithDetails.dto";
 import { UpdateUserWithDetailsDto } from "./dto/updateUserWithDetails.dto";
 import { User } from "./interfaces/users.interface";
-import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import { ResponseMessage } from "src/shared/interface/response.interface";
-//import { RolesGuard } from '../../auth/guards/roles.guard'; // for later restrictions
-//import { Roles } from '../../auth/decorators/roles.decorator'; // might use this or the one after, enum 
-//import { RoleEnum } from '../../auth/enums/role.enum'; 
+//auth
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UseGuards } from '@nestjs/common';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RoleEnum } from 'src/auth/enums/role.enum';
 
 @Controller("users")
 export class UserController {
@@ -26,7 +28,8 @@ async adminCreatesUser(
 }
 
 
- // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)  
   @Get("all")
   async findAllUsers(): Promise<User[]> {
     return this.userService.findAllUsers();

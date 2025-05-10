@@ -6,7 +6,7 @@ import { PassportModule } from "@nestjs/passport";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-
+import { UserService } from "src/backend/users/users.service";
 @Module({
   imports: [
     ConfigModule,

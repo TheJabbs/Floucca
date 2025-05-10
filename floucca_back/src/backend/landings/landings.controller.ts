@@ -1,10 +1,14 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards} from '@nestjs/common';
 import {LandingsService} from "./landings.service";
 import {idDTO} from "../../shared/dto/id.dto";
 import {CreateLandingDto} from "./dto/create_landings.dto";
 import {UpdateLandingsDto} from "./dto/update_landings.dto";
 import {CreateFormLandingDto} from "./dto/create_form_landing.dto";
 import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
+import {JwtAuthGuard} from "../../auth/guards/jwt-auth.guard";
+import {RolesGuard} from "../../auth/guards/roles.guard";
+import {Roles} from "../../auth/decorators/roles.decorator";
+import {RoleEnum} from "../../auth/enums/role.enum";
 
 
 @Controller("api/dev/landings")
@@ -41,11 +45,12 @@ export class LandingsController {
     updateLanding(@Param("landing_id") landing_id: idDTO, @Body() updatedLanding: UpdateLandingsDto) {
         return this.service.updateLanding(landing_id.id, updatedLanding);
     }
-
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RoleEnum.ADMIN)
     @Post("/create/form")
-    createFormLanding(@Body() formLanding: CreateFormLandingDto) {
+    createFormLanding(@Body() formLanding: CreateFormLandingDto, @Req() req: Request) {
        formLanding.boat_details = {}
-        console.log(JSON.stringify(formLanding));
+        const user = req.json()
         return this.service.createLandingForm(formLanding);
     }
 }

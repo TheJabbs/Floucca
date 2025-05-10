@@ -29,7 +29,7 @@ export class PeriodService {
         });
     }
 
-    async updatePeriod( updatedPeriod: UpdatePeriodDto): Promise<ResponseMessage<any>> {
+    async updatePeriod(updatedPeriod: UpdatePeriodDto): Promise<ResponseMessage<any>> {
         const date = new Date(updatedPeriod.period_date);
 
         try {
@@ -71,8 +71,8 @@ export class PeriodService {
 
     //===================================================================
 
-    async getPeriodsWithActiveDays(){
-        const [periods , activeDays] = await Promise.all([
+    async getPeriodsWithActiveDays() {
+        const [periods, activeDays] = await Promise.all([
             this.prisma.period.findMany(),
             this.prisma.active_days.findMany()
         ])
@@ -103,5 +103,41 @@ export class PeriodService {
     //     };
     //
     // }
+
+    async periodCreator(period: Date) {
+        try {
+            // If no date is passed, use the first day of the next month
+
+
+            // Create new period
+            const newPeriod = await this.prisma.period.create({
+                data: { period_date: period },
+            });
+            // Fetch required data
+            const [allPorts, allGears] = await Promise.all([
+                this.prisma.ports.findMany(),
+                this.prisma.gear.findMany({
+                    select: { gear_code: true },
+                }),
+            ]);
+
+            // Generate active_days records
+            const codes = allGears.map((gear) => gear.gear_code);
+            const data = allPorts.flatMap((port) =>
+                codes.map((code) => ({
+                    port_id: port.port_id,
+                    period_date: newPeriod.period_date,
+                    active_days: 0,
+                    gear_code: code,
+                }))
+            );
+
+            await this.prisma.active_days.createMany({ data });
+
+            console.log('✅ New period created:', newPeriod);
+        } catch (error) {
+            console.error('❌ Error creating period:', error);
+        }
+    }
 
 }

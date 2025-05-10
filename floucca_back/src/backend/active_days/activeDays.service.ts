@@ -128,6 +128,7 @@ export class ActiveDaysService {
         await this.prisma.active_days.createMany({ data });
     }
 
+
     //================================================================
     async validate(gd: any, isCreate: boolean) {
         if (isCreate) {

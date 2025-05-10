@@ -1,6 +1,6 @@
-import {Injectable, OnModuleInit} from '@nestjs/common';
-import {schedule} from 'node-cron';
-import {PrismaClient} from '@prisma/client';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { schedule } from 'node-cron';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class ScheduleService implements OnModuleInit {
@@ -13,32 +13,35 @@ export class ScheduleService implements OnModuleInit {
     private scheduleGeneratePeriod() {
         schedule('0 0 1 * *', async () => {
             try {
+                const currentDate = new Date();
+
+                const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+
                 const newPeriod = await this.prisma.period.create({
-                    data: {period_date: new Date()},
+                    data: { period_date: nextMonthDate },
                 });
 
                 const [allPorts, allGears] = await Promise.all([
                     this.prisma.ports.findMany(),
                     this.prisma.gear.findMany({
                         select: {
-                            gear_code: true
-                        }
-                    })
+                            gear_code: true,
+                        },
+                    }),
                 ]);
 
-                const codes = allGears.map(gear => gear.gear_code);
+                const codes = allGears.map((gear) => gear.gear_code);
 
-                const data = allPorts.flatMap(port =>
-                    codes.map(code => ({
+                const data = allPorts.flatMap((port) =>
+                    codes.map((code) => ({
                         port_id: port.port_id,
                         period_date: newPeriod.period_date,
                         active_days: 0,
-                        gear_code: code
+                        gear_code: code,
                     }))
                 );
 
                 await this.prisma.active_days.createMany({ data });
-
 
                 console.log('New period created:', newPeriod);
             } catch (error) {
@@ -46,5 +49,4 @@ export class ScheduleService implements OnModuleInit {
             }
         });
     }
-
 }

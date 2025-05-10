@@ -9,21 +9,12 @@ import {
     Save,
     RotateCcw,
     FileSpreadsheet,
-    FilePlus,
-    Copy,
     Anchor,
     FileChartColumnIncreasing,
     CalendarRange,
     Upload,
-    FileText,
-    FileBarChart,
-    ClipboardList,
     Trash2,
     MapPin,
-    Unlock,
-    Lock,
-    CheckSquare,
-    History,
     ChevronRight,
     LayoutGrid,
 } from "lucide-react";
@@ -120,7 +111,7 @@ const AdminDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="md:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                             <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                                Note for: UOB, Administrator
+                                Note
                             </h2>
                             <p className="text-gray-700 mb-4">
                                 You have exclusive access to key functions of the system which

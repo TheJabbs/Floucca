@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Fish } from "lucide-react";
+import { Fish, Anchor } from "lucide-react";
 import Link from "next/link";
 
 export default function FormHeader() {
@@ -10,7 +10,7 @@ export default function FormHeader() {
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <Link href="/" className="flex items-center space-x-2 cursor-pointer">
-            <Fish className="h-8 w-8 text-blue-600" />
+            <Anchor className="h-8 w-8 text-blue-600" />
             <div>
               <h1 className="text-2xl font-bold text-blue-600 tracking-tight">
                 FLOUCA

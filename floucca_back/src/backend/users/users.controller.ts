@@ -10,6 +10,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RoleEnum } from 'src/auth/enums/role.enum';
+import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 
 @Controller("users")
 export class UserController {
@@ -72,5 +73,10 @@ async adminCreatesUser(
     const id = parseInt(user_id, 10);
     console.log("Deleting user with ID:", id);
     return this.userService.deleteUser(id);
+  }
+
+  @Post('/workload')
+  async getWorkload(@Body() filter : GeneralFilterDto): Promise<any> {
+    return this.userService.getWorkLoadStat(filter);
   }
 }

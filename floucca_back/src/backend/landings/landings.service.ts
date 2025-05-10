@@ -181,7 +181,7 @@ export class LandingsService {
     }
 
 
-    async getLandingsByFilter(filter: GeneralFilterDto): Promise<GetFilteredInterface[]> {
+    async getLandingsByFilter(filter: GeneralFilterDto, user?: number): Promise<GetFilteredInterface[]> {
         const {
             period,
             gear_code,
@@ -199,6 +199,9 @@ export class LandingsService {
         const landings = await this.prisma.landing.findMany({
             where: {
                 form: {
+                    users:{
+                        user_id: user ? {in: [user]} : undefined
+                    },
                     period_date: period,
                     port_id: port_id ? {in: port_id} : undefined,
                     ports: {

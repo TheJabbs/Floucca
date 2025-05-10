@@ -13,5 +13,6 @@ import {ActiveDaysModule} from "../backend/active_days/activeDays.module";
         GearModule, FleetModule, ActiveDaysModule],
     controllers: [FormulasController],
     providers: [FormulasService],
+    exports: [FormulasService],
 })
 export class FormulasModule{}

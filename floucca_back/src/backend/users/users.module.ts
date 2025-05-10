@@ -6,8 +6,9 @@ import { UserCoopModule } from '../user_coop/user_coop.module';
 import { UserRoleModule } from '../user_role/user_role.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import {FormModule} from "../form/form.module";
 @Module({
-  imports: [UserCoopModule, UserRoleModule], 
+  imports: [UserCoopModule, UserRoleModule],
   controllers: [UserController],
   providers: [UserService, 
     PrismaService, 

@@ -27,7 +27,7 @@ export class FormulasService {
     ) {
     }
 
-    async getReportData(filter: GeneralFilterDto) {
+    async getReportData(filter: GeneralFilterDto, user?: number) {
         let filter2 = JSON.parse(JSON.stringify(filter));
         filter2.gear_code = undefined;
 
@@ -38,7 +38,7 @@ export class FormulasService {
         const [effortData, landingData,
             allEffort, fleetCensus, allCensus] = await Promise.all([
             this.senseLastWService.getEffortsByFilter(filter),
-            this.landingsService.getLandingsByFilter(filter),
+            this.landingsService.getLandingsByFilter(filter, user),
             this.senseLastWService.getEffortsByFilter(filter2),
             this.fleetService.generateFleetReport(filter, new Date(filter.period).getMonth() + 1),
             this.fleetService.generateFleetReport(filter2, new Date(filter.period).getMonth() + 1),

@@ -38,5 +38,4 @@ export class ActiveDaysController {
         return this.service.test();
     }
 
-
 }

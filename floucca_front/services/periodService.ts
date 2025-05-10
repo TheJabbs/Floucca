@@ -44,12 +44,21 @@ export const updatePeriodStatus = async (periodDate: string, newStatus: string):
 // active days for a specific entry
 export const updateActiveDay = async (activeId: number, activeDays: number): Promise<any> => {
   try {
-    const response = await apiClient.put("/api/dev/active_days/update/${activeId}", {
+    const response = await apiClient.put(`/api/dev/active_days/update/${activeId}`, {
       active_days: activeDays
     });
     return response.data;
   } catch (error) {
     return handleApiError(error, "updating active days");
+  }
+};
+
+export const createNewPeriod = async (date: string): Promise<any> => {
+  try {
+    const response = await apiClient.get(`/api/dev/period/createnew/${date}`);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "creating new period");
   }
 };
 
@@ -68,6 +77,10 @@ export const formatDate = (dateString: string): string => {
     year: "numeric",
     month: "long"
   });
+};
+
+export const formatDateForApi = (date: Date): string => {
+  return date.toISOString().split('T')[0];
 };
 
 export const getPeriods = async (): Promise<Period[]> => {

@@ -42,4 +42,10 @@ export class PeriodController {
     //     console.log('Updated Period and Active Days:', updatedPeriod);
     //     return this.periodService.updatePeriodWithActiveDays(updatedPeriod);
     // }
+
+    @Get('createnew/:id')
+    async createNewPeriod(@Param('id') id: string) {
+        const date = new Date(id);
+        return this.periodService.periodCreator(date);
+    }
 }

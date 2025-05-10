@@ -237,82 +237,83 @@ export class UserService {
     }
 
 
-    async getWorkLoadStat(filter: GeneralFilterDto) {
-       const users = await this.prisma.users.findMany({
-           where: {
-               form: {
-                   some: {}
-               }
-           },
-           select: {
-               user_id: true,
-               user_fname: true,
-               user_lname: true,
-           }
-       });
-
-        const work:  WorkLoadStatisticInterface[] = []
-
-        let allEffortSample = 0, allLaningSample = 0, allSamples = 0
-
-        for (const user of users) {
-            const formFilter: any = {
-              users: {
-                user_id: user.user_id
-              },
-              period_date: filter.period,
-              port_id: filter.port_id ? { in: filter.port_id } : undefined,
-              ports: {
-                coop_code: filter.coop ? { in: filter.coop } : undefined,
-                coop: {
-                  region_code: filter.region ? { in: filter.region } : undefined
+async getWorkLoadStat(filter: GeneralFilterDto) {
+        const users = await this.prisma.users.findMany({
+            where: {
+                form: {
+                    some: {}
                 }
-              }
+            },
+            select: {
+                user_id: true,
+                user_fname: true,
+                user_lname: true,
+            }
+        });
+
+        const work: WorkLoadStatisticInterface[] = [];
+        let allEffortSample = 0, allLaningSample = 0, allSamples = 0;
+
+        const userPromises = users.map(async (user) => {
+            const formFilter: any = {
+                users: {
+                    user_id: user.user_id
+                },
+                period_date: filter.period,
+                port_id: filter.port_id ? { in: filter.port_id } : undefined,
+                ports: {
+                    coop_code: filter.coop ? { in: filter.coop } : undefined,
+                    coop: {
+                        region_code: filter.region ? { in: filter.region } : undefined
+                    }
+                }
             };
 
-            const landing = await this.prisma.landing.findMany({
-              distinct: ['form_id'],
-              select: {
-                landing_id: true
-              },
-              where: {
-                form: formFilter
-              }
-            });
+            const [landing, effort] = await Promise.all([
+                this.prisma.landing.findMany({
+                    distinct: ['form_id'],
+                    select: {
+                        landing_id: true
+                    },
+                    where: {
+                        form: formFilter
+                    }
+                }),
+                this.prisma.sense_lastw.findMany({
+                    distinct: ['form_id'],
+                    select: {
+                        sense_lastW_id: true
+                    },
+                    where: {
+                        form: formFilter
+                    }
+                })
+            ]);
 
-            const effort = await this.prisma.sense_lastw.findMany({
-              distinct: ['form_id'],
-              select: {
-                sense_lastW_id: true
-              },
-              where: {
-                form: formFilter
-              }
-            });
+            const total = effort.length + landing.length;
+            const totalEffort = effort.length;
+            const totalLanding = landing.length;
 
-            const total = effort.length + landing.length
-            const totalEffort = effort.length
-            const totalLanding = landing.length
+            allEffortSample += totalEffort;
+            allLaningSample += totalLanding;
+            allSamples += total;
 
-            const data : WorkLoadStatisticInterface = {
+            return {
                 dataOperator: `${user.user_fname} ${user.user_lname}`,
                 effortSample: totalEffort,
                 landingSamples: totalLanding,
                 allSamples: total,
-            }
+            };
+        });
 
-            allEffortSample += totalEffort
-            allLaningSample += totalLanding
-            allSamples += total
+        const results = await Promise.all(userPromises);
+        work.push(...results);
 
-            work.push(data)
-        }
-
-        work.forEach(work =>{
-            work.totalEffortPerc = work.effortSample / allEffortSample * 100
-            work.totalPerc = work.allSamples / allSamples * 100
-            work.allSamplesPerc = work.allSamples / allSamples * 100
-        })
+        work.forEach((workItem) => {
+            workItem.totalEffortPerc = workItem.effortSample / allEffortSample * 100;
+            workItem.totalPerc = workItem.allSamples / allSamples * 100;
+            workItem.allSamplesPerc = workItem.allSamples / allSamples * 100;
+        });
 
         return {
             work: work,
@@ -321,6 +322,5 @@ export class UserService {
                 allLaningSample: allLaningSample,
                 allSamples: allSamples,
             }
-        }
-    }
-}
+        };
+    }}

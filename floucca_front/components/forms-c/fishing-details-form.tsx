@@ -121,7 +121,7 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     
     // when total_quantity changes, update fish_quantity
     if (field === 'total_quantity' && value > 0 && updatedEntry.fish_weight > 0) {
-      updatedEntry.fish_quantity = Math.round(value / updatedEntry.fish_weight);
+      updatedEntry.fish_quantity = value / updatedEntry.fish_weight;
     }
     setCurrentEntry(updatedEntry);
   };

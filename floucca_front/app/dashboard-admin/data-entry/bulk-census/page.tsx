@@ -37,7 +37,7 @@ const BulkEntriesPage = () => {
   } | null>(null);
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
+  const years = Array.from({ length: 20 }, (_, i) => (currentYear - i).toString());
 
   const months = [
     { value: "1", label: "January" },

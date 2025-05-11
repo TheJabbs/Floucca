@@ -165,9 +165,9 @@ function EffortAndLandingPage() {
     }
     
     // If effort today data exists, location and fishing details are required
-    if (hasEffortToday) {
-      return !!formValues?.location && (formValues?.fishingDetails?.fish_entries ?? []).length > 0;
-    }
+    // if (hasEffortToday) {
+    //   return !!formValues?.location && (formValues?.fishingDetails?.fish_entries ?? []).length > 0;
+    // }
     
     // Otherwise just require some basic boat info
     return true;
@@ -344,14 +344,14 @@ function EffortAndLandingPage() {
           <>
             {/* Map for Location Selection */}
             <MapWithMarkers
-              required={true}
+              required={false}
               control={control}
               setValue ={setValue}
             />
 
             {/* Fishing Details */}
             <FishingDetails
-              required={true}
+              required={false}
               control={control}
               gears={gears}
               species={species}

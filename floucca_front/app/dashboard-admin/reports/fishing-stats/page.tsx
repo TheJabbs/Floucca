@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, FileDown } from "lucide-react";
 import { useStatsData } from "@/contexts/StatsDataContext";
 import EffortTable from "@/components/stats/tables/effort-table";
 import LandingsTable from "@/components/stats/tables/landings-table";
 import SpeciesTable from "@/components/stats/tables/species-table";
 import { fetchStatisticsData } from "@/services/statsService";
+import * as XLSX from 'xlsx';
 
 const StatsPage: React.FC = () => {
   // Get data from context
@@ -42,6 +43,7 @@ const StatsPage: React.FC = () => {
   const [isEffortLoading, setIsEffortLoading] = useState(false);
   const [isLandingsLoading, setIsLandingsLoading] = useState(false);
   const [isStatsLoading, setIsStatsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -93,6 +95,131 @@ const StatsPage: React.FC = () => {
     }
   }, [areFiltersSelected, selectedPeriod, selectedGear, selectedPort]);
 
+  // Export data to Excel
+  const exportToExcel = useCallback(() => {
+    if (!areFiltersSelected() || isExporting || isEffortLoading || isLandingsLoading || isStatsLoading) {
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      // Format data for export
+      const selectedGearName = gears.find(g => g.gear_code === selectedGear)?.gear_name || 'Unknown Gear';
+      const selectedPortName = ports.find(p => p.port_id === selectedPort)?.port_name || 'Unknown Port';
+      const periodLabel = formattedPeriods.find(p => p.value === selectedPeriod)?.label || 'Unknown Period';
+      
+      // Create a new workbook with a single sheet
+      const wb = XLSX.utils.book_new();
+      
+      // Prepare the report data as a single array of arrays (rows)
+      const reportData = [
+        // Report header section
+        ['FLOUCA Fishing Statistics Report'],
+        ['Generated on', new Date().toLocaleString()],
+        [''],
+        ['Filters'],
+        ['Period', periodLabel],
+        ['Gear', selectedGearName],
+        ['Port', selectedPortName],
+        [''],
+        [''],
+        
+        // Effort data section
+        ['Effort (WEEKLY) Data'],
+        [''],
+        ['Records', 'Boats/Gears', 'Active Days', 'PBA', 'Estimated Effort'],
+        [effortData.records, effortData.gears, effortData.activeDays, effortData.pba, effortData.estEffort],
+        [''],
+        [''],
+        
+        // Landings data section
+        ['Landings Data'],
+        [''],
+        ['Records', 'Average Price', 'Estimated Value', 'CPUE', 'Estimated Catch', 'Sample Effort', 'Sample Catch'],
+        [
+          landingsData.records, 
+          landingsData.avgPrice, 
+          landingsData.estValue, 
+          landingsData.cpue, 
+          landingsData.estCatch, 
+          landingsData.sampleEffort,
+          landingsData.sampleCatch
+        ],
+        [''],
+        [''],
+        
+        // Species data section
+        ['Species Data'],
+        ['']
+      ];
+      
+      // Add species header row
+      const speciesHeader = [
+        'Species', 
+        'N. Catch', 
+        'Avg. Price', 
+        'Avg. Weight (kg)', 
+        'Avg. Length (cm)', 
+        'Avg. Quantity', 
+        'Value', 
+        'CPUE', 
+        'Est. Catch', 
+        'Effort'
+      ];
+      reportData.push(speciesHeader);
+      
+      // Add species data rows
+      statsData.forEach(item => {
+        reportData.push([
+          item.specie_name,
+          item.numbOfCatch,
+          item.avgPrice,
+          item.avgWeight,
+          item.avgLength,
+          item.avgQuantity,
+          item.value,
+          item.cpue,
+          item.estCatch,
+          item.effort
+        ]);
+      });
+      
+      // Create worksheet from the single array
+      const ws = XLSX.utils.aoa_to_sheet(reportData);
+      
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Fishing Statistics');
+      
+      // Generate filename
+      const fileName = `FLOUCA_Stats_${periodLabel.replace(/\s+/g, '_')}_${selectedGearName.replace(/\s+/g, '_')}_${selectedPortName.replace(/\s+/g, '_')}.xlsx`;
+      
+      // Trigger download
+      XLSX.writeFile(wb, fileName);
+      
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      alert('Failed to export data. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [
+    areFiltersSelected, 
+    isExporting, 
+    isEffortLoading, 
+    isLandingsLoading, 
+    isStatsLoading,
+    selectedPeriod, 
+    selectedGear, 
+    selectedPort, 
+    effortData, 
+    landingsData, 
+    statsData,
+    gears,
+    ports,
+    formattedPeriods
+  ]);
+
   // Fetch data when filters change
   useEffect(() => {
     if (areFiltersSelected()) {
@@ -140,6 +267,21 @@ const StatsPage: React.FC = () => {
           >
             <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">Refresh Data</span>
+          </button>
+          
+          <button
+            onClick={exportToExcel}
+            disabled={!areFiltersSelected() || isExporting || isEffortLoading || isLandingsLoading || isStatsLoading}
+            className={`px-3 py-1.5 rounded-lg flex items-center gap-1 text-sm ${
+              areFiltersSelected() && !isExporting && !isEffortLoading && !isLandingsLoading && !isStatsLoading
+                ? "bg-green-100 text-green-800 hover:bg-green-200"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            <FileDown className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {isExporting ? "Exporting..." : "Export Excel"}
+            </span>
           </button>
         </div>
       </div>
@@ -230,7 +372,6 @@ const StatsPage: React.FC = () => {
                 isLoading={isEffortLoading}
                 effortData={effortData}
               />
-              {/* <EffortBarPlot isLoading={isEffortLoading} data={effortData ? [effortData] : []} /> */}
               <div className="border-t border-gray-300 my-4"></div>
               <LandingsTable
                 isLoading={isLandingsLoading}

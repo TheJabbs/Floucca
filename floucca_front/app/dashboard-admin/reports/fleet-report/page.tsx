@@ -1,9 +1,10 @@
 "use client";
-import React, { useState } from "react";
-import { RefreshCw } from "lucide-react";
+import React, { useState, useCallback } from "react";
+import { RefreshCw, FileDown } from "lucide-react";
 import { useStatsData } from "@/contexts/StatsDataContext";
 import { fetchFleetReport, FleetReportData } from "@/services/fleetReportService";
 import FleetUsageTable from "@/components/stats/tables/fleet-table";
+import * as XLSX from 'xlsx';
 
 interface FormattedGearData {
   gear_code: number;
@@ -34,6 +35,7 @@ const FleetReportPage: React.FC = () => {
   const [selectedCoops, setSelectedCoops] = useState<number[]>([]);
   const [reportData, setReportData] = useState<FormattedGearData[]>([]);
   const [isReportLoading, setIsReportLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   
   const [activeTab, setActiveTab] = useState<TabType>('frequency');
@@ -136,6 +138,172 @@ const FleetReportPage: React.FC = () => {
     }
   };
 
+  // Export data to Excel
+  const exportToExcel = useCallback(() => {
+    if (!reportData.length || isExporting || isReportLoading) {
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      // Get filter information for the report
+      const filterInfo = filterType === 'port' 
+        ? `Ports: ${selectedPorts.map(p => ports.find(port => port.port_id === p)?.port_name).join(', ')}`
+        : filterType === 'region'
+          ? `Regions: ${selectedRegions.map(r => regions.find(region => region.region_code === r)?.region_name).join(', ')}`
+          : `Cooperatives: ${selectedCoops.map(c => coops.find(coop => coop.coop_code === c)?.coop_name).join(', ')}`;
+
+      // Create a new workbook
+      const wb = XLSX.utils.book_new();
+
+      // Prepare the data for export
+      // We'll only export data for the active tab (frequency or active days)
+      const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+      const headerRow = ['Gear Name', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      // Create report data based on active tab
+      const reportRows: (string | number)[][] = reportData.map(gear => {
+        const row: (string | number)[] = [
+          gear.gear_name
+        ];
+        
+        // Add data for each month
+        monthNames.forEach(month => {
+          const monthData = gear[month as keyof FormattedGearData] as { freq: number; activeDays: number } | undefined;
+          if (activeTab === 'frequency') {
+            row.push(monthData?.freq ?? 0);
+          } else { // activeDays
+            row.push(monthData?.activeDays ?? 0);
+          }
+        });
+        
+        return row;
+      });
+      
+      // Prepare data for the worksheet
+      const excelData = [
+        // Report header
+        [`FLOUCA Fleet ${activeTab === 'frequency' ? 'Frequency' : 'Active Days'} Report - ${selectedYear}`],
+        ['Generated on', new Date().toLocaleString()],
+        [''],
+        ['Filter', filterInfo],
+        ['Year', selectedYear],
+        ['Type', activeTab === 'frequency' ? 'Monthly Gear Frequency' : 'Monthly Active Days'],
+        [''],
+        headerRow,
+        ...reportRows
+      ];
+      
+      // Create the worksheet
+      const ws = XLSX.utils.aoa_to_sheet(excelData);
+      
+      // Apply styling to the sheet
+      // Style for the main title
+      ws['A1'].s = {
+        font: { bold: true, sz: 16 },
+        alignment: { horizontal: 'center' }
+      };
+      
+      // Merge cells for the title
+      if (!ws['!merges']) ws['!merges'] = [];
+      ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 13 } }); // Merge A1:N1
+      
+      // Style filter information as bold
+      for (let i = 3; i <= 5; i++) {
+        ws[`A${i+1}`].s = { font: { bold: true } };
+      }
+      
+      // Style the table header
+      for (let i = 0; i < headerRow.length; i++) {
+        const cellRef = XLSX.utils.encode_cell({ r: 7, c: i });
+        ws[cellRef].s = {
+          font: { bold: true },
+          fill: { fgColor: { rgb: "E6F2FF" } }, // Light blue background
+          border: {
+            top: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' },
+            right: { style: 'thin' }
+          }
+        };
+      }
+      
+      // Style data rows
+      for (let r = 8; r < 8 + reportRows.length; r++) {
+        for (let c = 0; c < headerRow.length; c++) {
+          const cellRef = XLSX.utils.encode_cell({ r, c });
+          if (ws[cellRef]) {
+            ws[cellRef].s = {
+              border: {
+                top: { style: 'thin' },
+                bottom: { style: 'thin' },
+                left: { style: 'thin' },
+                right: { style: 'thin' }
+              }
+            };
+            
+            // Format numeric cells
+            if (c >= 1) { // Skip gear code and name columns
+              ws[cellRef].z = '#,##0'; // Number format without decimal places for frequencies
+            }
+          }
+        }
+      }
+      
+      // Set column widths
+      ws['!cols'] = [
+        { width: 20 }, // Gear name
+        { width: 8 }, // Jan
+        { width: 8 }, // Feb
+        { width: 8 }, // Mar
+        { width: 8 }, // Apr
+        { width: 8 }, // May
+        { width: 8 }, // Jun
+        { width: 8 }, // Jul
+        { width: 8 }, // Aug
+        { width: 8 }, // Sep
+        { width: 8 }, // Oct
+        { width: 8 }, // Nov
+        { width: 8 }  // Dec
+      ];
+      
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, `Fleet ${activeTab === 'frequency' ? 'Frequency' : 'Active Days'}`);
+      
+      // Generate filename
+      const filterText = filterType === 'port' 
+        ? `Ports_${selectedPorts.length}`
+        : filterType === 'region'
+          ? `Regions_${selectedRegions.length}`
+          : `Coops_${selectedCoops.length}`;
+      
+      const fileName = `FLOUCA_Fleet_${activeTab}_${selectedYear}_${filterText}.xlsx`;
+      
+      // Trigger download
+      XLSX.writeFile(wb, fileName);
+      
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      alert('Failed to export data. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [
+    activeTab,
+    reportData,
+    isExporting,
+    isReportLoading,
+    selectedYear,
+    filterType,
+    selectedPorts,
+    selectedRegions,
+    selectedCoops,
+    ports,
+    regions,
+    coops
+  ]);
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-10">
@@ -164,14 +332,29 @@ const FleetReportPage: React.FC = () => {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Fleet Gear Usage Report</h1>
-        <button
-          onClick={fetchData}
-          disabled={!areFiltersSelected()}
-          className="px-3 py-2 rounded-lg flex items-center gap-1 text-sm bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <RefreshCw className="h-4 w-4" />
-          <span>Refresh Data</span>
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={fetchData}
+            disabled={!areFiltersSelected()}
+            className="px-3 py-2 rounded-lg flex items-center gap-1 text-sm bg-blue-100 text-blue-800 hover:bg-blue-200 disabled:bg-gray-300 disabled:text-gray-500"
+          >
+            <RefreshCw className="h-4 w-4" />
+            <span>Refresh Data</span>
+          </button>
+          
+          <button
+            onClick={exportToExcel}
+            disabled={!reportData.length || isExporting || isReportLoading}
+            className={`px-3 py-2 rounded-lg flex items-center gap-1 text-sm ${
+              reportData.length && !isExporting && !isReportLoading
+                ? "bg-green-100 text-green-800 hover:bg-green-200"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            <FileDown className="h-4 w-4" />
+            <span>{isExporting ? "Exporting..." : "Export Excel"}</span>
+          </button>
+        </div>
       </div>
 
       <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">

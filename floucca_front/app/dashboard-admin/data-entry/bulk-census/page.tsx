@@ -360,11 +360,11 @@ const BulkEntriesPage = () => {
                   {...registerBulk("numberOfGears", {
                     required: "Please enter a number",
                     min: { value: 1, message: "Minimum value is 1" },
-                    max: { value: 100, message: "Maximum value is 100" },
+                    // max: { value: 100, message: "Maximum value is 100" },
                     valueAsNumber: true,
                   })}
                   className="w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter number (1-100)"
+                  placeholder="Enter number"
                 />
                 {bulkErrors.numberOfGears && (
                   <p className="mt-1 text-sm text-red-600">

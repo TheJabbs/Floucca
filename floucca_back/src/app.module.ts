@@ -23,6 +23,7 @@ import { UserModule } from './backend/users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import {PeriodModule} from "./backend/period/period.module";
 import {ActiveDaysModule} from "./backend/active_days/activeDays.module";
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,

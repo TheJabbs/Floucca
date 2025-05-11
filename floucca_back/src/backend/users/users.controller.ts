@@ -4,7 +4,7 @@ import { CreateUserWithDetailsDto } from "./dto/createUserWithDetails.dto";
 import { UpdateUserWithDetailsDto } from "./dto/updateUserWithDetails.dto";
 import { User } from "./interfaces/users.interface";
 import { ResponseMessage } from "src/shared/interface/response.interface";
-//auth
+//auth and role restriction enumerator 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -16,7 +16,10 @@ import {GeneralFilterDto} from "../../shared/dto/general_filter.dto";
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('admin-create')
+  //might exclude admin if not his role 
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)  
+@Post('admin-create')
 async adminCreatesUser(
   @Body() body: CreateUserWithDetailsDto
 ): Promise<ResponseMessage<{ user_id: number }>> {
@@ -36,7 +39,8 @@ async adminCreatesUser(
     return this.userService.findAllUsers();
   }
 
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)    
   @Get(":user_id")
   async findUserById(@Param("user_id") user_id: string, @Req() req): Promise<User | null> {
     const id = parseInt(user_id, 10);

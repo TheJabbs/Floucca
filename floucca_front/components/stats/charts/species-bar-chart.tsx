@@ -224,7 +224,7 @@ const SpeciesBarChart: React.FC<SpeciesBarChartProps> = ({
           
           <BarChart
             data={chartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+            margin={{ top: 20, right: 20, left: 20, bottom: 70 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis

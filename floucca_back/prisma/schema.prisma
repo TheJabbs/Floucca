@@ -240,3 +240,9 @@ model active_days {
   @@index([port_id], map: "active_days_ibfk_2")
   @@index([gear_code], map: "active_days_ibfk_3_idx")
 }
+
+model backup {
+  backup_id      Int       @id
+  backup_content String    @db.LongText
+  backup_date    DateTime? @default(now()) @db.DateTime(0)
+}

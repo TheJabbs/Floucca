@@ -59,7 +59,10 @@ const AdminDashboard = () => {
                                 <UserCheck className="w-4 h-4 mr-3 text-blue-600"/>
                                 <span>Table of field agents</span>
                             </button>
-                            <button className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700">
+                            <button
+                                className="w-full flex items-center p-2 rounded-md hover:bg-blue-50 text-gray-700"
+                                onClick={() => router.push("/dashboard-admin/workload-stat")}
+                            >
                                 <BarChart2 className="w-4 h-4 mr-3 text-blue-600"/>
                                 <span>Workload Statistics</span>
                             </button>

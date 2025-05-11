@@ -336,7 +336,7 @@ const FleetReportPage: React.FC = () => {
           <button
             onClick={fetchData}
             disabled={!areFiltersSelected()}
-            className="px-3 py-2 rounded-lg flex items-center gap-1 text-sm bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-300 disabled:text-gray-500"
+            className="px-3 py-2 rounded-lg flex items-center gap-1 text-sm bg-blue-100 text-blue-800 hover:bg-blue-200 disabled:bg-gray-300 disabled:text-gray-500"
           >
             <RefreshCw className="h-4 w-4" />
             <span>Refresh Data</span>
@@ -347,7 +347,7 @@ const FleetReportPage: React.FC = () => {
             disabled={!reportData.length || isExporting || isReportLoading}
             className={`px-3 py-2 rounded-lg flex items-center gap-1 text-sm ${
               reportData.length && !isExporting && !isReportLoading
-                ? "bg-green-600 hover:bg-green-700 text-white"
+                ? "bg-green-100 text-green-800 hover:bg-green-200"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >

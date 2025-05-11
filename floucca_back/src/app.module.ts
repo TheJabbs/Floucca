@@ -24,13 +24,13 @@ import { ConfigModule } from '@nestjs/config';
 import {PeriodModule} from "./backend/period/period.module";
 import {ActiveDaysModule} from "./backend/active_days/activeDays.module";
 import { AuthModule } from './auth/auth.module';
-
+import { BackupModule } from './backend/backup/backup.module';
 @Module({
   imports: [PrismaModule, CoopModule, BoatDetailsModule,
     EffortTodayModule, FishModule, FishModule, FleetModule,
     FormModule, GearModule, GearUsageModule, GearDetailModule,
   ScheduleModule, SenseLastwModule, LandingsModule, PortsModule,
-  RegionModule, RoleModule, SpecieModule, UserRoleModule, 
+  RegionModule, RoleModule, SpecieModule, UserRoleModule, BackupModule,
   UserCoopModule,PeriodModule, FormulasModule, UserModule, ActiveDaysModule, ConfigModule.forRoot()],
   providers: [],
 })

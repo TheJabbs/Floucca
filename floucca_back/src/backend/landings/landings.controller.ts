@@ -45,12 +45,14 @@ export class LandingsController {
     updateLanding(@Param("landing_id") landing_id: idDTO, @Body() updatedLanding: UpdateLandingsDto) {
         return this.service.updateLanding(landing_id.id, updatedLanding);
     }
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(RoleEnum.ADMIN)
+   // @UseGuards(JwtAuthGuard, RolesGuard)
+  //  @Roles(RoleEnum.ADMIN)
+      //, @Req() req: Request
+
     @Post("/create/form")
-    createFormLanding(@Body() formLanding: CreateFormLandingDto, @Req() req: Request) {
+    createFormLanding(@Body() formLanding: CreateFormLandingDto) {
        formLanding.boat_details = {}
-        const user = req.json()
+       // const user = req.json()
         return this.service.createLandingForm(formLanding);
     }
 }

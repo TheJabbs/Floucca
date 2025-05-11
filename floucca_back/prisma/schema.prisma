@@ -242,7 +242,7 @@ model active_days {
 }
 
 model backup {
-  backup_id      Int       @id
+  backup_id      Int       @id @default(autoincrement())
   backup_content String    @db.LongText
   backup_date    DateTime? @default(now()) @db.DateTime(0)
 }

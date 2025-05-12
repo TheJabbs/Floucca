@@ -10,6 +10,18 @@ export class BackupService {
     constructor(private prisma: PrismaService) {
     }
 
+    async getBackupInfo(){
+        return this.prisma.backup.findMany({
+            select: {
+                backup_id: true,
+                backup_date: true,
+            },
+            orderBy: {
+                backup_date: 'desc'
+            }
+        });
+    }
+
     async createBackup(dto: CreateBackupDto): Promise<Backup> {
         return this.prisma.backup.create({
             data: {

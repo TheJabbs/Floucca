@@ -17,6 +17,11 @@ export class BackupController {
     return this.service.getAllBackups();
   }
 
+  @Get('info')
+    async getBackupInfo() {
+        return this.service.getBackupInfo();
+    }
+
   @Get('up')
   async dumpAndSaveBackup() {
     return this.service.dumpAndSaveBackup();

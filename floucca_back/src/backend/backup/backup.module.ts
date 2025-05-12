@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Module({
   controllers: [BackupController],
-  providers: [BackupService, PrismaService],
+  providers: [BackupService],
+  exports: [BackupService],
 })
 export class BackupModule {}

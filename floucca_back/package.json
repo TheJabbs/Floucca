@@ -36,6 +36,8 @@
     "cookie-parser": "^1.4.7",
     "floucca_back": "file:",
     "lodash": "^4.17.21",
+    "mysql2": "^3.14.1",
+    "mysqldump": "^3.2.0",
     "node-cron": "^3.0.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

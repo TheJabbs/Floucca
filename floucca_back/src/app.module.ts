@@ -30,7 +30,7 @@ import { BackupModule } from './backend/backup/backup.module';
     EffortTodayModule, FishModule, FishModule, FleetModule,
     FormModule, GearModule, GearUsageModule, GearDetailModule,
   ScheduleModule, SenseLastwModule, LandingsModule, PortsModule,
-  RegionModule, RoleModule, SpecieModule, UserRoleModule, BackupModule,
+  RegionModule, RoleModule, SpecieModule,AuthModule, UserRoleModule, BackupModule,
   UserCoopModule,PeriodModule, FormulasModule, UserModule, ActiveDaysModule, ConfigModule.forRoot()],
   providers: [],
 })

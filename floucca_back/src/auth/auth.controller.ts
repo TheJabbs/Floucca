@@ -30,7 +30,7 @@ export class AuthController {
 
     return { message: 'User registered successfully' };
   }
-  
+
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('access_token');
@@ -44,9 +44,6 @@ export class AuthController {
   ) {
     const { access_token } = await this.authService.login(loginDto);
     res.cookie('access_token', access_token, COOKIE_OPTIONS);
-
-
-
     return { message: 'Login successful' };
   }
 }

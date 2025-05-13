@@ -1,13 +1,17 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { schedule } from 'node-cron';
-import { PrismaClient } from '@prisma/client';
+import {Injectable, OnModuleInit} from '@nestjs/common';
+import {schedule} from 'node-cron';
+import {PrismaClient} from '@prisma/client';
+import {PrismaService} from "../prisma/prisma.service";
+import {BackupService} from "../backend/backup/backup.service";
 
 @Injectable()
 export class ScheduleService implements OnModuleInit {
-    private readonly prisma = new PrismaClient();
+    constructor(private readonly prisma: PrismaService, private readonly backupService: BackupService) {
+    }
 
     onModuleInit() {
         this.scheduleGeneratePeriod();
+        this.scheduleBackup();
     }
 
     private scheduleGeneratePeriod() {
@@ -18,7 +22,7 @@ export class ScheduleService implements OnModuleInit {
                 const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
 
                 const newPeriod = await this.prisma.period.create({
-                    data: { period_date: nextMonthDate },
+                    data: {period_date: nextMonthDate},
                 });
 
                 const [allPorts, allGears] = await Promise.all([
@@ -41,7 +45,7 @@ export class ScheduleService implements OnModuleInit {
                     }))
                 );
 
-                await this.prisma.active_days.createMany({ data });
+                await this.prisma.active_days.createMany({data});
 
                 console.log('New period created:', newPeriod);
             } catch (error) {
@@ -49,4 +53,16 @@ export class ScheduleService implements OnModuleInit {
             }
         });
     }
+
+    private scheduleBackup() {
+        schedule('0 0 * * 0', async () => {
+            try {
+                const backup = await this.backupService.dumpAndSaveBackup();
+                console.log('Backup created:', backup);
+            } catch (error) {
+                console.error('Error creating backup:', error);
+            }
+        });
+    }
+
 }

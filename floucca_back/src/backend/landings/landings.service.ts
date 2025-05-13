@@ -104,9 +104,10 @@ export class LandingsService {
 
         const boatDetails = await this.prisma.boat_details.create({data: data.boat_details});
         data.form.boat_detail = boatDetails.boat_id;
+        let form;
 
-        return await this.prisma.$transaction(async (prisma) => {
-            const form = await prisma.form.create({data: data.form});
+        await this.prisma.$transaction(async (prisma) => {
+             form = await prisma.form.create({data: data.form});
             if (!form) throw new Error("Failed to create form data missing");
 
             let landing: any = null;
@@ -165,19 +166,21 @@ export class LandingsService {
                 await Promise.all(lastwPromises);
             }
 
-            const newForm = await this.prisma.form.findUnique({where: {form_id: form.form_id}, include: {users: true}});
-            this.formGateway.notifyNewForm(newForm);
 
-
-            return {
-                message: `Landing form created successfully. Errors - Fish: ${fishError}, Gear: ${gearError}, Sense: ${senseError}`,
-                data: null
-            };
         }).catch(async (error) => {
             // Cleanup if transaction fails
             await this.prisma.boat_details.delete({where: {boat_id: boatDetails.boat_id}});
             return {message: `Failed to create landing form: ${error.message}`, data: null};
         });
+
+        const newForm = await this.prisma.form.findUnique({where: {form_id: form.form_id}, include: {users: true}});
+        this.formGateway.notifyNewForm(newForm);
+
+
+        return {
+            message: `Landing form created successfully. Errors - Fish: ${fishError}, Gear: ${gearError}, Sense: ${senseError}`,
+            data: null
+        };
     }
 
 
@@ -199,7 +202,7 @@ export class LandingsService {
         const landings = await this.prisma.landing.findMany({
             where: {
                 form: {
-                    users:{
+                    users: {
                         user_id: user ? {in: [user]} : undefined
                     },
                     period_date: period,

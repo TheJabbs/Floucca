@@ -298,9 +298,9 @@ export class FleetService {
             })
         ]);
 
-        if (!fleet || fleet.length === 0) {
-            throw new NotFoundException('No fleet senses found');
-        }
+        // if (!fleet || fleet.length === 0) {
+        //     throw new NotFoundException('No fleet senses found');
+        // }
 
         // Create a map for gear codes to gear names
         const gearMap = new Map<number, string>();

@@ -13,6 +13,8 @@ import {FleetService} from "../backend/fleet_senses/fleet.service";
 import {ActiveDaysService} from "../backend/active_days/activeDays.service";
 import {censusCounter} from "./utils/censusCounter";
 import {FleetReportInterface} from "../backend/fleet_senses/interface/fleetReport.interface";
+import {WorkLoadStatisticInterface} from "./interface/workLoadStatistic.interface";
+import {sampleDayCounter} from "./utils/sampleDayCounter";
 
 @Injectable()
 export class FormulasService {
@@ -22,10 +24,13 @@ export class FormulasService {
         private readonly landingsService: LandingsService,
         private readonly senseLastWService: SenseLastwService,
         private readonly fleetService: FleetService,
-        private readonly activeDaysService : ActiveDaysService,
+        private readonly activeDaysService: ActiveDaysService,
         private readonly gearService: GearService
     ) {
     }
+
+    //==============================================
+
 
     async getReportData(filter: GeneralFilterDto, user?: number) {
         let filter2 = JSON.parse(JSON.stringify(filter));
@@ -64,7 +69,6 @@ export class FormulasService {
         const avgPrice = this.getAvgPrice(landingData);
 
 
-
         let mappedSpecies = specieMapMapper(landingData);
         let lowerTable = []
 
@@ -96,7 +100,7 @@ export class FormulasService {
 
         let totalVal = 0
         lowerTable.forEach((element) => {
-           totalVal += element.value
+            totalVal += element.value
         })
 
         let upperTables = {
@@ -124,6 +128,48 @@ export class FormulasService {
         }
     }
 
+
+    //===================Progress Monitoring===============
+
+    async generateWorkloadStatistics(filter: GeneralFilterDto): Promise<WorkLoadStatisticInterface[]> {
+        const month = new Date(filter.period).getMonth() + 1;
+
+        const [fleetCensus] = await Promise.all([
+            this.fleetService.generateFleetReport(filter, month),
+        ]);
+
+        // Precompute gear_code -> freq map
+        const gearFreqMap = new Map(fleetCensus.map(el => [el.gear_code, el.freq]));
+
+        // Process each gear in parallel
+        const workLoad = await Promise.all(
+            fleetCensus.map(async element => {
+                const [landingStat, effortStat] = await Promise.all([
+                    this.gearService.getSamplingGearsDaysLanding(element.gear_code, filter.period),
+                    this.gearService.getSamplingGearsDaysEffort(element.gear_code, filter.period),
+                ]);
+
+                const gu = gearFreqMap.get(element.gear_code) ?? 0;
+
+                return {
+                    gearName: element.gear_name,
+                    gearUnit: gu,
+                    landing: {
+                        samplingDays: sampleDayCounter(landingStat),
+                        samplingDaysMin: 8,
+                        samples: landingStat.length,
+                        samplesMin: gu * gu * -0.000059 + 0.056530 * gu + 17.580268,
+                    },
+                    effort: {
+                        samples: effortStat.length,
+                        samplesMin: gu * gu * -0.000015 + 0.024229 * gu + 12.317537,
+                    }
+                };
+            })
+        );
+
+        return workLoad;
+    }
 
     //===============Report=Tables=================
 
@@ -170,15 +216,15 @@ export class FormulasService {
     }
 
     getActiveDays(allGears: FleetReportInterface[]) {
-        let numerator= 0
+        let numerator = 0
         let denominator = 0
 
-        allGears.forEach(element =>{
+        allGears.forEach(element => {
             numerator = numerator + (element.freq * element.activeDays);
             denominator += element.freq
         })
 
-        return numerator/denominator
+        return numerator / denominator
     }
 
     getEstimateCatch(estimateEffort: number, cpue: number) {
@@ -236,7 +282,7 @@ export class FormulasService {
             numberOfCatch += element.fish.fish_weight * element.fish.fish_quantity;
         });
 
-        return numberOfCatch/landingsData.length;
+        return numberOfCatch / landingsData.length;
     }
 
 
@@ -273,6 +319,8 @@ export class FormulasService {
                 sampleCatch: sampleCatch[period] || 0
             };
         });
+
+        console.log("Left Panel Data:", dataCombine);
 
         return dataCombine;
     }
@@ -444,7 +492,7 @@ export class FormulasService {
     }
 
     async getAllFishingGears() {
-        const periods = await this.prisma.period.findMany({ select: { period_date: true } });
+        const periods = await this.prisma.period.findMany({select: {period_date: true}});
         const promises = periods.map((period) => {
             return this.fleetService.generateFleetReport({period: period.period_date.toString()}, period.period_date.getMonth());
         });
@@ -462,16 +510,16 @@ export class FormulasService {
         return record
     }
 
-    async getCatchByPeriod(){
+    async getCatchByPeriod() {
         const form = await this.prisma.landing.findMany({
             select: {
-                form:{
-                    select:{
+                form: {
+                    select: {
                         period_date: true
                     }
                 },
-                fish:{
-                    select:{
+                fish: {
+                    select: {
                         fish_weight: true,
                         fish_quantity: true
                     }
@@ -481,10 +529,10 @@ export class FormulasService {
 
         const record: Record<string, number> = {};
 
-        form.forEach(val =>{
+        form.forEach(val => {
             let totalCatch = 0
 
-            val.fish.forEach(fish =>{
+            val.fish.forEach(fish => {
                 totalCatch = totalCatch + fish.fish_weight * fish.fish_quantity
             })
             record[val.form.period_date.toDateString()] = totalCatch

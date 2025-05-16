@@ -3,11 +3,17 @@ import {
   Post,
   Body,
   Res,
+  Req,
+  Get,
+  UseGuards 
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserWithDetailsDto } from 'src/backend/users/dto/createUserWithDetails.dto';
 import { LoginUserDto } from 'src/backend/users/dto/login-user.dto';
 import { Response } from 'express';
+import { Request } from 'express';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true,
@@ -37,13 +43,30 @@ export class AuthController {
     return { message: 'Logged out successfully' };
   }
   
-  @Post('login')
-  async login(
-    @Body() loginDto: LoginUserDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { access_token } = await this.authService.login(loginDto);
-    res.cookie('access_token', access_token, COOKIE_OPTIONS);
-    return { message: 'Login successful' };
+
+@Post('login')
+async login(
+  @Body() loginDto: LoginUserDto,
+  @Res({ passthrough: true }) res: Response
+) {
+  const { access_token, user } = await this.authService.login(loginDto);
+
+  res.cookie('access_token', access_token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+  });
+
+  return { message: 'Login successful', access_token, user };
+}
+
+
+    
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@Req() req: Request) {
+    return req.user;
   }
+  
 }

@@ -21,7 +21,7 @@ import { UserService } from "src/backend/users/users.service";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PrismaService],
+  providers: [AuthService, JwtStrategy, PrismaService, UserService],
   exports: [AuthService],
 })
 export class AuthModule {}

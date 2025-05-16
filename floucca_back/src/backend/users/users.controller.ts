@@ -17,8 +17,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   //might exclude admin if not his role 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)  
+//@UseGuards(JwtAuthGuard, RolesGuard)
+//@Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)  
 @Post('admin-create')
 async adminCreatesUser(
   @Body() body: CreateUserWithDetailsDto

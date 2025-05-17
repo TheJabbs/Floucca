@@ -1,4 +1,4 @@
-export interface SamplingInterface{
+export interface SamplingInterface {
     gear_code: number,
     period: Date
 }

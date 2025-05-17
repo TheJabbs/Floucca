@@ -142,7 +142,7 @@ export class FormulasService {
         const gearFreqMap = new Map(fleetCensus.map(el => [el.gear_code, el.freq]));
 
         // Process each gear in parallel
-        const workLoad = await Promise.all(
+        return await Promise.all(
             fleetCensus.map(async element => {
                 const [landingStat, effortStat] = await Promise.all([
                     this.gearService.getSamplingGearsDaysLanding(element.gear_code, filter.period),
@@ -158,17 +158,15 @@ export class FormulasService {
                         samplingDays: sampleDayCounter(landingStat),
                         samplingDaysMin: 8,
                         samples: landingStat.length,
-                        samplesMin: gu * gu * -0.000059 + 0.056530 * gu + 17.580268,
+                        samplesMin: Math.round(gu * gu * -0.000059 + 0.056530 * gu + 17.580268),
                     },
                     effort: {
                         samples: effortStat.length,
-                        samplesMin: gu * gu * -0.000015 + 0.024229 * gu + 12.317537,
+                        samplesMin:Math.round(gu * gu * -0.000015 + 0.024229 * gu + 12.317537),
                     }
                 };
             })
         );
-
-        return workLoad;
     }
 
     //===============Report=Tables=================

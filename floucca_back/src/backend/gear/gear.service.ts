@@ -5,7 +5,8 @@ import Any = jasmine.Any;
 import {PrismaService} from "../../prisma/prisma.service";
 import {ResponseMessage} from "../../shared/interface/response.interface";
 import {UpdateGearDto} from './dto/update_gear.dto';
-import {samplingGearDaysMapper} from "./mapper/samplingGearDays.mapper";
+import {samplingLanding} from "./mapper/samplingGearDaysLanding.mapper";
+import {samplingEffort} from "./mapper/samplingGearDaysEffort";
 
 @Injectable()
 export class GearService {
@@ -125,8 +126,7 @@ export class GearService {
                 }
             }
         })
-
-        return samplingGearDaysMapper(forms);
+        return samplingLanding(forms);
     }
 
     async getSamplingGearsDaysEffort(gearCode: number, periodDate: string) {
@@ -154,7 +154,7 @@ export class GearService {
             }
         })
 
-        return samplingGearDaysMapper(forms);
+        return samplingEffort(forms);
     }
 
 }

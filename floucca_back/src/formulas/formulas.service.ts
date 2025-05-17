@@ -15,6 +15,9 @@ import {censusCounter} from "./utils/censusCounter";
 import {FleetReportInterface} from "../backend/fleet_senses/interface/fleetReport.interface";
 import {WorkLoadStatisticInterface} from "./interface/workLoadStatistic.interface";
 import {sampleDayCounter} from "./utils/sampleDayCounter";
+import {mergeCensusMapper} from "./utils/mergers/mergeCensus.mapper";
+import {mergeEffortMapper} from "./utils/mergers/mergeEffort.Mapper";
+import {mergeLandingMapper} from "./utils/mergers/mergeLanding.mapper";
 
 @Injectable()
 export class FormulasService {
@@ -40,7 +43,7 @@ export class FormulasService {
 
         console.log("Filter 1:", filter, "Filter 2:", filter2);
 
-        const [effortData, landingData,
+        let [effortData, landingData,
             allEffort, fleetCensus, allCensus] = await Promise.all([
             this.senseLastWService.getEffortsByFilter(filter),
             this.landingsService.getLandingsByFilter(filter, user),
@@ -48,6 +51,14 @@ export class FormulasService {
             this.fleetService.generateFleetReport(filter, new Date(filter.period).getMonth() + 1),
             this.fleetService.generateFleetReport(filter2, new Date(filter.period).getMonth() + 1),
         ]);
+
+        // mapping for multi data
+        allCensus = mergeCensusMapper(allCensus);
+        effortData = mergeEffortMapper(effortData);
+        landingData = mergeLandingMapper(landingData);
+        allEffort = mergeEffortMapper(allEffort);
+        fleetCensus = mergeCensusMapper(fleetCensus);
+
 
         let totalGears = censusCounter(fleetCensus)
         let totalAllGears = censusCounter(allCensus)

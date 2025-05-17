@@ -37,9 +37,13 @@ export class FormulasService {
 
     async getReportData(filter: GeneralFilterDto, user?: number) {
         let filter2 = JSON.parse(JSON.stringify(filter));
-        filter2.gear_code = undefined;
+
+        if(filter2.gear_code.length === 0) {
+            filter2.gear_code = undefined;
+        }
 
         filter.specie_code = await this.fishService.getFishSpecieByGear(filter2);
+
 
         console.log("Filter 1:", filter, "Filter 2:", filter2);
 

@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 
 export const useAuth = () => {
@@ -25,15 +24,20 @@ export const useAuth = () => {
     fetchMe();
   }, []);
 
-  return { user, loading };
+  const hasRole = (allowedRoles: string[] = []) => {
+    if (!user || !user.user_role) return false;
+    const roleMap: Record<string, string> = {
+      "Administrator": "ADMIN",
+      "Super Admin": "SUPER_ADMIN",
+    };
+    const roleCodes = user.user_role.map((ur: any) =>
+      roleMap[ur?.roles?.role_name] ?? undefined
+    );
+    console.log("Extracted role codes:", roleCodes);
+    return roleCodes.some((r: string | undefined) => allowedRoles.includes(r!));
+  };
+  
+  
+
+  return { user, loading, hasRole };
 };
-/**
- * halae in any page btaamlila implementation : 
- * const { user, loading } = useAuth();
-
-if (loading) return <p>Loading</p>;
-if (!user) return <p>Not logged in, log in to access the page</p>;
-
-return <p>Welcome</p>;
-
- */

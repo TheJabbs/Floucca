@@ -28,6 +28,7 @@ import {
 } from "@/services/periodService";
 import { getPorts } from "@/services/portService";
 import { getGears } from "@/services/gearService";
+import { ProtectedPage } from '@/components/ProtectedPage';
 
 const STATUS_COLORS = {
     B: "bg-blue-100 text-blue-800 border-blue-300",
@@ -672,4 +673,10 @@ const PeriodManagement = () => {
   );
 };
 
-export default PeriodManagement;
+export default function PeriodsPage() {
+  return (
+    <ProtectedPage allowedRoles={['ADMIN', 'SUPER_ADMIN']}>
+      <PeriodManagement />
+    </ProtectedPage>
+  );
+}

@@ -9,7 +9,6 @@ interface LandingsData {
   estValue: number;
   cpue: number;
   estCatch: number;
-  sampleEffort: number;
   sampleCatch: number;
 }
 
@@ -22,10 +21,10 @@ const LandingsTable: React.FC<LandingsTableProps> = ({ isLoading, landingsData }
   // Define columns for the table
   const columns = [
     { key: "records", header: "Records" },
-    { key: "avgPrice", header: "Average Price" },
-    { key: "estValue", header: "Estimated Value" },
+    { key: "avgPrice", header: "Avg. Price" },
+    { key: "estValue", header: "Est. Value" },
     { key: "cpue", header: "CPUE" },
-    { key: "estCatch", header: "Estimated Catch" },
+    { key: "estCatch", header: "Est. Catch" },
     { key: "sampleCatch", header: "Sample Catch" },
   ];
 

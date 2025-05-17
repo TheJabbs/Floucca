@@ -39,8 +39,8 @@ async adminCreatesUser(
     return this.userService.findAllUsers();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)    
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)    
   @Get(":user_id")
   async findUserById(@Param("user_id") user_id: string, @Req() req): Promise<User | null> {
     const id = parseInt(user_id, 10);

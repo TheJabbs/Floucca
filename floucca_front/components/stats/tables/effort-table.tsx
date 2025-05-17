@@ -22,7 +22,7 @@ const EffortTable: React.FC<EffortTableProps> = ({ isLoading, effortData }) => {
     { key: "gears", header: "Gears" },
     { key: "activeDays", header: "Active Days" },
     { key: "pba", header: "PBA" },
-    { key: "estEffort", header: "Estimated Effort" },
+    { key: "estEffort", header: "Est. Effort" },
   ];
 
   // Convert object data to array format for the reusable table

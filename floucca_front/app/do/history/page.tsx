@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { Calendar, Clock, Fish, MapPin, Users, Ruler, Scale, Hash, Anchor, RefreshCw } from 'lucide-react';
 import { getFromCache, saveToCache, isCacheValid } from '@/components/utils/cache-utils';
+import { getUserById } from '@/services';
 
 interface SubmittedForm {
   form: {
@@ -70,6 +71,7 @@ const SubmissionHistory = () => {
       endDate: new Date().toISOString().split('T')[0],
     }
   });
+  const [user, setUser] = useState<String| null>(null);
 
   // Function to fetch submissions from API
   const fetchSubmissionsFromApi = async () => {
@@ -120,6 +122,20 @@ const SubmissionHistory = () => {
     loadSubmissions();
   }, [loadSubmissions]);
 
+  // Fetch user data
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userId = 1; 
+        const userData = await getUserById(userId);
+        setUser(userData.user_fname + ' ' + userData.user_lname);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUser();
+  }, []);
+
   // Force refresh submissions from API
   const refreshSubmissions = async () => {
     setLoading(true);
@@ -147,7 +163,7 @@ const SubmissionHistory = () => {
 
   const onFilterSubmit = (data: FilterOptions) => {
     console.log('Filter applied:', data);
-    // Implementation for filtering can be added here
+    // filter to be added here
   };
 
   const toggleExpand = (formId: number) => {
@@ -215,7 +231,7 @@ const SubmissionHistory = () => {
               key={form.form.form_id}
               className="bg-white rounded-lg border shadow-sm overflow-hidden"
             >
-              {/* Summary Row (always visible) */}
+              {/* Summary Row */}
               <div 
                 className="p-4 cursor-pointer hover:bg-gray-50 flex items-center justify-between"
                 onClick={() => toggleExpand(form.form.form_id)}
@@ -223,7 +239,7 @@ const SubmissionHistory = () => {
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5">
                     <Fish className="w-4 h-4 text-blue-600" />
-                    <h3 className="font-medium">{form.form.fisher_name}</h3>
+                    <h3 className="font-medium">{user}</h3>
                   </div>
                   <div className="flex items-center space-x-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">

@@ -1,36 +1,41 @@
 import { apiClient, handleApiError } from "./apiClient";
 
+export interface EffortData {
+  records: number;
+  gears: number;
+  activeDays: number;
+  pba: number;
+  estEffort: number;
+}
+
+export interface LandingsData {
+  records: number;
+  avgPrice: number;
+  estValue: number;
+  cpue: number;
+  estCatch: number;
+  sampleCatch: number;
+}
+
+export interface SpeciesData {
+  specie_name: string;
+  numbOfCatch: number;
+  avgPrice: number;
+  avgWeight: number;
+  avgLength: number;
+  avgQuantity: number;
+  value: number;
+  cpue: number;
+  estCatch: number;
+  effort: number;
+}
+
 export interface EffortAndLandingData {
   upperTables: {
-    effort: {
-      records: number;
-      gears: number;
-      activeDays: number;
-      pba: number;
-      estEffort: number;
-    };
-    landings: {
-      records: number;
-      avgPrice: number;
-      estValue: number;
-      cpue: number;
-      estCatch: number;
-      sampleEffort: number;
-      sampleCatch: number;
-    };
+    effort: EffortData;
+    landings: LandingsData;
   };
-  lowerTable: Array<{
-    specie_name: number;
-    numbOfCatch: number;
-    avgPrice: number;
-    avgWeight: number;
-    avgLength: number;
-    avgQuantity: number;
-    value: number;
-    cpue: number;
-    estCatch: number;
-    effort: number;
-  }>;
+  lowerTable: SpeciesData[];
 }
 
 export interface StatsFilter {
@@ -39,22 +44,17 @@ export interface StatsFilter {
   port_id?: number[];
   region?: number[];
   coop?: number[];
+  specie_code?: number[];
 }
 
+/**
+ * Fetch statistics data from the API
+ */
 export const fetchStatisticsData = async (filter: StatsFilter): Promise<EffortAndLandingData> => {
   try {
-    // Format the filter for the API
-    const apiFilter = {
-      period: filter.period,
-      gear_code: filter.gear_code ? filter.gear_code : undefined,
-      port_id: filter.port_id ? filter.port_id : undefined,
-      region: filter.region ? filter.region : undefined,
-      coop: filter.coop ? filter.coop : undefined
-    };
-
-    console.log("Sending filter to API:", apiFilter);
+    console.log("Sending filter to API:", filter);
     
-    const response = await apiClient.post('/api/dev/formulas/report/effort&landing', apiFilter);
+    const response = await apiClient.post('/api/dev/formulas/report/effort&landing', filter);
     return response.data;
   } catch (error) {
     return handleApiError(error, 'fetching statistics data');

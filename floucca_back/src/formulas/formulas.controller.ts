@@ -57,4 +57,9 @@ export class FormulasController {
         return Promise.all([this.service.getAllFishingGears(), this.service.getLandingRecordsByPeriod()])
     }
 
+    @Post('report/workloadstat')
+    async getWorkloadStat(@Body() filter: GeneralFilterDto) {
+        return this.service.generateProgressMonitoring(filter);
+    }
+
 }

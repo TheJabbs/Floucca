@@ -14,6 +14,14 @@ export class GearController {
         return this.service.getAllGear();
     }
 
+    @Get("/:gear/:date")
+    getSampling(
+        @Param("gear") gear: number,
+        @Param("date") date: string
+    ) {
+        return this.service.getSamplingGearsDaysLanding(gear, date);
+    }
+
     @Get("/gear/:gear_code")
     getGearByCode(@Param("gear_code") gear_code: GearIdDto) {
         return this.service.getGearById(gear_code.gear_id);
@@ -34,9 +42,9 @@ export class GearController {
       @Param("gear_code") gear_code: number,
       @Body() updatedGear: UpdateGearDto
     ) {
-      return this.service.updateGear(gear_code, updatedGear); 
+      return this.service.updateGear(gear_code, updatedGear);
     }
-    
-    
+
+
 
 }

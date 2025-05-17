@@ -13,7 +13,10 @@ import { LoginUserDto } from 'src/backend/users/dto/login-user.dto';
 import { Response } from 'express';
 import { Request } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RoleEnum } from 'src/auth/enums/role.enum';
+import { GeneralFilterDto } from 'src/shared/dto/general_filter.dto';
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true,

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 axios.defaults.withCredentials = true;
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,16 +33,19 @@ export default function LoginPage() {
         console.log('Login successful');
         console.log('Received Token:', data.access_token);
         console.log('User Info:', data.user); 
-        
+        router.push('/dashboard-admin'); 
       } else {
         console.error('Login failed:', data.message);
+        const message = data.message || 'Login failed';
+        setError(message);
+        toast.error(message); 
       }
 
-    router.push('/dashboard-admin'); 
   };
 
   return (
     <div className="p-8 max-w-md mx-auto">
+            <Toaster /> 
       <h1 className="text-2xl font-bold mb-4">Login</h1>
       <form onSubmit={handleLogin} className="space-y-4">
         <input

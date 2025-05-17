@@ -59,7 +59,7 @@ export class FormulasController {
 
     @Post('report/workloadstat')
     async getWorkloadStat(@Body() filter: GeneralFilterDto) {
-        return this.service.generateWorkloadStatistics(filter);
+        return this.service.generateProgressMonitoring(filter);
     }
 
 }

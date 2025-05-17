@@ -131,7 +131,7 @@ export class FormulasService {
 
     //===================Progress Monitoring===============
 
-    async generateWorkloadStatistics(filter: GeneralFilterDto): Promise<WorkLoadStatisticInterface[]> {
+    async generateProgressMonitoring(filter: GeneralFilterDto): Promise<WorkLoadStatisticInterface[]> {
         const month = new Date(filter.period).getMonth() + 1;
 
         const [fleetCensus] = await Promise.all([

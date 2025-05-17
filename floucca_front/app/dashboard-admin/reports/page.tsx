@@ -16,10 +16,12 @@ import ReportCard from "@/components/dashboard/report-card";
 import StatCard from "@/components/dashboard/stat-card";
 import RecentActivity from "@/components/dashboard/recent-activity";
 import { useSharedStats } from "@/contexts/SharedStatContext";
+import { useStatsData } from "@/contexts/StatsDataContext";
 
 export default function ReportsDashboard() {
   const { statsData, isLoading, refreshStats } = useSharedStats();
-  
+  const { ports } = useStatsData();
+
   // Get the latest period date
   const getLatestPeriodDate = () => {
     if (!statsData || Object.keys(statsData).length === 0) return null;
@@ -154,7 +156,7 @@ export default function ReportsDashboard() {
         ))}
       </div>
 
-      <RecentActivity />
+      <RecentActivity ports = {ports} />
     </div>
   );
 }

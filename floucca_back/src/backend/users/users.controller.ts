@@ -32,8 +32,8 @@ async adminCreatesUser(
 }
 
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)  
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)  
   @Get("all")
   async findAllUsers(): Promise<User[]> {
     return this.userService.findAllUsers();

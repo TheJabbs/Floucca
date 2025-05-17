@@ -13,6 +13,7 @@ import PortDropdown from "@/components/forms-c/port-dropdown";
 import Notification from "@/components/utils/notification";
 import { submitLandingForm, LandingFormDTO } from "@/services";
 import { removeFromCache } from "@/components/utils/cache-utils";
+import { useAuth } from '@/hooks/useAuth';
 
 // Dynamic import for the map component since it uses browser APIs
 const MapWithMarkers = dynamic(
@@ -78,6 +79,7 @@ interface LandingFormValues {
 function EffortAndLandingPage() {
   const { selectedPort } = usePort();
   const { gears, species, ports, isLoading, error: dataError, refetch } = useFormsData();
+  const { user } = useAuth();
   
   // Notification state
   const [notification, setNotification] = useState<{
@@ -186,7 +188,7 @@ function EffortAndLandingPage() {
       const apiPayload: LandingFormDTO = {
         form: {
           port_id: formData.port,
-          user_id: 1,
+          user_id: user.user_id,
           fisher_name: formData.boatData.fleet_owner,
         },
         boat_details: {

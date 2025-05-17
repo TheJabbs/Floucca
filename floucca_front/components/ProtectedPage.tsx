@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import AccessDenied from '@/components/auth/access-denied';
 
 export const ProtectedPage = ({
   allowedRoles,
@@ -11,9 +12,36 @@ export const ProtectedPage = ({
 }) => {
   const { user, loading, hasRole } = useAuth();
 
-  if (loading) return <p>Loading...</p>;
-  if (!user) return <p>You must log in to access this page.</p>;
-  if (!hasRole(allowedRoles)) return <p>Access denied.</p>;
+  // Loading state
+  if (loading) {
+    return <AccessDenied type="loading" />;
+  }
+
+  // Not logged in
+  if (!user) {
+    return (
+      <AccessDenied 
+        type="not-logged-in"
+        title="Authentication Required"
+        message="You need to log in to access this page."
+        showLoginButton={true}
+      />
+    );
+  }
+
+  if (!hasRole(allowedRoles)) {
+    const userRoles = user?.user_role?.map((ur: any) => ur?.roles?.role_name).filter(Boolean) || [];
+    
+    return (
+      <AccessDenied 
+        type="access-denied"
+        title="Access Denied"
+        message={`You don't have the required permissions to access this page. Your current role${userRoles.length > 1 ? 's' : ''}: ${userRoles.join(', ')}`}
+        requiredRoles={allowedRoles}
+        showLoginButton={false}
+      />
+    );
+  }
 
   return <>{children}</>;
 };

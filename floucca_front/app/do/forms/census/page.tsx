@@ -11,6 +11,7 @@ import SubmitButton from "@/components/utils/submit-button";
 import Notification from "@/components/utils/notification";
 import { submitFleetSensesForm } from "@/services";
 import { removeFromCache } from "@/components/utils/cache-utils";
+import { useAuth } from '@/hooks/useAuth';
 
 interface BoatData {
   fleet_owner: string;
@@ -40,6 +41,7 @@ function FleetSensesPage() {
     message: string;
   } | null>(null);
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+  const { user } = useAuth();
 
   const {
     handleSubmit,
@@ -101,7 +103,7 @@ function FleetSensesPage() {
       const apiPayload = {
         formDto: {
           port_id: formData.port,
-          user_id: 1,
+          user_id: user.user_id,
           fisher_name: formData.boatData.fleet_owner,
         },
         boatDetailDto: formData.boatData,

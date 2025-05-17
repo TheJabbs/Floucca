@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Calendar, Clock, Fish, MapPin, Users, Ruler, Scale, Hash, Anchor, RefreshCw } from 'lucide-react';
 import { getFromCache, saveToCache, isCacheValid } from '@/components/utils/cache-utils';
 import { getUserById } from '@/services';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SubmittedForm {
   form: {
@@ -71,7 +72,9 @@ const SubmissionHistory = () => {
       endDate: new Date().toISOString().split('T')[0],
     }
   });
-  const [user, setUser] = useState<String| null>(null);
+  const [user, setUser] = useState<string | null>(null);
+  const { user: authUser } = useAuth();
+  
 
   // Function to fetch submissions from API
   const fetchSubmissionsFromApi = async () => {
@@ -126,7 +129,7 @@ const SubmissionHistory = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userId = 1; 
+        const userId = authUser.user_id; 
         const userData = await getUserById(userId);
         setUser(userData.user_fname + ' ' + userData.user_lname);
       } catch (error) {

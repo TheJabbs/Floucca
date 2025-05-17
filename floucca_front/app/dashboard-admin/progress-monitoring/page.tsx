@@ -61,21 +61,15 @@ export default function WorkProgressMonitoringPage() {
       setIsLoading(true);
       setError(null);
 
-      // Format the date as "DD-MM-YYYY"
-    const date = new Date(data.period);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); 
-    const year = date.getFullYear();
-    const formattedDate = `${day}-${month}-${year}`;
-
     const filter: WorkProgressFilter = {
-      period: formattedDate, 
+      period: data.period, 
       port_id: [Number(data.portId)]
     };
 
       const result = await fetchWorkProgressData(filter);
       setWorkProgressData(result);
       setDataFetched(true);
+      console.log(result);
     } catch (err: any) {
       console.error("Error fetching work progress data:", err);
       setError(err.message || "Failed to fetch data. Please try again.");

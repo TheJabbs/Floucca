@@ -33,7 +33,6 @@ const StatsPage: React.FC = () => {
     estValue: 0,
     cpue: 0,
     estCatch: 0,
-    sampleEffort: 0,
     sampleCatch: 0,
   });
 
@@ -136,14 +135,13 @@ const StatsPage: React.FC = () => {
         // Landings data section
         ['Landings Data'],
         [''],
-        ['Records', 'Average Price', 'Estimated Value', 'CPUE', 'Estimated Catch', 'Sample Effort', 'Sample Catch'],
+        ['Records', 'Average Price', 'Estimated Value', 'CPUE', 'Estimated Catch', 'Sample Catch'],
         [
           landingsData.records, 
           landingsData.avgPrice, 
           landingsData.estValue, 
           landingsData.cpue, 
           landingsData.estCatch, 
-          landingsData.sampleEffort,
           landingsData.sampleCatch
         ],
         [''],

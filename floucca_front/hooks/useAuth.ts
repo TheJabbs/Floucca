@@ -29,6 +29,7 @@ export const useAuth = () => {
     const roleMap: Record<string, string> = {
       "Administrator": "ADMIN",
       "Super Admin": "SUPER_ADMIN",
+      "Data Operator": "DATA_OPERATOR"
     };
     const roleCodes = user.user_role.map((ur: any) =>
       roleMap[ur?.roles?.role_name] ?? undefined

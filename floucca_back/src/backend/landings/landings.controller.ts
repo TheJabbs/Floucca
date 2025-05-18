@@ -49,7 +49,6 @@ export class LandingsController {
     //  @Roles(RoleEnum.ADMIN)
     @Post("/create/form")
     createFormLanding(@Body() formLanding: CreateFormLandingDto, @Req() req: Request) {
-        formLanding.boat_details = {}
-        return this.service.createLandingForm(formLanding, );
+        return this.service.createLandingForm(formLanding);
     }
 }

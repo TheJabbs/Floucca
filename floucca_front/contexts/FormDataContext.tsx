@@ -1,13 +1,14 @@
 "use client";
 
 import React, { createContext, ReactNode, useContext } from "react";
-import { getGears, getSpecies, getPorts } from "@/services"; 
+import { getGears, getSpecies, getPorts, getPeriods } from "@/services"; 
 import { useDataContext } from "@/hooks/useDataContext";
 
 export interface FormDataType {
   gears: any[];
   species: any[];
   ports: any[];
+  periods: any[];
   isLoading: boolean;
   error: string | null;
   lastFetched: number | null;
@@ -18,6 +19,7 @@ const CACHE_KEYS = {
   FORM_GEARS: "flouca_form_gears",
   FORM_SPECIES: "flouca_form_species",
   FORM_PORTS: "flouca_form_ports",
+  FORM_PERIODS: "flouca_form_periods",
 };
 
 const FormsDataContext = createContext<FormDataType | undefined>(undefined);
@@ -36,26 +38,29 @@ export function FormsDataProvider({ children }: { children: ReactNode }) {
   const gearContext = useDataContext(getGears, CACHE_KEYS.FORM_GEARS);
   const speciesContext = useDataContext(getSpecies, CACHE_KEYS.FORM_SPECIES);
   const portContext = useDataContext(getPorts, CACHE_KEYS.FORM_PORTS);
+  const periodContext = useDataContext(getPeriods, CACHE_KEYS.FORM_PERIODS);
 
   // Combined refetch function
   const refetchAll = async () => {
     await Promise.all([
       gearContext.refetch(),
       speciesContext.refetch(),
-      portContext.refetch()
+      portContext.refetch(),
+      periodContext.refetch()
     ]);
   };
 
-  const isLoading = gearContext.isLoading || speciesContext.isLoading || portContext.isLoading;
+  const isLoading = gearContext.isLoading || speciesContext.isLoading || portContext.isLoading || periodContext.isLoading;
   
   // Determine overall error state (first error encountered)
-  const error = gearContext.error || speciesContext.error || portContext.error;
+  const error = gearContext.error || speciesContext.error || portContext.error || periodContext.error;
 
   // Find the most recent fetch time
   const lastFetchedTimes = [
     gearContext.lastFetched,
     speciesContext.lastFetched,
-    portContext.lastFetched
+    portContext.lastFetched,
+    periodContext.lastFetched
   ].filter(Boolean) as number[];
   
   const lastFetched = lastFetchedTimes.length > 0 
@@ -67,6 +72,7 @@ export function FormsDataProvider({ children }: { children: ReactNode }) {
     gears: gearContext.data,
     species: speciesContext.data,
     ports: portContext.data,
+    periods: periodContext.data,
     isLoading,
     error,
     lastFetched,

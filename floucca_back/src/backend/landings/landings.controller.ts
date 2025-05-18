@@ -17,7 +17,7 @@ export class LandingsController {
     }
 
     @Post("/coordinates")
-    getCoordinates(@Body() filter: GeneralFilterDto){
+    getCoordinates(@Body() filter: GeneralFilterDto) {
         return this.service.getCoordinates(filter);
     }
 
@@ -45,14 +45,11 @@ export class LandingsController {
     updateLanding(@Param("landing_id") landing_id: idDTO, @Body() updatedLanding: UpdateLandingsDto) {
         return this.service.updateLanding(landing_id.id, updatedLanding);
     }
-   // @UseGuards(JwtAuthGuard, RolesGuard)
-  //  @Roles(RoleEnum.ADMIN)
-      //, @Req() req: Request
 
+    //  @Roles(RoleEnum.ADMIN)
     @Post("/create/form")
-    createFormLanding(@Body() formLanding: CreateFormLandingDto) {
-       formLanding.boat_details = {}
-       // const user = req.json()
-        return this.service.createLandingForm(formLanding);
+    createFormLanding(@Body() formLanding: CreateFormLandingDto, @Req() req: Request) {
+        formLanding.boat_details = {}
+        return this.service.createLandingForm(formLanding, );
     }
 }

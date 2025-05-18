@@ -31,9 +31,7 @@
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="cccecdde-5c22-41d3-bb4f-077e1c1a5bdb" object-ref="schemas/floucca/tables/users" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="cccecdde-5c22-41d3-bb4f-077e1c1a5bdb" />
@@ -76,7 +74,7 @@
           <token-type value="" />
           <token-config-file value="" />
           <token-profile value="" />
-          <session-user value="root@94.187.21.221" />
+          <session-user value="root@94.187.17.45" />
         </database>
         <properties>
           <auto-commit value="false" />

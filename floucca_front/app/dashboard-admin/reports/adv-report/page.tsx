@@ -1108,8 +1108,7 @@ const AdvancedReportPage: React.FC = () => {
           !isLoading && (
             <div className="bg-white border rounded-lg p-8 text-center">
               <p className="text-gray-500">
-                Use the filters above and click "Generate Report" to see
-                statistics.
+                Use the filters above and click &quot;Generate Report&quot; to see statistics.
               </p>
             </div>
           )}

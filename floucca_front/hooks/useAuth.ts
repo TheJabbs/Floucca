@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 export const useAuth = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const fetchMe = async () => {
@@ -14,6 +15,7 @@ export const useAuth = () => {
         if (!res.ok) throw new Error('Not logged in');
         const data = await res.json();
         setUser(data);
+        setIsAuthenticated(true);
       } catch {
         setUser(null);
       } finally {
@@ -40,5 +42,5 @@ export const useAuth = () => {
   
   
 
-  return { user, loading, hasRole };
+  return { user, loading, hasRole, isAuthenticated };
 };

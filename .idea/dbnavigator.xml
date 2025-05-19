@@ -74,7 +74,7 @@
           <token-type value="" />
           <token-config-file value="" />
           <token-profile value="" />
-          <session-user value="root@94.187.17.45" />
+          <session-user value="root@178.135.10.1" />
         </database>
         <properties>
           <auto-commit value="false" />

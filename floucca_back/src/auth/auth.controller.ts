@@ -5,7 +5,7 @@ import {
   Res,
   Req,
   Get,
-  UseGuards 
+  UseGuards
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserWithDetailsDto } from 'src/backend/users/dto/createUserWithDetails.dto';
@@ -18,8 +18,8 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RoleEnum } from 'src/auth/enums/role.enum';
 import { GeneralFilterDto } from 'src/shared/dto/general_filter.dto';
 const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: true,
+  httpOnly: false,
+  secure: false,
   sameSite: 'strict' as const,
   maxAge: 24 * 60 * 60 * 1000,
 };
@@ -45,7 +45,7 @@ export class AuthController {
     res.clearCookie('access_token');
     return { message: 'Logged out successfully' };
   }
-  
+
 
 @Post('login')
 async login(
@@ -65,11 +65,11 @@ async login(
 }
 
 
-    
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   getMe(@Req() req: Request) {
     return req.user;
   }
-  
+
 }

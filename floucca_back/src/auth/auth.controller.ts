@@ -19,8 +19,8 @@ import { RoleEnum } from 'src/auth/enums/role.enum';
 import { GeneralFilterDto } from 'src/shared/dto/general_filter.dto';
 const COOKIE_OPTIONS = {
   httpOnly: false,
-  secure: false,
-  sameSite: 'strict' as const,
+  secure: true,
+  sameSite: 'none' as const,
   maxAge: 24 * 60 * 60 * 1000,
 };
 @Controller('auth')
@@ -56,7 +56,7 @@ async login(
 
   res.cookie('access_token', access_token, {
     httpOnly: false,
-    secure: false,
+    secure: true,
     sameSite: 'none',
     maxAge: 1000 * 60 * 60 * 24, // 1 day
   });

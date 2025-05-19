@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { useForm, Controller} from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useStatsData } from "@/contexts/StatsDataContext";
 import {
   RefreshCw,
@@ -784,21 +784,29 @@ const AdvancedReportPage: React.FC = () => {
                         <div className="flex items-center">
                           <span className="text-sm font-medium">{value}</span>
                           <div className="ml-2 flex items-center">
-                            {diff.isIncrease ? (
-                              <TrendingUp className="h-4 w-4 text-green-600" />
+                            {diff.value !== 0 ? (
+                              <>
+                                {diff.isIncrease ? (
+                                  <TrendingUp className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4 text-red-600" />
+                                )}
+                                <span
+                                  className={`text-xs ml-1 ${
+                                    diff.isIncrease
+                                      ? "text-green-600"
+                                      : "text-red-600"
+                                  }`}
+                                >
+                                  {diff.value.toFixed(2)} (
+                                  {diff.percent.toFixed(1)}%)
+                                </span>
+                              </>
                             ) : (
-                              <TrendingDown className="h-4 w-4 text-red-600" />
+                              <span className="text-xs ml-1 text-gray-500">
+                                0.00 (0.0%)
+                              </span>
                             )}
-                            <span
-                              className={`text-xs ml-1 ${
-                                diff.isIncrease
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }`}
-                            >
-                              {diff.value.toFixed(2)} ({diff.percent.toFixed(1)}
-                              %)
-                            </span>
                           </div>
                         </div>
                       </div>
@@ -838,21 +846,29 @@ const AdvancedReportPage: React.FC = () => {
                         <div className="flex items-center">
                           <span className="text-sm font-medium">{value}</span>
                           <div className="ml-2 flex items-center">
-                            {diff.isIncrease ? (
-                              <TrendingUp className="h-4 w-4 text-green-600" />
+                            {diff.value !== 0 ? (
+                              <>
+                                {diff.isIncrease ? (
+                                  <TrendingUp className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4 text-red-600" />
+                                )}
+                                <span
+                                  className={`text-xs ml-1 ${
+                                    diff.isIncrease
+                                      ? "text-green-600"
+                                      : "text-red-600"
+                                  }`}
+                                >
+                                  {diff.value.toFixed(2)} (
+                                  {diff.percent.toFixed(1)}%)
+                                </span>
+                              </>
                             ) : (
-                              <TrendingDown className="h-4 w-4 text-red-600" />
+                              <span className="text-xs ml-1 text-gray-500">
+                                0.00 (0.0%)
+                              </span>
                             )}
-                            <span
-                              className={`text-xs ml-1 ${
-                                diff.isIncrease
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }`}
-                            >
-                              {diff.value.toFixed(2)} ({diff.percent.toFixed(1)}
-                              %)
-                            </span>
                           </div>
                         </div>
                       </div>
@@ -1108,7 +1124,8 @@ const AdvancedReportPage: React.FC = () => {
           !isLoading && (
             <div className="bg-white border rounded-lg p-8 text-center">
               <p className="text-gray-500">
-                Use the filters above and click &quot;Generate Report&quot; to see statistics.
+                Use the filters above and click &quot;Generate Report&quot; to
+                see statistics.
               </p>
             </div>
           )}

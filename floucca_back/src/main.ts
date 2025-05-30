@@ -1,20 +1,21 @@
-import {NestFactory} from '@nestjs/core';
-import {AppModule} from './app.module';
-import {TypeTransformPipe} from './pipes/type_transform_pipe';
-import {ValidationPipe} from "@nestjs/common";
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { TypeTransformPipe } from './pipes/type_transform_pipe';
+import { ValidationPipe } from "@nestjs/common";
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
     app.enableCors({
-        origin: true, // Allow all origins
-        methods: 'GET,POST,PUT,DELETE', // Specify allowed HTTP methods
-        allowedHeaders: 'Content-Type, Authorization', // Specify allowed headers
-        credentials: true, // Allow credentials if necessary
+        origin: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true,
     });
-    
-    
+
+
+
 
     app.useGlobalPipes(
         new ValidationPipe({
@@ -22,7 +23,7 @@ async function bootstrap() {
         }),
         new TypeTransformPipe(),
     );
-    app.use(cookieParser());
+    //app.use(cookieParser());
 
 
     await app.listen(4000, '0.0.0.0');

@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -12,7 +13,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req) => {
+        (req: Request) => {
+          // Try Authorization header first
+          const authHeader = req?.headers?.authorization;
+          if (authHeader?.startsWith('Bearer ')) {
+            return authHeader.split(' ')[1];
+          }
+
+          // Fallback to access_token cookie
           return req?.cookies?.access_token;
         },
       ]),
@@ -34,18 +42,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             roles: {
               select: {
                 role_name: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
       },
     });
-  
+
     if (!user) {
       throw new UnauthorizedException('Invalid token');
     }
-  
+
     return user;
   }
-  
 }

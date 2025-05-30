@@ -14,6 +14,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const[email, setEmail] = useState('');
+  const[password, setPassword] = useState('');
 
   const {
     register,
@@ -24,19 +26,23 @@ export default function LoginPage() {
     mode: 'onChange'
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+
+  const onSubmit = async () => {
     setIsLoading(true);
+    console.log(email, password);
     
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/login`;
+      console.log('Login URL:', url);
+      const res = await fetch(url, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_email: data.email,
-          user_pass: data.password,
+          user_email: email,
+          user_pass: password,
         }),
       });
 
@@ -99,7 +105,7 @@ export default function LoginPage() {
           </div>
 
           {/* Login form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form className="space-y-6">
             {/* Email field */}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-gray-700">
@@ -123,6 +129,7 @@ export default function LoginPage() {
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder="Enter your email"
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               {errors.email && (
@@ -153,6 +160,7 @@ export default function LoginPage() {
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder="Enter your password"
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -173,6 +181,9 @@ export default function LoginPage() {
 
             {/* Submit button */}
             <button
+              onClick={(()=>{
+                onSubmit();
+              })}
               type="submit"
               disabled={isLoading}
               className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium py-3 px-4 rounded-lg hover:from-blue-600 hover:to-cyan-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95"

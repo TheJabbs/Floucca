@@ -15,7 +15,7 @@ export default function FormHeader() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
         method: 'POST',
-        credentials: 'include',
+        //credentials: 'include',
       });
 
       if (response.ok) {

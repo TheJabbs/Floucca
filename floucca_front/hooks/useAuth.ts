@@ -7,24 +7,36 @@ export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
-          credentials: 'include',
-        });
-        if (!res.ok) throw new Error('Not logged in');
-        const data = await res.json();
-        setUser(data);
-        setIsAuthenticated(true);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchMe = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      console.log('Token from localStorage:', token);
+      if (!token) throw new Error('No token found');
 
-    fetchMe();
-  }, []);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!res.ok) throw new Error('Not logged in');
+
+      const data = await res.json();
+      setUser(data);
+      setIsAuthenticated(true);
+    } catch (error) {
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchMe();
+}, []);
+
+
 
   const hasRole = (allowedRoles: string[] = []) => {
     if (!user || !user.user_role) return false;

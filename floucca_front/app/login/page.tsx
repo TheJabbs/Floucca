@@ -28,56 +28,65 @@ export default function LoginPage() {
 
 
   const onSubmit = async () => {
-    setIsLoading(true);
-    console.log(email, password);
-    
-    try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/login`;
-      console.log('Login URL:', url);
-      const res = await fetch(url, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_email: email,
-          user_pass: password,
-        }),
-      });
+  setIsLoading(true);
+  console.log(email, password);
 
-      const result = await res.json();
+  try {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/login`;
+    console.log('Login URL:', url);
 
-      if (res.ok) {
-        console.log('Login successful');
-        toast.success('Welcome back!');
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_email: email,
+        user_pass: password,
+      }),
+    });
 
-        // Extract all role names for easier checking
-        const userRoles = result.user.user_role.map(
-          (role: { roles: { role_name: string } }) => role.roles.role_name
-        );
+    const result = await res.json();
 
-        // Navigate based on user role
-        if (userRoles.includes('Super Admin') || userRoles.includes('Administrator')) {
-          router.push('/dashboard-admin');
-        } else if (userRoles.includes('Data Operator')) {
-          router.push('/do');
-        } else {
-          console.error('No recognized role for user.');
-          router.push('/');
-        }
+    if (res.ok) {
+      console.log('Login successful');
+
+      // Store token manually since you are NOT using cookies
+      if (result.access_token) {
+        localStorage.setItem('access_token', result.access_token);
       } else {
-        const message = result.message || 'Login failed';
-        setError('root', { message });
-        toast.error(message);
+        console.warn('No access token returned on login');
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+
+      toast.success('Welcome back!');
+
+      // Extract all role names for easier checking
+      const userRoles: string[] = result.user.user_role.map(
+        (role: { roles: { role_name: string } }) => role.roles.role_name
+      );
+
+      // Navigate based on user role
+      if (userRoles.includes('Super Admin') || userRoles.includes('Administrator')) {
+        router.push('/dashboard-admin');
+      } else if (userRoles.includes('Data Operator')) {
+        router.push('/do');
+      } else {
+        console.error('No recognized role for user.');
+        router.push('/');
+      }
+    } else {
+      const message = result.message || 'Login failed';
+      setError('root', { message });
+      toast.error(message);
     }
-  };
+  } catch (error) {
+    console.error('Login error:', error);
+    toast.error('Something went wrong. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center p-4">

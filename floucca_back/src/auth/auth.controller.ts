@@ -55,11 +55,12 @@ async login(
   const { access_token, user } = await this.authService.login(loginDto);
 
   res.cookie('access_token', access_token, {
-    httpOnly: false,
-    secure: false,
-    sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
+    httpOnly: true,
+    secure: false,         // OK for HTTP
+    sameSite: 'lax',       // 'none' is not allowed without HTTPS
+    maxAge: 1000 * 60 * 60 * 24,
   });
+
 
   return { message: 'Login successful', access_token, user };
 }

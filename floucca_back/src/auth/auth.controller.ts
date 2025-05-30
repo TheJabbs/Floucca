@@ -18,9 +18,9 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RoleEnum } from 'src/auth/enums/role.enum';
 import { GeneralFilterDto } from 'src/shared/dto/general_filter.dto';
 const COOKIE_OPTIONS = {
-  httpOnly: false,
-  secure: true,
-  sameSite: 'none' as const,
+  httpOnly: true,
+  secure: false,
+  sameSite: 'lax' as const,
   maxAge: 24 * 60 * 60 * 1000,
 };
 @Controller('auth')

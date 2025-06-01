@@ -3,12 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
+import * as jwt from 'jsonwebtoken';
+
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private prisma: PrismaService,
-    private configService: ConfigService,
+      private prisma: PrismaService,
+      private configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -21,31 +23,40 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { user_id: number }) {
+  async validate(payload: any) {
+
+    console.log('JWT Strategy - Validating payload:', payload);
+
     const user = await this.prisma.users.findUnique({
       where: { user_id: payload.user_id },
-      select: {
-        user_id: true,
-        user_fname: true,
-        user_lname: true,
-        user_email: true,
+      include: {
         user_role: {
-          select: {
-            roles: {
-              select: {
-                role_name: true,
-              }
-            }
-          }
+          include: {
+            roles: true,
+          },
         },
       },
     });
-  
+
     if (!user) {
       throw new UnauthorizedException('Invalid token');
     }
-  
-    return user;
+
+    console.log('JWT Strategy - User found:', user);
+
+    return {
+      ...user,
+      roles: payload.roles, // Include roles from JWT payload for easier access
+    };
   }
-  
+
+  async decodeAndValidateToken(token: string) {
+    try {
+      const secret = this.configService.get<string>('JWT_SECRET');
+      const payload = jwt.verify(token, secret);
+      return this.validate(payload);
+    } catch (err) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 }

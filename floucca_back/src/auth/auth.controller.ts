@@ -10,66 +10,67 @@ import {
 import { AuthService } from './auth.service';
 import { CreateUserWithDetailsDto } from 'src/backend/users/dto/createUserWithDetails.dto';
 import { LoginUserDto } from 'src/backend/users/dto/login-user.dto';
-import { Response } from 'express';
-import { Request } from 'express';
+import { Response, Request } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { RoleEnum } from 'src/auth/enums/role.enum';
-import { GeneralFilterDto } from 'src/shared/dto/general_filter.dto';
+
 const COOKIE_OPTIONS = {
-  httpOnly: false,
+  httpOnly: true, // FIXED: Changed to true for security
   secure: true,
   sameSite: 'none' as const,
-  maxAge: 24 * 60 * 60 * 1000,
+  maxAge: 24 * 60 * 60 * 1000, // 1 day
 };
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('admin-register')
   async register(
-    @Body() registerDto: CreateUserWithDetailsDto,
-    @Res({ passthrough: true }) res: Response,
+      @Body() registerDto: CreateUserWithDetailsDto,
+      @Res({ passthrough: true }) res: Response,
   ) {
     const { access_token } = await this.authService.register(registerDto);
-
     res.cookie('access_token', access_token, COOKIE_OPTIONS);
-
-
     return { message: 'User registered successfully' };
   }
 
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token');
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
     return { message: 'Logged out successfully' };
   }
 
+  @Post('login')
+  async login(
+      @Body() loginDto: LoginUserDto,
+      @Res({ passthrough: true }) res: Response
+  ) {
+    const { access_token, user } = await this.authService.login(loginDto);
+    res.cookie('access_token', access_token, COOKIE_OPTIONS);
 
-@Post('login')
-async login(
-  @Body() loginDto: LoginUserDto,
-  @Res({ passthrough: true }) res: Response
-) {
-  const { access_token, user } = await this.authService.login(loginDto);
-
-  res.cookie('access_token', access_token, {
-    httpOnly: false,
-    secure: true,
-    sameSite: 'none',
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-  });
-
-  return { message: 'Login successful', access_token, user };
-}
-
-
+    return {
+      message: 'Login successful',
+      user: {
+        user_id: user.user_id,
+        user_fname: user.user_fname,
+        user_lname: user.user_lname,
+        user_email: user.user_email,
+        coops: user.user_coop?.map(c => ({
+          coop_code: c.coop_code,
+          coop_name: c.coop.coop_name
+        })) || [],
+        roles: user.user_role?.map(r => r.roles.role_name) || [],
+      }
+    };
+  }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
   getMe(@Req() req: Request) {
     return req.user;
   }
-
 }

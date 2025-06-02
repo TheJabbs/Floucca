@@ -26,7 +26,7 @@ export class UpdateFishDto {
 
     @IsOptional()
     @IsPositive()
-    @IsInt()
+    @IsNumber()
     fish_quantity?: number
 
     @IsOptional()

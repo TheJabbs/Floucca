@@ -204,6 +204,16 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
     }
   };
 
+  const handleTotalValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const totalValue = parseFloat(e.target.value);
+    //setCurrentEntry(prev => ({ ...prev, total_value: isNaN(totalValue) ? 0 : totalValue }));
+  };
+
+  const handleTotalQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const quantity = parseInt(e.target.value, 10);
+    //setCurrentEntry(prev => ({ ...prev, total_quantity: isNaN(quantity) ? 0 : quantity }));
+  };
+
   
   // If no location is selected, show a message
   if (!location) {
@@ -521,8 +531,8 @@ const FishingDetails: React.FC<FishingDetailsProps> = ({
                   </div>
                   {(entry.total_value || entry.total_quantity) && (
                     <div className="mt-2 text-sm text-gray-500 pl-2">
-                      {entry.total_value && <span className="mr-3">Total value: {entry.total_value} LBP</span>}
-                      {entry.total_quantity && <span>Total quantity: {entry.total_quantity} fish</span>}
+                      {entry.total_value && <span className="mr-3"><b>Total value:</b> <input className="sm" type="number" value={entry.total_value} onChange={handleTotalValueChange} /> LBP</span>}
+                      {entry.total_quantity && <span><b>Total quantity:</b> <input className="sm" type="number" value={entry.total_quantity} onChange={handleTotalQuantityChange} /> fish</span>}
                     </div>
                   )}
                 </div>

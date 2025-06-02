@@ -18,7 +18,7 @@ export class CreateFishDto {
     @IsNumber()
     fish_length?: number;
     @IsPositive()
-    @IsInt()
+    @IsNumber()
     fish_quantity?: number
     @IsPositive()
     @IsNumber()

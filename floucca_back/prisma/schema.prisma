@@ -46,7 +46,7 @@ model fish {
   gear_code     Int?
   fish_weight   Float?  @db.Float
   fish_length   Float?  @db.Float
-  fish_quantity Int?
+  fish_quantity Float?  @db.Float
   price         Float?  @db.Float
   specie        specie  @relation(fields: [specie_code], references: [specie_code], onDelete: Cascade, map: "fish_ibfk_1")
   landing       landing @relation(fields: [landing_id], references: [landing_id], onDelete: Cascade, map: "fish_ibfk_2")

@@ -20,7 +20,7 @@ export class PortsController {
     }
 
     @Get()
-    @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)
+    //@Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)
     async findAll(): Promise<Port[]> {
         return this.portsService.getAllPorts();
     }

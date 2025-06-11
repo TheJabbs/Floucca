@@ -1,20 +1,18 @@
-import { IsInt, IsPositive, IsString, IsDate } from "class-validator";
-import { Optional } from "@nestjs/common";
+import { IsInt, IsPositive, IsString, IsDate, Min, IsOptional } from "class-validator";
 
 export class UpdateSenseLastwDto {
-    @Optional()
-    @IsInt()
-    @IsPositive()
-    days_fished?: number;
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  days_fished?: number;
 
-    @Optional()
-    @IsInt()
-    @IsPositive()
-    gear_code?: number;
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  gear_code?: number;
 
-    @Optional()
-    @IsInt()
-    @IsPositive()
-    form_id?: number;
-
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  form_id?: number;
 }

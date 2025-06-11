@@ -18,24 +18,27 @@ export const apiClient = axios.create({
 // Reusable error handling
 export const handleApiError = (error: any, context: string): never => {
   console.error(`Error ${context}:`, error);
-  
+
   if (axios.isAxiosError(error) && error.response) {
-    console.error("Error response data:", error.response.data);
-    console.error("Error response status:", error.response.status);
-    
-    if (error.response.data && typeof error.response.data === 'object') {
-      throw {
-        message: error.response.data.message || `Server error (${context})`,
-        statusCode: error.response.status,
-        details: error.response.data
-      };
-    }
-    
-    throw new Error(`Server error (${error.response.status}): ${error.message}`);
+    const { data, status } = error.response;
+
+    console.error("Error response data:", data);
+    console.error("Error response status:", status);
+
+    const message = Array.isArray(data?.message)
+      ? data.message.join('\n') // show validation messages line-by-line
+      : data?.message || `Server error (${context})`;
+
+    throw {
+      message,
+      statusCode: status,
+      details: data,
+    };
   }
-  
+
   throw new Error(`Failed to ${context}. Please check your connection and try again.`);
 };
+
 
 // Common response interface
 export interface ApiResponse<T = any> {

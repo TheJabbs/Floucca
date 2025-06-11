@@ -56,6 +56,7 @@ export const submitLandingForm = async (formData: LandingFormDTO): Promise<ApiRe
     
     return response.data;
   } catch (error) {
+    console.log(error);
     return handleApiError(error, "submitting landing form");
   }
 };

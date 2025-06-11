@@ -88,7 +88,6 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
   };
 
   const isAddDisabled =
-    currentGear.gear_code === 0 ||
     currentGear.days_used === "" 
 
   return (

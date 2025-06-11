@@ -61,7 +61,6 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
   const addGear = () => {
     const parsedDays = parseInt(currentGear.days_used);
     if (
-      currentGear.gear_code === 0 ||
       isNaN(parsedDays) ||
       parsedDays < 1 ||
       parsedDays > 7

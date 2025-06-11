@@ -49,20 +49,21 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
 
   const handleDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (/^\d{0,1}$|^[1-7]$/.test(value) || value === "") {
+    if (/^[0-7]?$/.test(value)) {
       setCurrentGear((prev) => ({
         ...prev,
         days_used: value,
       }));
     }
   };
+
   
 
   const addGear = () => {
     const parsedDays = parseInt(currentGear.days_used);
     if (
       isNaN(parsedDays) ||
-      parsedDays < 1 ||
+      parsedDays < 0 ||
       parsedDays > 7
     )
       return;
@@ -87,8 +88,7 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
     return gears.find((g) => g.gear_code === gear_code)?.gear_name || "";
   };
 
-  const isAddDisabled =
-    currentGear.days_used === "" 
+  const isAddDisabled = currentGear.days_used === ""
 
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6">
@@ -127,7 +127,7 @@ const EffortLastWeek: React.FC<EffortLastWeekProps> = ({
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  min={1}
+                  min={0}
                   max={7}
                   value={currentGear.days_used}
                   onChange={handleDaysChange}

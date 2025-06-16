@@ -26,6 +26,14 @@ const Navbar: React.FC = () => {
                 >
                     Fleet Census
                 </Link>
+                <Link
+                    href="/dashboard-admin/data-entry/forms/census-data"
+                    className={`${
+                        pathname === '/census-data' ? 'text-blue-600 font-semibold' : 'text-gray-800'
+                    } font-medium hover:text-blue-600`}
+                >
+                    Fleet Data
+                </Link>
             </div>
         </nav>
     );

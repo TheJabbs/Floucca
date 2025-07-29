@@ -296,14 +296,16 @@ const UsersManagement = () => {
 
   const formatDate = (date: string) => {
     if (!date) return "Never";
-    return new Date(date).toLocaleString("en-US", {
+    return new Date(date).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
       year: "numeric",
-      month: "short",
-      day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
     });
   };
+
 
   const toggleRole = (id: number) => {
     const current = getValues("roles") || [];

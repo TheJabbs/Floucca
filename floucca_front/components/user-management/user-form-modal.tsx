@@ -176,11 +176,10 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                     <button
                       key={role.id}
                       type="button"
-                      className={`px-3 py-1.5 text-sm rounded-full ${
-                        field.value?.includes(role.id)
+                      className={`px-3 py-1.5 text-sm rounded-full ${field.value?.includes(role.id)
                           ? "bg-blue-600 text-white"
                           : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                      }`}
+                        }`}
                       onClick={() => toggleRole(role.id)}
                     >
                       {role.name}
@@ -199,20 +198,21 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
               control={control}
               rules={{ required: "At least one cooperative is required" }}
               render={({ field }) => (
-                <div className="grid grid-cols-2 gap-2">
-                  {coops.map((coop) => (
-                    <div
-                      key={coop.id}
-                      className={`px-3 py-2 border rounded-lg cursor-pointer ${
-                        field.value?.includes(coop.id)
-                          ? "bg-green-50 border-green-300 text-green-800"
-                          : "bg-white hover:bg-gray-50"
-                      }`}
-                      onClick={() => toggleCoop(coop.id)}
-                    >
-                      {coop.name}
-                    </div>
-                  ))}
+                <div className="max-h-40 overflow-y-auto border rounded-md p-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    {coops.map((coop) => (
+                      <div
+                        key={coop.id}
+                        className={`px-3 py-2 border rounded-lg cursor-pointer ${field.value?.includes(coop.id)
+                            ? "bg-green-50 border-green-300 text-green-800"
+                            : "bg-white hover:bg-gray-50"
+                          }`}
+                        onClick={() => toggleCoop(coop.id)}
+                      >
+                        {coop.name}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             />
